@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Balta Media · Conocimiento en acción</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png">
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-[#050505] text-white font-[Plus_Jakarta_Sans] overflow-x-hidden">
+
+<!-- Search overlay (para móvil) - ya no se usa, pero lo dejamos por si acaso -->
+<div class="search-overlay" id="searchOverlay"></div>
+
+<!-- Header principal (sticky) -->
+<header id="main-header" class="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 transition-opacity duration-300">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2" data-link>
+            <img src="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg object-cover" loading="lazy">
+            <span class="text-lg sm:text-xl font-bold text-white">Balta Media</span>
+        </a>
+
+        <!-- Sin búsqueda en el header -->
+
+        <!-- Iconos derecha -->
+        <div class="flex items-center gap-3 sm:gap-4">
+            <a href="/novedades" class="relative text-gray-400 hover:text-white" data-link>
+                <img src="https://media.baltaanay.org/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
+                <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </a>
+            <a href="/my/home" class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden">
+                <img src="https://media.baltaanay.org/web/image/793-902e5b33/Search%20%282%29.png" alt="Usuario" class="w-full h-full object-cover" loading="lazy">
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Barra de categorías (sticky) -->
+<div class="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-xl border-b border-white/5" id="category-filters">
+    <div class="py-2 sm:py-3 overflow-x-auto no-scrollbar">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center gap-2 sm:gap-3" id="category-pills"></div>
+    </div>
+</div>
+
+<!-- Contenedor principal donde se inyectan las vistas -->
+<main id="content" class="max-w-[1600px] mx-auto px-4 sm:px-6 mt-4 min-h-screen"></main>
+
+<!-- Modal de error (opcional) -->
+<div id="errorModal" class="fixed inset-0 z-[10000] flex items-center justify-center hidden" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
+    <div class="bg-[#1e1e2f] rounded-2xl max-w-md w-full p-6 border border-white/10 shadow-2xl">
+        <h3 class="text-xl font-bold text-white mb-3" id="errorModalTitle">Error</h3>
+        <p class="text-gray-300 mb-6" id="errorModalMessage"></p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-end">
+            <a href="https://www.baltaanay.org/contactus" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-semibold text-center">Reportar problema</a>
+            <a href="https://www.baltaanay.org/solicitar" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-semibold text-center">Solicitar</a>
+            <button id="closeErrorModal" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm font-semibold">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Script principal (tipo módulo) -->
+<script type="module" src="/main.js"></script>
+</body>
+</html>
