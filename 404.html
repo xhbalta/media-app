@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Balta Media</title>
+    <!-- Estilos generales y de sidebar -->
+    <style>
+        /* Reset y base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-color: #0a0a0a;
+            color: #fff;
+            font-family: 'Spline Sans', sans-serif;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            background: #1e1e1e;
+            color: white;
+            transition: width 0.3s ease;
+            overflow: hidden;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #333;
+        }
+        #sidebar.expanded {
+            width: 15%;
+            min-width: 180px;
+        }
+        #sidebar.collapsed {
+            width: 60px;
+            min-width: 60px;
+        }
+        #sidebar.collapsed .sidebar-content,
+        #sidebar.collapsed h2 {
+            display: none;
+        }
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 8px;
+            border-bottom: 1px solid #333;
+        }
+        .toggle-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+            margin-right: 8px;
+            border-radius: 4px;
+        }
+        .toggle-btn:hover {
+            background: #333;
+        }
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .sidebar-content {
+            flex: 1;
+            padding: 16px 8px;
+            overflow-y: auto;
+        }
+
+        /* Contenedor principal */
+        #main-container {
+            flex: 1;
+            transition: width 0.3s ease;
+            width: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header principal */
+        #main-header {
+            padding: 16px 24px;
+            background: #0a0a0a;
+            border-bottom: 1px solid #222;
+            transition: opacity 0.2s;
+        }
+
+        /* Categorías */
+        #category-filters {
+            padding: 12px 24px;
+            background: #0f0f0f;
+            border-bottom: 1px solid #222;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+        }
+        #category-filters::-webkit-scrollbar {
+            display: none;
+        }
+        #category-pills {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Contenido principal */
+        #content {
+            flex: 1;
+            padding: 24px;
+            background: #0a0a0a;
+        }
+
+        /* Reproductor (inyectado por player.js) */
+        #miniPlayer {
+            /* Se asegurará de que esté pegado al fondo dentro de main-container */
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 40;
+        }
+
+        /* Ajustes para móvil */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            #sidebar {
+                width: 100% !important;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid #333;
+            }
+            #sidebar.expanded,
+            #sidebar.collapsed {
+                width: 100%;
+            }
+            #sidebar.collapsed .sidebar-content,
+            #sidebar.collapsed h2 {
+                display: block; /* en móvil mostramos contenido aunque esté colapsado */
+            }
+            #sidebar.collapsed .toggle-btn {
+                margin-right: 0;
+            }
+            #miniPlayer {
+                display: none; /* ocultamos miniplayer en móvil como se pidió */
+            }
+        }
+
+        /* Clases auxiliares */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+    <!-- Fuentes y otros recursos (ya los carga player.js, pero podemos ponerlos aquí también) -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CDN opcional (player.js lo carga) -->
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="expanded">
+        <div class="sidebar-header">
+            <button id="toggleSidebar" class="toggle-btn">☰</button>
+            <h2>Menú</h2>
+        </div>
+        <div class="sidebar-content">
+            <!-- Aquí puedes poner enlaces de navegación, lista de reproducción, etc. -->
+            <ul style="list-style: none;">
+                <li><a href="/" data-link style="color:white; text-decoration:none; padding:8px; display:block;">Inicio</a></li>
+                <li><a href="/biblioteca" data-link style="color:white; text-decoration:none; padding:8px; display:block;">Biblioteca</a></li>
+                <li><a href="/explorar" data-link style="color:white; text-decoration:none; padding:8px; display:block;">Explorar</a></li>
+                <li><a href="/novedades" data-link style="color:white; text-decoration:none; padding:8px; display:block;">Novedades</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Contenedor principal -->
+    <div id="main-container">
+        <header id="main-header">
+            <!-- Puedes poner un logo o título aquí -->
+            <h1>Balta Media</h1>
+        </header>
+
+        <div id="category-filters">
+            <div id="category-pills"></div>
+        </div>
+
+        <main id="content">
+            <!-- El contenido dinámico se inyecta aquí por el router -->
+        </main>
+
+        <!-- El reproductor se inyectará aquí (dentro de #main-container) mediante player.js -->
+        <!-- No poner nada más aquí -->
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        // Importar los módulos principales
+        import './episodios.js';
+        import './show.js';
+        import './main.js';
+        import './sidebar.js';   // nuevo archivo para la lógica de la sidebar
+        // Nota: player.js se importa dentro de show.js (o main.js) según el código original.
+        // En show.js hay import './player.js'; así que aseguramos que player.js esté presente.
+    </script>
+    <!-- El script de player.js se cargará mediante importación, pero también podría ser un script aparte. 
+         En show.js hay import './player.js'; así que se encadena. -->
+</body>
+</html>
