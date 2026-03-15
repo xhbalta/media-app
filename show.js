@@ -1,4 +1,4 @@
-// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN PROFESIONALIZADA MEJORADA
+// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN OPTIMIZADA
 
 import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from './episodios.js';
 import { userStorage } from './storage.js';
@@ -16,21 +16,10 @@ const ICONS = {
 };
 
 const CATEGORIES = [
-    "Todos",
-    "Derecho",
-    "Física y Astronomía",
-    "Matemáticas",
-    "Historia",
-    "Filosofía",
-    "Economía y Finanzas",
-    "Ciencias Sociales",
-    "Arte y Cultura",
-    "Literatura y Audiolibros",
-    "Cine y TV",
-    "Documentales",
-    "Ciencias Naturales",
-    "Tecnología e Informática",
-    "Otras Ciencias"
+    "Todos", "Derecho", "Física y Astronomía", "Matemáticas", "Historia",
+    "Filosofía", "Economía y Finanzas", "Ciencias Sociales", "Arte y Cultura",
+    "Literatura y Audiolibros", "Cine y TV", "Documentales", "Ciencias Naturales",
+    "Tecnología e Informática", "Otras Ciencias"
 ];
 
 // ---------- UTILIDADES ----------
@@ -68,13 +57,12 @@ function determineCategories(ep) {
     return Array.from(cats);
 }
 
-// Enriquecer episodios con categorías y serie
 export const DATA = getEpisodiosConSerie().map(ep => ({
     ...ep,
     categories: determineCategories(ep)
 }));
 
-// ---------- RENDERIZADO DE TARJETAS (exportadas para otros módulos) ----------
+// ---------- RENDERIZADO DE TARJETAS ----------
 export function createStandardCard(ep) {
     const inPlaylist = userStorage.playlist.has(ep.id);
     const addIcon = inPlaylist ? ICONS.added : ICONS.add;
@@ -171,7 +159,7 @@ export function createGridCard(item) {
     `;
 }
 
-// ---------- CARRUSELES ----------
+// ---------- CARRUSELES (con navegación SPA) ----------
 function createCarousel(title, type, items, categoryContext) {
     if (!items || items.length === 0) return '';
 
@@ -203,10 +191,15 @@ function createCarousel(title, type, items, categoryContext) {
             `</div>`;
     }
 
+    // Usar SPA para el botón "Ver todo"
+    const verTodoHandler = categoryContext !== 'Todos' 
+        ? `window.handleCategoryClick('${categoryContext}')` 
+        : `window.location.href='/'`;
+
     return `<section class="carousel-wrapper relative group/section mb-8 sm:mb-12">
         <div class="flex items-end justify-between mb-3 sm:mb-5 px-1">
             <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition-colors cursor-default">${title}</h2>
-            <button onclick="window.location.href='/categoria/${encodeURIComponent(categoryContext)}'" class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">Ver todo</button>
+            <button onclick="${verTodoHandler}" class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">Ver todo</button>
         </div>
         <div class="relative">
             <div class="nav-btn left" onclick="document.getElementById('${id}').scrollLeft -= 600"><button>❮</button></div>
@@ -272,7 +265,7 @@ function createSeriesCarousel() {
     </section>`;
 }
 
-// ---------- VISTAS DE DETALLE PROFESIONALIZADAS ----------
+// ---------- VISTAS DE DETALLE ----------
 export function renderEpisodio(container, episodioId) {
     const ep = DATA.find(e => e.id === episodioId);
     if (!ep) {
@@ -285,9 +278,9 @@ export function renderEpisodio(container, episodioId) {
 
     const html = `
         <div class="detail-view w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <!-- Header adaptable: mobile vs desktop -->
+            <!-- Header adaptable -->
             <div class="episode-header mb-8">
-                <!-- Versión móvil (stack vertical) -->
+                <!-- Versión móvil -->
                 <div class="block lg:hidden">
                     <div class="relative w-full aspect-square max-w-[300px] mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl">
                         <img src="${ep.coverUrl}" class="w-full h-full object-cover" alt="${ep.title}">
@@ -296,7 +289,6 @@ export function renderEpisodio(container, episodioId) {
                     <p class="text-lg text-gray-300 mb-3">${ep.author}</p>
                     <p class="text-gray-400 mb-6 leading-relaxed">${ep.description}</p>
                     
-                    <!-- Barra de acciones móvil -->
                     <div class="flex items-center gap-3 mb-8">
                         <button class="flex-1 bg-[#7b2eda] hover:bg-[#8f3ef0] rounded-2xl py-4 px-6 flex items-center justify-center gap-3 transition transform hover:scale-[1.02]" onclick="window.handlePlay(event, '${ep.id}')">
                             <img src="${ICONS.play}" class="w-6 h-6 icon-white">
@@ -314,7 +306,7 @@ export function renderEpisodio(container, episodioId) {
                     </div>
                 </div>
 
-                <!-- Versión escritorio (layout horizontal tipo homeshow) -->
+                <!-- Versión escritorio -->
                 <div class="hidden lg:block relative rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-900 to-black border border-white/10">
                     <div class="absolute inset-0 opacity-20">
                         <img src="${ep.coverUrl}" class="w-full h-full object-cover blur-3xl scale-110">
@@ -415,9 +407,7 @@ export function renderSerie(container, serieUrl) {
 
     const html = `
         <div class="detail-view w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <!-- Header adaptable: mobile vs desktop -->
             <div class="serie-header mb-8">
-                <!-- Versión móvil (stack vertical) -->
                 <div class="block lg:hidden">
                     <div class="relative w-full aspect-square max-w-[300px] mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl">
                         <img src="${serie.portada_serie}" class="w-full h-full object-cover" alt="${serie.titulo_serie}">
@@ -426,7 +416,6 @@ export function renderSerie(container, serieUrl) {
                     <p class="text-lg text-gray-300 mb-3">${episodiosSerie[0]?.author || ''}</p>
                     <p class="text-gray-400 mb-6 leading-relaxed">${serie.descripcion_serie}</p>
                     
-                    <!-- Barra de acciones móvil -->
                     <div class="flex items-center gap-3 mb-8">
                         ${ultimoEpisodio ? `
                         <button class="flex-1 bg-[#7b2eda] hover:bg-[#8f3ef0] rounded-2xl py-4 px-6 flex items-center justify-center gap-3 transition transform hover:scale-[1.02]" onclick="window.handlePlay(event, '${ultimoEpisodio.id}')">
@@ -440,7 +429,6 @@ export function renderSerie(container, serieUrl) {
                     </div>
                 </div>
 
-                <!-- Versión escritorio (layout horizontal tipo homeshow) -->
                 <div class="hidden lg:block relative rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-900 to-black border border-white/10">
                     <div class="absolute inset-0 opacity-20">
                         <img src="${serie.portada_serie}" class="w-full h-full object-cover blur-3xl scale-110">
@@ -468,7 +456,6 @@ export function renderSerie(container, serieUrl) {
                 </div>
             </div>
 
-            <!-- Lista de episodios profesionalizada -->
             <div class="episodes-list mt-8 lg:mt-12">
                 <h2 class="text-xl lg:text-2xl font-bold mb-6 flex items-center gap-2">
                     <span>Episodios</span>
@@ -484,9 +471,8 @@ export function renderSerie(container, serieUrl) {
     container.innerHTML = html;
 }
 
-// ---------- RENDER FEED (MEJORADO CON MÁS CARRUSELES) ----------
+// ---------- RENDER FEED ----------
 export function renderFeed(container) {
-    // Crear estructura de feed si no existe
     let feedView = document.getElementById('feed-view');
     let gridView = document.getElementById('grid-view');
     if (!feedView) {
@@ -511,17 +497,15 @@ export function renderFeed(container) {
         gridView = document.getElementById('grid-view');
     }
 
-    // Función para obtener elementos aleatorios
     const getRandomSafe = (count, filterFn = () => true) => {
         const filtered = DATA.filter(filterFn);
         if (filtered.length === 0) return [];
         const shuffled = [...filtered].sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, Math.min(count, shuffled.length));
+        return shuffled.slice(0, Math.min(count, filtered.length));
     };
 
     feedView.innerHTML = '';
 
-    // ========== CARRUSELES EXISTENTES (sin cambios) ==========
     feedView.innerHTML += createCarousel("Nuevos Lanzamientos", "standard",
         getRandomSafe(15, ep => new Date(ep.date) > new Date(Date.now() - 30*24*60*60*1000)), "Todos");
 
@@ -553,7 +537,6 @@ export function renderFeed(container) {
             e.categories.some(c => ["Ciencias Naturales", "Tecnología e Informática"].includes(c))),
         "Otras Ciencias");
 
-    // ========== NUEVOS CARRUSELES DINÁMICOS (CREATIVOS) ==========
     feedView.innerHTML += createCarousel("Imprescindibles del Mes", "list",
         getRandomSafe(16, e => new Date(e.date) > new Date(Date.now() - 60*24*60*60*1000)), "Todos");
 
@@ -576,11 +559,10 @@ export function renderFeed(container) {
         getRandomSafe(20), "Todos");
 }
 
-// ---------- RENDER GRID (resultados de búsqueda/categoría) ----------
+// ---------- RENDER GRID ----------
 export function renderGrid(container, items, title) {
     let gridView = document.getElementById('grid-view');
     if (!gridView) {
-        // Si no existe, lo creamos
         container.innerHTML = `
             <div id="feed-view" class="hidden"></div>
             <div id="grid-view" class="transition-opacity duration-300">
@@ -627,13 +609,12 @@ export function renderGrid(container, items, title) {
         });
     }
 
-    // Mostrar grid y ocultar feed
     document.getElementById('feed-view')?.classList.add('hidden');
     gridView.classList.remove('hidden');
 
-    // Asignar evento al botón de cerrar
     document.getElementById('closeGridBtn')?.addEventListener('click', () => {
-        window.location.href = '/';
+        window.history.pushState(null, null, '/');
+        window.dispatchEvent(new PopStateEvent('popstate'));
     });
 }
 
@@ -684,7 +665,6 @@ window.handleAdd = function(e, episodioId) {
     if (!ep) return;
 
     userStorage.playlist.add(ep);
-    // Actualizar icono visualmente
     const target = e.target.closest('img');
     if (target) {
         target.src = ICONS.added;
@@ -729,10 +709,15 @@ window.goToDetail = function(url) {
     }
 };
 
-// Renderizar categorías en el header
-// ==========================================================================
-// RENDERIZADO DE CATEGORÍAS (CORREGIDO PARA SPA)
-// ==========================================================================
+// Helper para navegación de categorías desde carruseles
+window.handleCategoryClick = function(category) {
+    const url = category === 'Todos' ? '/' : `/categoria/${encodeURIComponent(category)}`;
+    window.history.pushState(null, null, url);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// Renderizar categorías en el header (SPA)
 export function renderCategoryPills(activeCat = 'Todos') {
     const container = document.getElementById('category-pills');
     if (!container) return;
@@ -745,31 +730,14 @@ export function renderCategoryPills(activeCat = 'Todos') {
         btn.className = `whitespace-nowrap px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs font-bold transition-all ${isActive ? 'bg-white text-black' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`;
         btn.innerText = cat;
         
-        // 🟢 CORREGIDO: Usar navegación SPA en lugar de window.location.href
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            let url;
-            if (cat === 'Todos') {
-                url = '/';
-            } else {
-                url = `/categoria/${encodeURIComponent(cat)}`;
-            }
-            
-            // Usar el sistema de navegación SPA
-            window.history.pushState(null, null, url);
-            
-            // Disparar el evento popstate para que el router procese la nueva URL
-            window.dispatchEvent(new PopStateEvent('popstate'));
-            
-            // Scroll suave al inicio
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        btn.addEventListener('click', () => {
+            window.handleCategoryClick(cat);
         });
         
         container.appendChild(btn);
     });
 }
+
 // Inicializar categorías al cargar
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => renderCategoryPills());
