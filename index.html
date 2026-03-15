@@ -14,32 +14,28 @@
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="/styles.css">
     
-    <!-- ESTILOS BASE - CON CSS GRID PARA LAYOUT PERFECTO -->
+    <!-- ESTILOS BASE - CON CSS GRID MEJORADO (SIDEBAR CON ANCHO FIJO) -->
     <style id="sidebar-base-styles">
-        /* Reset */
         * {
             box-sizing: border-box;
         }
-        
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             overflow-x: hidden;
         }
-        
         body {
             min-height: 100vh;
             background: #050505;
             display: grid;
-            grid-template-columns: auto 1fr; /* Sidebar automática, resto 1fr */
-            grid-template-rows: auto auto 1fr; /* Header, categorías, contenido */
+            grid-template-columns: auto 1fr;
+            grid-template-rows: auto auto 1fr;
             grid-template-areas: 
                 "sidebar header"
                 "sidebar categories"
                 "sidebar content";
         }
-        
         /* SIDEBAR */
         .sidebar-desktop {
             grid-area: sidebar;
@@ -51,17 +47,20 @@
             box-shadow: 2px 0 5px rgba(0,0,0,0.5);
             scrollbar-width: none;
             transition: width 0.3s ease;
-            width: 70px; /* Colapsado por defecto */
+            width: 70px;
             min-width: 70px;
         }
-        
         .sidebar-desktop.expanded {
-            width: 15%;
-            min-width: 180px;
+            width: 220px;
+            min-width: 220px;
         }
-        
+        @media (min-width: 1280px) {
+            .sidebar-desktop.expanded {
+                width: 250px;
+                min-width: 250px;
+            }
+        }
         .sidebar-desktop::-webkit-scrollbar { display: none; }
-        
         @media (max-width: 768px) {
             .sidebar-desktop { display: none !important; }
         }
@@ -99,9 +98,9 @@
         .sidebar-nav-item.active { background: rgba(255,255,255,0.2); }
         .sidebar-nav-item img { width: 24px; height: 24px; filter: brightness(1.2); flex-shrink: 0; }
         .sidebar-nav-item span { font-size: 14px; font-weight: 500; }
-        .sidebar-desktop.collapsed .sidebar-nav-item span { display: none; }
+        .sidebar-desktop:not(.expanded) .sidebar-nav-item span { display: none; }
 
-        .sidebar-desktop.collapsed .sidebar-rec-section { display: none; }
+        .sidebar-desktop:not(.expanded) .sidebar-rec-section { display: none; }
         .sidebar-rec-section {
             padding: 0 8px;
             margin-top: 20px;
@@ -154,7 +153,6 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
             z-index: 50;
         }
-        
         #main-header > div {
             padding: 0.75rem 1rem;
         }
@@ -169,7 +167,6 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
             z-index: 40;
         }
-        
         #category-filters > div {
             padding: 0.5rem 1rem;
         }
@@ -179,11 +176,6 @@
             grid-area: content;
             padding: 1rem 1rem;
             min-height: 100vh;
-        }
-
-        /* REPRODUCTOR (si se inserta dentro del contenido, se adaptará automáticamente) */
-        .player-universal {
-            /* Si es fijo y debe estar sobre el contenido, se manejará aparte */
         }
 
         /* En móviles, una sola columna */
@@ -227,16 +219,13 @@
     </div>
 </div>
 
-<!-- ================================================ -->
-<!-- 🟢 REPRODUCTOR UNIVERSAL - PEGA AQUÍ TU CÓDIGO 🟢 -->
-<!-- ================================================ -->
+<!-- Contenedor principal -->
+<main id="content"></main>
 
-<!-- ================================================ -->
-
-<!-- Contenedor principal - SIN LÍMITES -->
-<main id="content">
-    <!-- Aquí se inyecta el contenido dinámico -->
-</main>
+<!-- Reproductor flotante (se inyecta vía player.js) -->
+<div id="floating-player" class="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-[#333] p-3 flex items-center justify-between z-[10000] backdrop-blur hidden">
+    <!-- El contenido lo genera player.js -->
+</div>
 
 <!-- Modal de error -->
 <div id="errorModal" class="fixed inset-0 z-[10000] flex items-center justify-center hidden" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
@@ -251,20 +240,16 @@
     </div>
 </div>
 
-<!-- Botón flotante móvil -->
-<button id="openPlayerBtn" onclick="window.togglePlayer ? window.togglePlayer() : window.updatePlayerVisibility?.(true)" 
-        class="fixed bottom-20 right-4 z-[1002] bg-[#7b2eda] rounded-full p-3 shadow-lg flex items-center gap-2 lg:hidden">
+<!-- Botón flotante móvil para abrir reproductor -->
+<button id="openPlayerBtn" class="fixed bottom-20 right-4 z-[1002] bg-[#7b2eda] rounded-full p-3 shadow-lg flex items-center gap-2 lg:hidden">
     <img src="https://nikichitonjes-home.odoo.com/web/image/478-0e3df8d3/reanudar.gif" alt="Reproductor" class="w-6 h-6">
     <span class="text-sm font-bold">Escuchar</span>
 </button>
 
-<!-- Script de la barra lateral (simplificado, sin ajustes de layout manual) -->
+<!-- Script de la barra lateral (optimizado) -->
 <script>
 (function() {
-    const SIDEBAR_CONFIG = {
-        BREAKPOINT: 768,
-    };
-
+    const SIDEBAR_CONFIG = { BREAKPOINT: 768 };
     let sidebarInstance = {
         initialized: false,
         currentState: localStorage.getItem('sidebar_state') || 'collapsed',
@@ -323,14 +308,11 @@
     function populateRecommendations() {
         const container = document.getElementById('sidebarRecList');
         if (!container) return;
-
         const episodes = getRecommendations();
-
         if (!episodes.length) {
             container.innerHTML = '<div style="color:#aaa; padding:8px;">No hay recomendados</div>';
             return;
         }
-
         container.innerHTML = '';
         episodes.forEach(ep => {
             const title = ep.title || 'Sin título';
@@ -346,7 +328,6 @@
                     <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 </button>
             `;
-            
             const btn = item.querySelector('.sidebar-rec-play-btn');
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -386,14 +367,11 @@
         const sidebar = document.getElementById('sidebarDesktop');
         const toggle = document.getElementById('sidebarDesktopToggle');
         if (!sidebar || !toggle) return;
-
         const newToggle = toggle.cloneNode(true);
         toggle.parentNode.replaceChild(newToggle, toggle);
-        
         newToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             e.preventDefault();
-            
             const isCollapsed = sidebar.classList.contains('collapsed');
             if (isCollapsed) {
                 sidebar.classList.remove('collapsed');
@@ -408,21 +386,14 @@
 
     function initSidebar() {
         sidebarInstance.isMobile = window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT;
-        
         const oldSidebar = document.querySelector('.sidebar-desktop');
         if (oldSidebar) oldSidebar.remove();
-        
-        if (sidebarInstance.isMobile) {
-            return; // No sidebar en móvil
-        }
-        
+        if (sidebarInstance.isMobile) return;
         const sidebar = renderSidebar();
         document.body.insertBefore(sidebar, document.body.firstChild);
-        
         populateRecommendations();
         initSidebarToggle();
         setActiveNavItem();
-        
         sidebarInstance.initialized = true;
     }
 
@@ -435,7 +406,6 @@
     window.addEventListener('resize', () => {
         const wasMobile = sidebarInstance.isMobile;
         const isMobileNow = window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT;
-        
         if (wasMobile !== isMobileNow) {
             sidebarInstance.isMobile = isMobileNow;
             initSidebar();
@@ -466,6 +436,7 @@
 })();
 </script>
 
+<!-- Módulos JS -->
 <script type="module" src="/main.js"></script>
 </body>
 </html>
