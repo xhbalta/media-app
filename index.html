@@ -14,12 +14,11 @@
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="/styles.css">
     
-    <!-- ESTILOS BASE CORREGIDOS -->
+    <!-- ESTILOS BASE - CON CSS GRID PARA LAYOUT PERFECTO -->
     <style id="sidebar-base-styles">
-        /* Reset crítico */
+        /* Reset */
         * {
             box-sizing: border-box;
-            max-width: 100%;
         }
         
         html, body {
@@ -27,128 +26,44 @@
             padding: 0;
             width: 100%;
             overflow-x: hidden;
-            position: relative;
         }
         
         body {
             min-height: 100vh;
-            transition: margin-left 0.3s ease;
-            will-change: margin-left;
+            background: #050505;
+            display: grid;
+            grid-template-columns: auto 1fr; /* Sidebar automática, resto 1fr */
+            grid-template-rows: auto auto 1fr; /* Header, categorías, contenido */
+            grid-template-areas: 
+                "sidebar header"
+                "sidebar categories"
+                "sidebar content";
         }
         
-        /* Header - ancho completo controlado */
-        #main-header {
-            position: sticky;
-            top: 0;
-            width: 100% !important;
-            left: 0 !important;
-            right: 0 !important;
-            transition: left 0.3s ease, width 0.3s ease !important;
-            z-index: 50;
-        }
-        
-        #main-header > div {
-            width: 100%;
-            max-width: 100%;
-            padding-left: 1rem;
-            padding-right: 1rem;
-            margin: 0 auto;
-        }
-        
-        /* Barra de categorías */
-        #category-filters {
-            position: sticky;
-            top: 0;
-            width: 100% !important;
-            left: 0 !important;
-            right: 0 !important;
-            transition: left 0.3s ease, width 0.3s ease !important;
-            z-index: 40;
-        }
-        
-        #category-filters > div {
-            width: 100%;
-            max-width: 100%;
-            padding-left: 1rem;
-            padding-right: 1rem;
-            margin: 0 auto;
-        }
-        
-        /* Contenedor principal - SIN DESBORDAMIENTO */
-        #content {
-            width: 100% !important;
-            max-width: 100% !important;
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-            margin-left: 0 !important;
-            transition: margin-left 0.3s ease;
-            box-sizing: border-box;
-            overflow-x: hidden;
-        }
-        
-        /* Reproductor universal */
-        .player-universal {
-            transition: left 0.3s ease, width 0.3s ease !important;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-        
-        /* Cuando la sidebar está presente */
-        body.has-sidebar #main-header,
-        body.has-sidebar #category-filters,
-        body.has-sidebar #content,
-        body.has-sidebar .player-universal {
-            transition: left 0.3s ease, width 0.3s ease !important;
-        }
-        
-        /* En móvil, reset */
-        @media (max-width: 768px) {
-            body, #main-header, #category-filters, #content, .player-universal {
-                margin-left: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-            
-            #main-header > div,
-            #category-filters > div,
-            #content {
-                padding-left: 1rem !important;
-                padding-right: 1rem !important;
-            }
-        }
-
-        /* ESTILOS DE LA SIDEBAR */
+        /* SIDEBAR */
         .sidebar-desktop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
+            grid-area: sidebar;
             background: #0F0F0F;
             color: #fff;
             z-index: 900;
-            transition: width 0.3s ease;
             overflow-x: hidden;
             overflow-y: auto;
             box-shadow: 2px 0 5px rgba(0,0,0,0.5);
             scrollbar-width: none;
-            -ms-overflow-style: none;
+            transition: width 0.3s ease;
+            width: 70px; /* Colapsado por defecto */
+            min-width: 70px;
         }
-        .sidebar-desktop::-webkit-scrollbar {
-            display: none;
-        }
-        .sidebar-desktop.collapsed {
-            width: 70px;
-        }
+        
         .sidebar-desktop.expanded {
             width: 15%;
             min-width: 180px;
         }
         
+        .sidebar-desktop::-webkit-scrollbar { display: none; }
+        
         @media (max-width: 768px) {
-            .sidebar-desktop {
-                display: none !important;
-            }
+            .sidebar-desktop { display: none !important; }
         }
 
         .sidebar-toggle {
@@ -159,15 +74,8 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 20px;
         }
-        .sidebar-toggle svg {
-            width: 24px;
-            height: 24px;
-            fill: white;
-            transition: transform 0.2s;
-        }
-        .sidebar-desktop.expanded .sidebar-toggle svg {
-            transform: rotate(180deg);
-        }
+        .sidebar-toggle svg { width: 24px; height: 24px; fill: white; transition: transform 0.2s; }
+        .sidebar-desktop.expanded .sidebar-toggle svg { transform: rotate(180deg); }
 
         .sidebar-nav {
             display: flex;
@@ -187,30 +95,13 @@
             white-space: nowrap;
             transition: background 0.2s;
         }
-        .sidebar-nav-item:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        .sidebar-nav-item.active {
-            background: rgba(255,255,255,0.2);
-        }
-        .sidebar-nav-item img {
-            width: 24px;
-            height: 24px;
-            filter: brightness(1.2);
-            flex-shrink: 0;
-        }
-        .sidebar-nav-item span {
-            font-size: 14px;
-            font-weight: 500;
-            transition: opacity 0.2s;
-        }
-        .sidebar-desktop.collapsed .sidebar-nav-item span {
-            display: none;
-        }
+        .sidebar-nav-item:hover { background: rgba(255,255,255,0.1); }
+        .sidebar-nav-item.active { background: rgba(255,255,255,0.2); }
+        .sidebar-nav-item img { width: 24px; height: 24px; filter: brightness(1.2); flex-shrink: 0; }
+        .sidebar-nav-item span { font-size: 14px; font-weight: 500; }
+        .sidebar-desktop.collapsed .sidebar-nav-item span { display: none; }
 
-        .sidebar-desktop.collapsed .sidebar-rec-section {
-            display: none;
-        }
+        .sidebar-desktop.collapsed .sidebar-rec-section { display: none; }
         .sidebar-rec-section {
             padding: 0 8px;
             margin-top: 20px;
@@ -235,72 +126,83 @@
             align-items: center;
             gap: 6px;
         }
-        .sidebar-rec-header a:hover {
-            opacity: 1;
-        }
-        .sidebar-rec-header svg {
-            width: 16px;
-            height: 16px;
-            fill: white;
-        }
-        .sidebar-rec-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .sidebar-rec-header svg { width: 16px; height: 16px; fill: white; }
+        .sidebar-rec-list { display: flex; flex-direction: column; gap: 12px; }
         .sidebar-rec-item {
             display: flex;
             align-items: center;
             gap: 10px;
             font-size: 13px;
         }
-        .sidebar-rec-item-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .sidebar-rec-item-title {
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .sidebar-rec-item-author {
-            font-size: 11px;
-            opacity: 0.7;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .sidebar-rec-item-info { flex: 1; min-width: 0; }
+        .sidebar-rec-item-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-rec-item-author { font-size: 11px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .sidebar-rec-play-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
+            background: none; border: none; color: white; cursor: pointer; padding: 4px 8px; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; transition: background 0.2s;
         }
-        .sidebar-rec-play-btn:hover {
-            background: rgba(255,255,255,0.2);
+        .sidebar-rec-play-btn:hover { background: rgba(255,255,255,0.2); }
+        .sidebar-rec-play-btn svg { width: 18px; height: 18px; fill: white; }
+
+        /* HEADER */
+        #main-header {
+            grid-area: header;
+            position: sticky;
+            top: 0;
+            background: rgba(5,5,5,0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            z-index: 50;
         }
-        .sidebar-rec-play-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: white;
+        
+        #main-header > div {
+            padding: 0.75rem 1rem;
+        }
+
+        /* BARRA DE CATEGORÍAS */
+        #category-filters {
+            grid-area: categories;
+            position: sticky;
+            top: 0;
+            background: rgba(5,5,5,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            z-index: 40;
+        }
+        
+        #category-filters > div {
+            padding: 0.5rem 1rem;
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        #content {
+            grid-area: content;
+            padding: 1rem 1rem;
+            min-height: 100vh;
+        }
+
+        /* REPRODUCTOR (si se inserta dentro del contenido, se adaptará automáticamente) */
+        .player-universal {
+            /* Si es fijo y debe estar sobre el contenido, se manejará aparte */
+        }
+
+        /* En móviles, una sola columna */
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "header"
+                    "categories"
+                    "content";
+            }
         }
     </style>
 </head>
-<body class="bg-[#050505] text-white font-[Plus_Jakarta_Sans] overflow-x-hidden">
-
-<!-- Search overlay -->
-<div class="search-overlay" id="searchOverlay"></div>
+<body class="bg-[#050505] text-white font-[Plus_Jakarta_Sans]">
 
 <!-- Header principal -->
-<header id="main-header" class="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 transition-opacity duration-300">
-    <div class="w-full px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
+<header id="main-header">
+    <div class="flex items-center justify-between">
         <a href="/" class="flex items-center gap-2" data-link>
             <img src="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg object-cover" loading="lazy">
             <span class="text-lg sm:text-xl font-bold text-white">Balta Media</span>
@@ -319,8 +221,8 @@
 </header>
 
 <!-- Barra de categorías -->
-<div class="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-xl border-b border-white/5" id="category-filters">
-    <div class="w-full px-4 sm:px-6 lg:px-8 py-2 sm:py-3 overflow-x-auto no-scrollbar">
+<div id="category-filters">
+    <div class="overflow-x-auto no-scrollbar">
         <div class="flex items-center gap-2 sm:gap-3" id="category-pills"></div>
     </div>
 </div>
@@ -331,8 +233,8 @@
 
 <!-- ================================================ -->
 
-<!-- Contenedor principal -->
-<main id="content" class="w-full px-4 sm:px-6 lg:px-8 mt-4 min-h-screen overflow-x-hidden">
+<!-- Contenedor principal - SIN LÍMITES -->
+<main id="content">
     <!-- Aquí se inyecta el contenido dinámico -->
 </main>
 
@@ -349,181 +251,65 @@
     </div>
 </div>
 
-<!-- Botón flotante -->
+<!-- Botón flotante móvil -->
 <button id="openPlayerBtn" onclick="window.togglePlayer ? window.togglePlayer() : window.updatePlayerVisibility?.(true)" 
         class="fixed bottom-20 right-4 z-[1002] bg-[#7b2eda] rounded-full p-3 shadow-lg flex items-center gap-2 lg:hidden">
     <img src="https://nikichitonjes-home.odoo.com/web/image/478-0e3df8d3/reanudar.gif" alt="Reproductor" class="w-6 h-6">
     <span class="text-sm font-bold">Escuchar</span>
 </button>
 
-<!-- Script de la barra lateral (COMPLETO) -->
+<!-- Script de la barra lateral (simplificado, sin ajustes de layout manual) -->
 <script>
 (function() {
-    // ==========================================================================
-    // CONFIGURACIÓN
-    // ==========================================================================
     const SIDEBAR_CONFIG = {
         BREAKPOINT: 768,
-        COLOR: '#0F0F0F',
-        WIDTH_EXPANDED: '15%',
-        WIDTH_COLLAPSED: '70px',
-        MIN_WIDTH_EXPANDED: '180px'
     };
 
-    // ==========================================================================
-    // ESTADO GLOBAL
-    // ==========================================================================
     let sidebarInstance = {
         initialized: false,
         currentState: localStorage.getItem('sidebar_state') || 'collapsed',
         isMobile: window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT
     };
 
-    // ==========================================================================
-    // FUNCIONES AUXILIARES
-    // ==========================================================================
     function getRecommendations() {
-        try {
-            return window.RECOMENDADOS || [];
-        } catch (e) {
-            return [];
-        }
+        try { return window.RECOMENDADOS || []; } catch (e) { return []; }
     }
 
-    // ==========================================================================
-    // FUNCIÓN DE AJUSTE CORREGIDA - SIN DESBORDAMIENTO
-    // ==========================================================================
-    function adjustLayout(expanded) {
-        if (sidebarInstance.isMobile) return;
-        
-        // Calcular el ancho exacto en píxeles
-        let sidebarWidth;
-        if (expanded) {
-            // Usar mínimo entre porcentaje y mínimo definido
-            sidebarWidth = Math.max(
-                parseFloat(SIDEBAR_CONFIG.MIN_WIDTH_EXPANDED),
-                window.innerWidth * 0.15
-            );
-        } else {
-            sidebarWidth = 70; // 70px fijos para colapsado
-        }
-        
-        // Ajustar body
-        document.body.style.marginLeft = sidebarWidth + 'px';
-        document.body.classList.add('has-sidebar');
-        
-        // Ajustar header
-        const header = document.getElementById('main-header');
-        if (header) {
-            header.style.left = sidebarWidth + 'px';
-            header.style.width = `calc(100% - ${sidebarWidth}px)`;
-        }
-        
-        // Ajustar categorías
-        const categories = document.getElementById('category-filters');
-        if (categories) {
-            categories.style.left = sidebarWidth + 'px';
-            categories.style.width = `calc(100% - ${sidebarWidth}px)`;
-        }
-        
-        // Ajustar contenedor principal
-        const content = document.getElementById('content');
-        if (content) {
-            content.style.marginLeft = sidebarWidth + 'px';
-            content.style.width = `calc(100% - ${sidebarWidth}px)`;
-            content.style.maxWidth = `calc(100% - ${sidebarWidth}px)`;
-        }
-        
-        // Ajustar reproductor
-        const player = document.querySelector('.player-universal');
-        if (player) {
-            player.style.left = sidebarWidth + 'px';
-            player.style.width = `calc(100% - ${sidebarWidth}px)`;
-        }
-        
-        localStorage.setItem('sidebar_state', expanded ? 'expanded' : 'collapsed');
-        sidebarInstance.currentState = expanded ? 'expanded' : 'collapsed';
-    }
-
-    function resetLayout() {
-        document.body.style.marginLeft = '';
-        document.body.classList.remove('has-sidebar');
-        
-        const header = document.getElementById('main-header');
-        if (header) {
-            header.style.left = '';
-            header.style.width = '';
-        }
-        
-        const categories = document.getElementById('category-filters');
-        if (categories) {
-            categories.style.left = '';
-            categories.style.width = '';
-        }
-        
-        const content = document.getElementById('content');
-        if (content) {
-            content.style.marginLeft = '';
-            content.style.width = '';
-            content.style.maxWidth = '';
-        }
-        
-        const player = document.querySelector('.player-universal');
-        if (player) {
-            player.style.left = '';
-            player.style.width = '';
-        }
-    }
-
-    // ==========================================================================
-    // RENDERIZADO DE LA SIDEBAR
-    // ==========================================================================
     function renderSidebar() {
         const sidebar = document.createElement('aside');
         sidebar.className = `sidebar-desktop ${sidebarInstance.currentState}`;
         sidebar.id = 'sidebarDesktop';
 
-        // Botón toggle
         const toggle = document.createElement('div');
         toggle.className = 'sidebar-toggle';
         toggle.id = 'sidebarDesktopToggle';
         toggle.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>';
 
-        // Navegación
         const nav = document.createElement('div');
         nav.className = 'sidebar-nav';
         nav.innerHTML = `
             <a href="/" class="sidebar-nav-item" title="Home" data-link>
-                <img src="https://media.baltaanay.org/web/image/798-1b947c8d/Home%20%282%29.webp" alt="Home" loading="lazy">
-                <span>Home</span>
+                <img src="https://media.baltaanay.org/web/image/798-1b947c8d/Home%20%282%29.webp" alt="Home" loading="lazy"><span>Home</span>
             </a>
             <a href="/buscar" class="sidebar-nav-item" title="Explorar" data-link>
-                <img src="https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp" alt="Explorar" loading="lazy">
-                <span>Explorar</span>
+                <img src="https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp" alt="Explorar" loading="lazy"><span>Explorar</span>
             </a>
             <a href="/subir" class="sidebar-nav-item" title="Cargar" data-link>
-                <img src="https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp" alt="Cargar" loading="lazy">
-                <span>Cargar</span>
+                <img src="https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp" alt="Cargar" loading="lazy"><span>Cargar</span>
             </a>
             <a href="https://www.baltaanay.org/solicitud" class="sidebar-nav-item" title="Solicitar">
-                <img src="https://www.baltaanay.org/web/image/922-f3d79ca9/xhbalta-aula.png" alt="Solicitar" loading="lazy">
-                <span>Solicitar</span>
+                <img src="https://www.baltaanay.org/web/image/922-f3d79ca9/xhbalta-aula.png" alt="Solicitar" loading="lazy"><span>Solicitar</span>
             </a>
             <a href="/my/home" class="sidebar-nav-item" title="Usuario" data-link>
-                <img src="https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png" alt="Usuario" loading="lazy">
-                <span>Portal</span>
+                <img src="https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png" alt="Usuario" loading="lazy"><span>Portal</span>
             </a>
         `;
 
-        // Sección recomendados
         const recSection = document.createElement('div');
         recSection.className = 'sidebar-rec-section';
         recSection.innerHTML = `
             <div class="sidebar-rec-header">
-                <a href="/novedades" data-link>
-                    Recomendados
-                    <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
-                </a>
+                <a href="/novedades" data-link>Recomendados<svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
             </div>
             <div class="sidebar-rec-list" id="sidebarRecList"></div>
         `;
@@ -612,18 +398,14 @@
             if (isCollapsed) {
                 sidebar.classList.remove('collapsed');
                 sidebar.classList.add('expanded');
-                adjustLayout(true);
             } else {
                 sidebar.classList.add('collapsed');
                 sidebar.classList.remove('expanded');
-                adjustLayout(false);
             }
+            localStorage.setItem('sidebar_state', isCollapsed ? 'expanded' : 'collapsed');
         });
     }
 
-    // ==========================================================================
-    // INICIALIZACIÓN
-    // ==========================================================================
     function initSidebar() {
         sidebarInstance.isMobile = window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT;
         
@@ -631,8 +413,7 @@
         if (oldSidebar) oldSidebar.remove();
         
         if (sidebarInstance.isMobile) {
-            resetLayout();
-            return;
+            return; // No sidebar en móvil
         }
         
         const sidebar = renderSidebar();
@@ -642,20 +423,15 @@
         initSidebarToggle();
         setActiveNavItem();
         
-        adjustLayout(sidebarInstance.currentState === 'expanded');
-        
         sidebarInstance.initialized = true;
-        console.log('✅ Sidebar inicializada correctamente');
     }
 
-    // Inicializar
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initSidebar);
     } else {
         initSidebar();
     }
 
-    // Eventos de resize
     window.addEventListener('resize', () => {
         const wasMobile = sidebarInstance.isMobile;
         const isMobileNow = window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT;
@@ -663,16 +439,12 @@
         if (wasMobile !== isMobileNow) {
             sidebarInstance.isMobile = isMobileNow;
             initSidebar();
-        } else if (!sidebarInstance.isMobile) {
-            adjustLayout(sidebarInstance.currentState === 'expanded');
         }
     });
 
-    // Eventos de navegación SPA
     document.addEventListener('spa-navigation', setActiveNavItem);
     window.addEventListener('popstate', setActiveNavItem);
 
-    // API pública
     window.sidebarAPI = {
         refresh: populateRecommendations,
         setActive: setActiveNavItem,
@@ -683,35 +455,17 @@
                 if (isCollapsed) {
                     sidebar.classList.remove('collapsed');
                     sidebar.classList.add('expanded');
-                    adjustLayout(true);
                 } else {
                     sidebar.classList.add('collapsed');
                     sidebar.classList.remove('expanded');
-                    adjustLayout(false);
                 }
-            }
-        },
-        expand: () => {
-            const sidebar = document.getElementById('sidebarDesktop');
-            if (sidebar && sidebar.classList.contains('collapsed')) {
-                sidebar.classList.remove('collapsed');
-                sidebar.classList.add('expanded');
-                adjustLayout(true);
-            }
-        },
-        collapse: () => {
-            const sidebar = document.getElementById('sidebarDesktop');
-            if (sidebar && sidebar.classList.contains('expanded')) {
-                sidebar.classList.add('collapsed');
-                sidebar.classList.remove('expanded');
-                adjustLayout(false);
+                localStorage.setItem('sidebar_state', isCollapsed ? 'expanded' : 'collapsed');
             }
         }
     };
 })();
 </script>
 
-<!-- Script principal -->
 <script type="module" src="/main.js"></script>
 </body>
 </html>
