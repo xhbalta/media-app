@@ -1,17 +1,36 @@
-/* styles.css - Estilos adicionales a Tailwind */
-/* Versión corregida: contención suave + reglas originales */
+/* styles.css - Versión FINAL corregida (contención real) */
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* === CONTENCIÓN BÁSICA (solo lo necesario) === */
-html, body {
+/* === GRID PRINCIPAL - ARREGLO CLAVE === */
+body {
     margin: 0;
     padding: 0;
     width: 100%;
     overflow-x: hidden;
+    grid-template-columns: minmax(70px, 250px) minmax(0, 1fr) !important; /* ← Esto es lo que faltaba */
 }
 
+/* Header y categorías ahora respetan el espacio real */
+#main-header,
+#category-filters {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+#main-header > div,
+#category-filters > div {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* #content (ya estaba bien, pero reforzamos) */
 #content {
     width: 100%;
     max-width: 100%;
@@ -20,23 +39,19 @@ html, body {
     padding: 1rem;
 }
 
-/* Solo contención en carruseles y grids (sin romper flex) */
+/* Carruseles y grids nunca salen del contenedor */
 .carousel-wrapper,
 .detail-view,
 .episodes-list,
 #results-grid,
-#recommendations-grid {
+#recommendations-grid,
+.flex.overflow-x-auto {
     max-width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
 }
 
-/* Carruseles horizontales nunca salen del contenedor */
-.flex.overflow-x-auto {
-    max-width: 100%;
-}
-
-/* Botones de navegación carrusel */
+/* Botones de navegación carrusel (originales) */
 .nav-btn {
     position: absolute;
     top: 0; bottom: 0; z-index: 40; width: 60px;
@@ -54,7 +69,7 @@ html, body {
     .carousel-wrapper:hover .nav-btn { display: flex; }
 }
 
-/* Tarjetas y listados (estilos originales restaurados) */
+/* Tarjetas y listados (estilos originales restaurados y seguros) */
 .card-std { min-width: 200px; width: 200px; display: flex; flex-direction: column; gap: 10px; }
 .card-video {
     height: 220px; width: 220px; flex-shrink: 0; position: relative; overflow: hidden;
@@ -76,7 +91,6 @@ html, body {
 }
 .list-item:hover { background: rgba(255,255,255,0.08); }
 
-/* Overlays y iconos (originales) */
 .overlay-full {
     position: absolute; inset: 0; background: rgba(0,0,0,0.5);
     backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s;
@@ -95,16 +109,10 @@ html, body {
 }
 @media (min-width: 1024px) { .mobile-play-button { display: none; } }
 
-/* Grid cards y reproductor (originales) */
-.grid-card { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-
-#floating-player {
-    transform: translateY(100%); transition: transform 0.3s ease;
-    background: #1a1a1a; border-top: 1px solid #333;
-}
+/* Reproductor y iconos blancos */
+#floating-player { transform: translateY(100%); transition: transform 0.3s ease; }
 #floating-player.active { transform: translateY(0); }
 
-/* Iconos blancos */
 .icon-white,
 .podcast-icon-btn img,
 .episode-action-btn img,
@@ -121,7 +129,7 @@ html, body {
 .list-item { min-height: 56px; }
 .list-item .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 
-/* Medida ligera para futuros módulos */
+/* Medida ligera para cualquier módulo futuro */
 #content section,
 #content .detail-view,
 #content .grid { max-width: 100%; overflow-x: hidden; }
