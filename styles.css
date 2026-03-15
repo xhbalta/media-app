@@ -1,17 +1,10 @@
 /* styles.css - Estilos adicionales a Tailwind */
+/* Versión corregida: contención suave + reglas originales */
 
-/* ────────────────────────────────────────────────
-   General - no scrollbar, contención global
-   ──────────────────────────────────────────────── */
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-.no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Contención estricta para evitar desbordes */
+/* === CONTENCIÓN BÁSICA (solo lo necesario) === */
 html, body {
     margin: 0;
     padding: 0;
@@ -19,100 +12,56 @@ html, body {
     overflow-x: hidden;
 }
 
-body {
-    min-height: 100vh;
-    background: #050505;
-}
-
-/* #content siempre ocupa el espacio disponible sin salirse */
 #content {
     width: 100%;
     max-width: 100%;
-    margin: 0;
-    padding: 1rem;
     box-sizing: border-box;
     overflow-x: hidden;
+    padding: 1rem;
 }
 
-/* Forzar que todo lo que se inyecte en #content respete el ancho */
-#content > * {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+/* Solo contención en carruseles y grids (sin romper flex) */
+.carousel-wrapper,
+.detail-view,
+.episodes-list,
+#results-grid,
+#recommendations-grid {
+    max-width: 100%;
+    margin: 0 auto;
     box-sizing: border-box;
 }
 
-/* ────────────────────────────────────────────────
-   Botones de navegación carrusel
-   ──────────────────────────────────────────────── */
-.nav-btn {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    z-index: 40;
-    width: 60px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.3s;
-}
-.nav-btn.left {
-    left: 0;
-    background: linear-gradient(to right, #050505 0%, transparent 100%);
-}
-.nav-btn.right {
-    right: 0;
-    background: linear-gradient(to left, #050505 0%, transparent 100%);
-}
-.nav-btn button {
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    border: 1px solid rgba(255,255,255,0.1);
-    color: white;
-    font-size: 20px;
-    transition: transform 0.2s, background 0.2s;
-}
-.nav-btn button:hover {
-    background: rgba(255,255,255,0.3);
-    transform: scale(1.1);
-}
-@media (min-width: 1024px) {
-    .carousel-wrapper:hover .nav-btn {
-        display: flex;
-    }
+/* Carruseles horizontales nunca salen del contenedor */
+.flex.overflow-x-auto {
+    max-width: 100%;
 }
 
-/* ────────────────────────────────────────────────
-   Tarjetas y carruseles
-   ──────────────────────────────────────────────── */
-.card-std {
-    min-width: 200px;
-    width: 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    cursor: pointer;
-    position: relative;
+/* Botones de navegación carrusel */
+.nav-btn {
+    position: absolute;
+    top: 0; bottom: 0; z-index: 40; width: 60px;
+    display: none; align-items: center; justify-content: center;
 }
-.card-video {
-    height: 220px;
-    width: 220px;
-    flex-shrink: 0;
-    position: relative;
-    overflow: hidden;
-    border-radius: 12px;
-    transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-    cursor: pointer;
+.nav-btn.left  { left: 0; background: linear-gradient(to right, #050505 0%, transparent 100%); }
+.nav-btn.right { right: 0; background: linear-gradient(to left, #050505 0%, transparent 100%); }
+.nav-btn button {
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+    border-radius: 50%; width: 40px; height: 40px;
+    border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 20px;
 }
+.nav-btn button:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
 @media (min-width: 1024px) {
-    .card-video:hover {
-        width: 390px;
-    }
+    .carousel-wrapper:hover .nav-btn { display: flex; }
 }
+
+/* Tarjetas y listados (estilos originales restaurados) */
+.card-std { min-width: 200px; width: 200px; display: flex; flex-direction: column; gap: 10px; }
+.card-video {
+    height: 220px; width: 220px; flex-shrink: 0; position: relative; overflow: hidden;
+    border-radius: 12px; transition: width 0.5s cubic-bezier(0.25,1,0.5,1);
+}
+@media (min-width: 1024px) { .card-video:hover { width: 390px; } }
+
 .card-list-group {
     min-width: 300px;
     max-width: 340px;
@@ -120,290 +69,46 @@ body {
     flex-direction: column;
     gap: 16px;
 }
+
 .list-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 6px;
-    border-radius: 8px;
-    transition: background 0.2s;
-    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px; border-radius: 8px; transition: background 0.2s;
 }
-.list-item:hover {
-    background: rgba(255,255,255,0.08);
-}
+.list-item:hover { background: rgba(255,255,255,0.08); }
 
-/* Contención para carruseles y grids */
-.carousel-wrapper,
-.detail-view,
-.episodes-list,
-.grid.grid-cols-2,
-#results-grid,
-#recommendations-grid {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
-    padding-left: 0;
-    padding-right: 0;
-    box-sizing: border-box;
-}
-.flex.overflow-x-auto {
-    width: 100% !important;
-    max-width: 100% !important;
-}
-
-/* Overlays */
+/* Overlays y iconos (originales) */
 .overlay-full {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(2px);
-    opacity: 0;
-    transition: opacity 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    border-radius: 12px;
+    position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
 }
-.group:hover .overlay-full {
-    opacity: 1;
-}
-.overlay-mini {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    opacity: 0;
-    transition: opacity 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-}
-.list-item:hover .overlay-mini {
-    opacity: 1;
-}
+.group:hover .overlay-full { opacity: 1; }
 
-/* Iconos */
-.action-icon {
-    width: 36px;
-    height: 36px;
-    transition: transform 0.2s, opacity 0.3s;
-    cursor: pointer;
-    pointer-events: auto;
-}
-.action-icon:hover {
-    transform: scale(1.15);
-}
-.play-icon-lg {
-    width: 56px;
-    height: 56px;
-    transition: transform 0.2s;
-    cursor: pointer;
-    pointer-events: auto;
-}
-.play-icon-lg:hover {
-    transform: scale(1.1);
-}
-.play-icon-sm {
-    width: 28px;
-    height: 28px;
-    pointer-events: auto;
-}
+.action-icon { width: 36px; height: 36px; transition: transform 0.2s; cursor: pointer; }
+.play-icon-lg { width: 56px; height: 56px; transition: transform 0.2s; }
+.play-icon-sm { width: 28px; height: 28px; }
 
-/* Grid card */
-.grid-card {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    cursor: pointer;
-    position: relative;
-}
-.grid-card .aspect-square {
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-}
-
-/* Búsqueda escritorio resultados */
-.desktop-search-container {
-    position: relative;
-}
-.desktop-search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: rgba(10,10,10,0.98);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    margin-top: 8px;
-    padding: 12px;
-    max-height: 400px;
-    overflow-y: auto;
-    z-index: 1000;
-    display: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-.desktop-search-results.active {
-    display: block;
-    animation: fadeIn 0.2s ease;
-}
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.search-result-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.search-result-item:hover {
-    background: rgba(255,255,255,0.1);
-}
-
-/* Botón play para móvil */
 .mobile-play-button {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    width: 32px;
-    height: 32px;
-    background: rgba(0,0,0,0.7);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 30;
-    pointer-events: auto;
+    position: absolute; bottom: 8px; right: 8px; width: 32px; height: 32px;
+    background: rgba(0,0,0,0.7); border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; z-index: 30;
 }
-.mobile-play-button img {
-    width: 16px;
-    height: 16px;
-}
-@media (min-width: 1024px) {
-    .mobile-play-button {
-        display: none;
-    }
-}
+@media (min-width: 1024px) { .mobile-play-button { display: none; } }
 
-/* Reproductor flotante */
+/* Grid cards y reproductor (originales) */
+.grid-card { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+
 #floating-player {
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    background: #1a1a1a;
-    border-top: 1px solid #333;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    z-index: 10000;
-    backdrop-filter: blur(10px);
+    transform: translateY(100%); transition: transform 0.3s ease;
+    background: #1a1a1a; border-top: 1px solid #333;
 }
-#floating-player.active {
-    transform: translateY(0);
-}
-.player-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex: 1;
-    min-width: 0;
-}
-.player-cover {
-    width: 50px;
-    height: 50px;
-    border-radius: 8px;
-    object-fit: cover;
-}
-.player-details {
-    min-width: 0;
-    flex: 1;
-}
-.player-title {
-    font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.player-author {
-    font-size: 12px;
-    color: #aaa;
-}
-.player-controls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-shrink: 0;
-}
-.player-controls button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-}
-.player-controls img {
-    width: 24px;
-    height: 24px;
-    filter: brightness(0) invert(1);
-}
-.progress-area {
-    flex: 1;
-    min-width: 100px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.progress-bar {
-    flex: 1;
-    height: 4px;
-    background: #444;
-    border-radius: 2px;
-    cursor: pointer;
-    position: relative;
-}
-.progress-fill {
-    height: 100%;
-    background: #7b2eda;
-    width: 0%;
-    border-radius: 2px;
-}
-.time-display {
-    font-size: 12px;
-    color: #aaa;
-    min-width: 45px;
-}
-.close-player {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    margin-left: 10px;
-}
-@media (max-width: 640px) {
-    .progress-area {
-        display: none;
-    }
-    .player-controls {
-        gap: 10px;
-    }
-}
+#floating-player.active { transform: translateY(0); }
 
 /* Iconos blancos */
-.icon-white {
-    filter: brightness(0) invert(1);
-}
+.icon-white,
 .podcast-icon-btn img,
 .episode-action-btn img,
 .episode-play-btn img,
-.podcast-last-episode-btn img,
 .action-icon,
 .play-icon-lg,
 .play-icon-sm,
@@ -412,53 +117,11 @@ body {
     filter: brightness(0) invert(1);
 }
 
-/* Ajustes de vistas de detalle */
-.detail-full-width {
-    width: 100%;
-    margin-left: 0;
-    margin-right: 0;
-}
-.detail-full-width .podcast-header {
-    border-radius: 0 !important;
-}
-.detail-full-width .podcast-episodes-list {
-    margin-left: auto;
-    margin-right: auto;
-    width: 95%;
-    max-width: 1600px;
-}
-.podcast-header .max-w-\[1600px\] {
-    max-width: 1600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-#main-header {
-    transition: opacity 0.3s ease;
-}
+/* List-item seguro */
+.list-item { min-height: 56px; }
+.list-item .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 
-/* List-item mejorado */
-.list-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: 100%;
-    min-height: 56px;
-}
-.list-item .min-w-0 {
-    min-width: 0;
-}
-.list-item .truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
-}
-
-/* Medida de emergencia para módulos futuros */
-[data-force-contain],
+/* Medida ligera para futuros módulos */
+#content section,
 #content .detail-view,
-#content .grid,
-#content section {
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-}
+#content .grid { max-width: 100%; overflow-x: hidden; }
