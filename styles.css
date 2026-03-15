@@ -1,18 +1,18 @@
-/* styles.css - Versión FINAL corregida (contención real) */
+/* styles.css - VERSIÓN DEFINITIVA (sidebar se expande/colapsa correctamente) */
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* === GRID PRINCIPAL - ARREGLO CLAVE === */
+/* === GRID PRINCIPAL - CLAVE PARA EXPANSIÓN === */
 body {
     margin: 0;
     padding: 0;
     width: 100%;
     overflow-x: hidden;
-    grid-template-columns: minmax(70px, 250px) minmax(0, 1fr) !important; /* ← Esto es lo que faltaba */
+    grid-template-columns: auto 1fr !important;   /* ← Esto permite que el contenido se expanda al 100% al colapsar la sidebar */
 }
 
-/* Header y categorías ahora respetan el espacio real */
+/* Header y filtros siempre ocupan el espacio disponible */
 #main-header,
 #category-filters {
     width: 100%;
@@ -30,7 +30,7 @@ body {
     padding-right: 1rem;
 }
 
-/* #content (ya estaba bien, pero reforzamos) */
+/* #content */
 #content {
     width: 100%;
     max-width: 100%;
@@ -39,7 +39,7 @@ body {
     padding: 1rem;
 }
 
-/* Carruseles y grids nunca salen del contenedor */
+/* Contención suave para carruseles y grids (evita desbordes) */
 .carousel-wrapper,
 .detail-view,
 .episodes-list,
@@ -51,7 +51,7 @@ body {
     box-sizing: border-box;
 }
 
-/* Botones de navegación carrusel (originales) */
+/* Botones de navegación carrusel */
 .nav-btn {
     position: absolute;
     top: 0; bottom: 0; z-index: 40; width: 60px;
@@ -69,7 +69,7 @@ body {
     .carousel-wrapper:hover .nav-btn { display: flex; }
 }
 
-/* Tarjetas y listados (estilos originales restaurados y seguros) */
+/* Tarjetas y listados (originales) */
 .card-std { min-width: 200px; width: 200px; display: flex; flex-direction: column; gap: 10px; }
 .card-video {
     height: 220px; width: 220px; flex-shrink: 0; position: relative; overflow: hidden;
@@ -109,7 +109,7 @@ body {
 }
 @media (min-width: 1024px) { .mobile-play-button { display: none; } }
 
-/* Reproductor y iconos blancos */
+/* Reproductor y iconos */
 #floating-player { transform: translateY(100%); transition: transform 0.3s ease; }
 #floating-player.active { transform: translateY(0); }
 
@@ -129,7 +129,7 @@ body {
 .list-item { min-height: 56px; }
 .list-item .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 
-/* Medida ligera para cualquier módulo futuro */
+/* Medida extra de seguridad para cualquier módulo futuro */
 #content section,
 #content .detail-view,
 #content .grid { max-width: 100%; overflow-x: hidden; }
