@@ -1,5 +1,8 @@
 /* styles.css - Estilos adicionales a Tailwind */
 
+/* ────────────────────────────────────────────────
+   General - no scrollbar, contención global
+   ──────────────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
@@ -8,7 +11,41 @@
     scrollbar-width: none;
 }
 
-/* Botones de navegación carrusel */
+/* Contención estricta para evitar desbordes */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    min-height: 100vh;
+    background: #050505;
+}
+
+/* #content siempre ocupa el espacio disponible sin salirse */
+#content {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 1rem;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+/* Forzar que todo lo que se inyecte en #content respete el ancho */
+#content > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+}
+
+/* ────────────────────────────────────────────────
+   Botones de navegación carrusel
+   ──────────────────────────────────────────────── */
 .nav-btn {
     position: absolute;
     top: 0;
@@ -49,7 +86,9 @@
     }
 }
 
-/* Tarjetas feed */
+/* ────────────────────────────────────────────────
+   Tarjetas y carruseles
+   ──────────────────────────────────────────────── */
 .card-std {
     min-width: 200px;
     width: 200px;
@@ -75,7 +114,8 @@
     }
 }
 .card-list-group {
-    min-width: 340px;
+    min-width: 300px;
+    max-width: 340px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -91,6 +131,25 @@
 }
 .list-item:hover {
     background: rgba(255,255,255,0.08);
+}
+
+/* Contención para carruseles y grids */
+.carousel-wrapper,
+.detail-view,
+.episodes-list,
+.grid.grid-cols-2,
+#results-grid,
+#recommendations-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+}
+.flex.overflow-x-auto {
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
 /* Overlays */
@@ -337,7 +396,7 @@
     }
 }
 
-/* Forzar iconos blancos en todas partes */
+/* Iconos blancos */
 .icon-white {
     filter: brightness(0) invert(1);
 }
@@ -353,14 +412,11 @@
     filter: brightness(0) invert(1);
 }
 
-/* Ajustes de ancho completo para vistas de detalle */
+/* Ajustes de vistas de detalle */
 .detail-full-width {
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
 }
 .detail-full-width .podcast-header {
     border-radius: 0 !important;
@@ -376,82 +432,33 @@
     margin-left: auto;
     margin-right: auto;
 }
-
 #main-header {
     transition: opacity 0.3s ease;
 }
 
-/* Estilos para list-item que garantizan una sola línea */
+/* List-item mejorado */
 .list-item {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.75rem !important;
-    width: 100% !important;
-    min-height: 56px !important;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 56px;
 }
 .list-item .min-w-0 {
-    min-width: 0 !important;
+    min-width: 0;
 }
 .list-item .truncate {
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+/* Medida de emergencia para módulos futuros */
+[data-force-contain],
+#content .detail-view,
+#content .grid,
+#content section {
     max-width: 100% !important;
-}
-.card-list-group {
-    min-width: 300px !important;
-    max-width: 340px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 0.5rem !important;
-}
-@media (max-width: 640px) {
-    .list-item {
-        gap: 0.5rem !important;
-        padding: 0.5rem 0.25rem !important;
-    }
-    .list-item .w-12 {
-        width: 40px !important;
-        height: 40px !important;
-    }
-    /* === PROTECCIÓN CONTRA DESBORDES HORIZONTALES === */
-html, body {
     overflow-x: hidden !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-#content {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    box-sizing: border-box !important;
-    overflow-x: hidden !important; /* Evita que hijos se salgan */
-}
-
-/* Asegurar que imágenes y videos nunca excedan su contenedor */
-img, video {
-    max-width: 100% !important;
-    height: auto !important;
-}
-
-/* Los contenedores con scroll horizontal deben mantener el ancho completo */
-.overflow-x-auto {
-    overflow-x: auto !important;
-    max-width: 100% !important;
-}
-
-/* Corregir posibles problemas con vw */
-.detail-full-width {
-    width: 100% !important; /* Cambiar 100vw por 100% */
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    left: auto !important;
-    right: auto !important;
-}
-    * {
-    outline: 1px solid rgba(255,0,0,0.3) !important;
-}
 }
