@@ -1,0 +1,424 @@
+/* styles.css - Estilos adicionales a Tailwind */
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Botones de navegación carrusel */
+.nav-btn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 40;
+    width: 60px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s;
+}
+.nav-btn.left {
+    left: 0;
+    background: linear-gradient(to right, #050505 0%, transparent 100%);
+}
+.nav-btn.right {
+    right: 0;
+    background: linear-gradient(to left, #050505 0%, transparent 100%);
+}
+.nav-btn button {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+    font-size: 20px;
+    transition: transform 0.2s, background 0.2s;
+}
+.nav-btn button:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+}
+@media (min-width: 1024px) {
+    .carousel-wrapper:hover .nav-btn {
+        display: flex;
+    }
+}
+
+/* Tarjetas feed */
+.card-std {
+    min-width: 200px;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    position: relative;
+}
+.card-video {
+    height: 220px;
+    width: 220px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    cursor: pointer;
+}
+@media (min-width: 1024px) {
+    .card-video:hover {
+        width: 390px;
+    }
+}
+.card-list-group {
+    min-width: 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+.list-item:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+/* Overlays */
+.overlay-full {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    border-radius: 12px;
+}
+.group:hover .overlay-full {
+    opacity: 1;
+}
+.overlay-mini {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+.list-item:hover .overlay-mini {
+    opacity: 1;
+}
+
+/* Iconos */
+.action-icon {
+    width: 36px;
+    height: 36px;
+    transition: transform 0.2s, opacity 0.3s;
+    cursor: pointer;
+    pointer-events: auto;
+}
+.action-icon:hover {
+    transform: scale(1.15);
+}
+.play-icon-lg {
+    width: 56px;
+    height: 56px;
+    transition: transform 0.2s;
+    cursor: pointer;
+    pointer-events: auto;
+}
+.play-icon-lg:hover {
+    transform: scale(1.1);
+}
+.play-icon-sm {
+    width: 28px;
+    height: 28px;
+    pointer-events: auto;
+}
+
+/* Grid card */
+.grid-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    position: relative;
+}
+.grid-card .aspect-square {
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Búsqueda escritorio resultados */
+.desktop-search-container {
+    position: relative;
+}
+.desktop-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(10,10,10,0.98);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    margin-top: 8px;
+    padding: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.desktop-search-results.active {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.search-result-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* Botón play para móvil */
+.mobile-play-button {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    pointer-events: auto;
+}
+.mobile-play-button img {
+    width: 16px;
+    height: 16px;
+}
+@media (min-width: 1024px) {
+    .mobile-play-button {
+        display: none;
+    }
+}
+
+/* Búsqueda móvil overlay */
+#mobileSearchBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+}
+#mobileSearchBar.open {
+    transform: translateY(0);
+}
+.search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.search-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Reproductor flotante */
+#floating-player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+    padding: 10px 20px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+}
+#floating-player.active {
+    display: flex;
+}
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.player-cover {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.player-controls button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.player-controls img {
+    width: 24px;
+    height: 24px;
+    filter: invert(1);
+}
+.progress-bar {
+    flex: 1;
+    height: 4px;
+    background: #444;
+    border-radius: 2px;
+    margin: 0 20px;
+    cursor: pointer;
+}
+.progress-fill {
+    height: 100%;
+    background: #7b2eda;
+    width: 0%;
+    border-radius: 2px;
+}
+/* styles.css - añadir al final */
+
+/* Forzar iconos blancos en todas partes */
+.icon-white {
+    filter: brightness(0) invert(1);
+}
+
+/* Para los botones que usan imágenes sin clase, también aplicar */
+.podcast-icon-btn img,
+.episode-action-btn img,
+.episode-play-btn img,
+.podcast-last-episode-btn img,
+.action-icon,
+.play-icon-lg,
+.play-icon-sm,
+.mobile-play-button img {
+    filter: brightness(0) invert(1);
+}
+
+/* Excepciones: algunos iconos ya son blancos por naturaleza, pero no importa */
+
+/* Ajustes de ancho completo para vistas de detalle */
+.detail-full-width {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+}
+
+.detail-full-width .podcast-header {
+    border-radius: 0 !important;
+}
+
+.detail-full-width .podcast-episodes-list {
+    margin-left: auto;
+    margin-right: auto;
+    width: 95%;
+    max-width: 1600px;
+}
+
+/* Ajustar el contenido dentro del header para que esté centrado */
+.podcast-header .max-w-\[1600px\] {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Para que la barra de categorías no se superponga con el header al hacer scroll */
+#category-filters {
+    top: 0;
+}
+
+/* Ajuste del sticky header cuando se oculta */
+#main-header {
+    transition: opacity 0.3s ease;
+}
+/* Estilos para list-item que garantizan una sola línea */
+.list-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    min-height: 56px !important; /* Altura fija para consistencia */
+}
+
+.list-item .min-w-0 {
+    min-width: 0 !important; /* Permite que el texto se trunque */
+}
+
+.list-item .truncate {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+}
+
+/* Para el carrusel de listas */
+.card-list-group {
+    min-width: 300px !important;
+    max-width: 340px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+}
+
+/* En móvil, asegurar que no se rompa */
+@media (max-width: 640px) {
+    .list-item {
+        gap: 0.5rem !important;
+        padding: 0.5rem 0.25rem !important;
+    }
+    
+    .list-item .w-12 {
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
