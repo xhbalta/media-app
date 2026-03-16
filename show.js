@@ -1,5 +1,5 @@
-// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN OPTIMIZADA
-import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from 'https://podcast.tenam.site/episodios.js';
+// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN COMPLETA Y FUNCIONAL
+import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from './episodios.js';
 import { userStorage } from './storage.js';
 import './player.js';
 
@@ -103,25 +103,34 @@ export function createVideoExpand(ep) {
 export function createListItem(ep, idx) {
     const inPlaylist = userStorage.playlist.has(ep.id);
     const addIcon = inPlaylist ? ICONS.added : ICONS.add;
-    return `<div class="list-item group" data-episodio-id="${ep.id}">
-        <span class="text-gray-500 font-bold w-6 text-center text-sm">${idx + 1}</span>
-        <div class="relative w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer" onclick="window.goToDetail('${ep.detailUrl}')">
-            <img src="${ep.coverUrl}" class="w-full h-full object-cover" loading="lazy">
-            <div class="overlay-mini" onclick="window.handlePlay(event, '${ep.id}'); return false;"><img src="${ICONS.play}" class="play-icon-sm"></div>
-        </div>
-        <div class="item-content cursor-pointer flex-1 min-w-0" onclick="window.goToDetail('${ep.detailUrl}')">
-            <h4 class="font-bold text-sm truncate text-white group-hover:text-blue-400 transition-colors">${ep.title}</h4>
-            <p class="text-xs text-gray-500 truncate">${ep.author}</p>
-        </div>
-        <div class="item-actions flex items-center gap-2 flex-shrink-0">
-            <button class="lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-200 w-8 h-8 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 hover:bg-white/20 flex items-center justify-center" onclick="window.handleAdd(event, '${ep.id}'); return false;">
-                <img src="${addIcon}" alt="Agregar" class="w-4 h-4" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
-            </button>
-            <div class="lg:hidden mobile-play-btn w-8 h-8 rounded-lg bg-[#7b2eda] flex items-center justify-center" onclick="window.handlePlay(event, '${ep.id}'); return false;">
-                <img src="${ICONS.play}" alt="Play" class="w-4 h-4">
+
+    return `
+        <div class="list-item group flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors w-full min-h-[60px]"
+             data-episodio-id="${ep.id}">
+            
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+                <span class="text-gray-400 font-semibold w-6 text-center text-sm flex-shrink-0">${idx + 1}</span>
+                
+                <div class="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-md overflow-hidden cursor-pointer"
+                     onclick="window.goToDetail('${ep.detailUrl}')">
+                    <img src="${ep.coverUrl}" class="w-full h-full object-cover" loading="lazy">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                         onclick="window.handlePlay(event, '${ep.id}'); return false;">
+                        <img src="${ICONS.play}" class="w-5 h-5">
+                    </div>
+                </div>
+                
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-medium text-white truncate group-hover:text-blue-400">${ep.title}</h4>
+                    <p class="text-xs text-gray-400 truncate">${ep.author}</p>
+                </div>
             </div>
-        </div>
-    </div>`;
+            
+            <button onclick="window.handleAdd(event, '${ep.id}'); return false;"
+                    class="flex-shrink-0 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 flex items-center justify-center transition-colors">
+                <img src="${addIcon}" class="w-5 h-5" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
+            </button>
+        </div>`;
 }
 
 export function createGridCard(item) {
@@ -159,10 +168,10 @@ function createCarousel(title, type, items, categoryContext) {
             items.map(ep => createStandardCard(ep)).join('') +
             `</div>`;
     } else if (type === 'list') {
-        content = `<div id="${id}" class="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth pb-4">`;
+        content = `<div id="${id}" class="flex gap-6 sm:gap-10 overflow-x-auto no-scrollbar scroll-smooth pb-6 snap-x snap-mandatory">`;
         for (let i = 0; i < items.length; i += 4) {
-            content += `<div class="card-list-group min-w-[300px] sm:min-w-[340px] space-y-3">` +
-                (items[i] ? createListItem(items[i], i) : '') +
+            content += `<div class="flex flex-col min-w-[320px] sm:min-w-[380px] md:min-w-[420px] snap-start space-y-2 md:space-y-3">` +
+                (items[i] ? createListItem(items[i], i) : '<div class="h-16"></div>') +
                 (items[i+1] ? createListItem(items[i+1], i+1) : '') +
                 (items[i+2] ? createListItem(items[i+2], i+2) : '') +
                 (items[i+3] ? createListItem(items[i+3], i+3) : '') +
@@ -561,7 +570,7 @@ export function renderGrid(container, items, title) {
     });
 }
 
-// ---------- EXPONER FUNCIONES GLOBALES ----------
+// ---------- FUNCIONES GLOBALES ----------
 window.shareContent = async (title, url) => {
     const fullUrl = window.location.origin + url;
     if (navigator.share) {
@@ -582,7 +591,7 @@ window.handlePlay = function(e, episodioId) {
     
     const ep = DATA.find(x => x.id === episodioId);
     if (!ep) {
-        alert('No se encontró el episodio.');
+        showCustomAlert('Este episodio', 'no se encontró.');
         return false;
     }
 
@@ -602,15 +611,38 @@ window.handlePlay = function(e, episodioId) {
             );
         } catch (err) {
             console.error('Error al reproducir:', err);
-            alert('No se pudo reproducir el episodio.\n' +
-                  'Posibles causas: enlace roto, formato no soportado o problema de conexión.\n' +
-                  'Intenta descargar el archivo o recargar la página.');
+            showCustomAlert(ep.title, 'no está disponible por ahora.');
         }
     } else {
-        alert('El reproductor no está disponible en este momento.\n' +
-              'Por favor, intenta más tarde o usa el botón de descarga si está habilitado.');
+        showCustomAlert(ep.title, 'no está disponible por ahora.');
     }
 
+    return false;
+};
+
+window.handleDl = function(e, episodioId) {
+    e.stopPropagation();
+    e.preventDefault();
+    const ep = DATA.find(x => x.id === episodioId);
+    if (!ep) return;
+
+    if (!ep.allowDownload) {
+        showCustomAlert(ep.title, 'no está disponible para descarga por ahora.');
+        return false;
+    }
+
+    const ext = ep.type === 'video' ? 'mp4' : 'mp3';
+    const filename = `${ep.title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}.${ext}`;
+    try {
+        const a = document.createElement('a');
+        a.href = ep.mediaUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    } catch (error) {
+        showCustomAlert(ep.title, 'no se pudo descargar automáticamente. Intenta abrir el enlace manualmente.');
+    }
     return false;
 };
 
@@ -624,14 +656,13 @@ window.handleAdd = function(e, episodioId) {
     const alreadyIn = userStorage.playlist.has(ep.id);
     
     if (alreadyIn) {
-        userStorage.playlist.remove(ep.id);  // Asegúrate de tener .remove() en storage.js
-        alert('Episodio eliminado de tu lista');
+        userStorage.playlist.remove(ep.id);
+        alert(`"${ep.title}" se quitó de tu lista`);
     } else {
         userStorage.playlist.add(ep);
-        alert('Episodio añadido a tu lista');
+        alert(`"${ep.title}" se añadió a tu lista`);
     }
 
-    // Actualizar todos los iconos relacionados con este episodio
     document.querySelectorAll(`[data-episodio-id="${episodioId}"] img[data-added]`)
         .forEach(img => {
             img.src = alreadyIn ? ICONS.add : ICONS.added;
@@ -640,30 +671,6 @@ window.handleAdd = function(e, episodioId) {
             setTimeout(() => img.style.transform = 'scale(1)', 180);
         });
 
-    return false;
-};
-
-window.handleDl = function(e, episodioId) {
-    e.stopPropagation();
-    e.preventDefault();
-    const ep = DATA.find(x => x.id === episodioId);
-    if (!ep) return;
-    if (!ep.allowDownload) {
-        alert('Descarga no disponible para este episodio');
-        return false;
-    }
-    const ext = ep.type === 'video' ? 'mp4' : 'mp3';
-    const filename = `${ep.title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}.${ext}`;
-    try {
-        const a = document.createElement('a');
-        a.href = ep.mediaUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    } catch (error) {
-        window.open(ep.mediaUrl, '_blank');
-    }
     return false;
 };
 
@@ -706,3 +713,37 @@ if (document.readyState === 'loading') {
 } else {
     renderCategoryPills();
 }
+
+// ---------- ALERTA PERSONALIZADA ----------
+function showCustomAlert(title, message) {
+    const fullMessage = `"${title}" ${message}`;
+    
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm';
+    modal.innerHTML = `
+        <div class="bg-zinc-900 rounded-2xl p-6 max-w-md w-[90%] border border-zinc-700 shadow-2xl">
+            <h3 class="text-xl font-bold text-white mb-4">${fullMessage}</h3>
+            <div class="flex flex-col sm:flex-row gap-3 justify-end">
+                <a href="https://www.baltaanay.org/error" target="_blank" 
+                   class="px-5 py-2.5 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium text-center transition">
+                    Reportar
+                </a>
+                <a href="https://www.baltaanay.org/contactus" target="_blank" 
+                   class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-medium text-center transition">
+                    Solicitar
+                </a>
+                <button onclick="this.closest('.fixed').remove()" 
+                        class="px-5 py-2.5 bg-zinc-700 hover:bg-zinc-600 rounded-lg text-white font-medium transition">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    modal.addEventListener('click', e => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+console.log('✅ show.js cargado completamente');
