@@ -1,5 +1,5 @@
 // buscar.js - Página de búsqueda profesional con vistas integradas
-import { getEpisodiosConSerie, series } from 'https://baltaestudiante.github.io/menu/episodios.js';
+import { getEpisodiosConSerie, series } from 'https://podcast.tenam.site/episodios.js';
 import { createGridCard } from './show.js';
 
 // ---------- CONSTANTES ----------
@@ -381,29 +381,14 @@ export function renderSearch(container, query) {
     render(container);
 }
 
-// ==========================================================================
-// RENDERIZADO DE CATEGORÍA (CORREGIDO PARA SPA)
-// ==========================================================================
 export function renderCategory(container, category) {
     // Cargar datos
     DATA = getEpisodiosConSerie();
 
     container.innerHTML = `
         <div class="max-w-7xl mx-auto py-6 md:py-10 px-4">
-            <!-- Hero de categoría (corregido para usar SPA) -->
-            <div class="relative w-full h-64 rounded-2xl overflow-hidden mb-8 cursor-pointer group" 
-                 id="categoryHero" data-category="${category}">
-                <div class="absolute inset-0 bg-gradient-to-br ${getCategoryColor(category)} opacity-90 group-hover:scale-105 transition-transform duration-700"></div>
-                <div class="absolute inset-0 bg-black/20"></div>
-                <div class="absolute inset-0 flex items-center justify-between p-8">
-                    <div>
-                        <span class="text-6xl mb-2 block">${getCategoryIcon(category)}</span>
-                        <h1 class="text-4xl font-black text-white">${category}</h1>
-                        <p class="text-white/80 mt-2">Explorar contenido →</p>
-                    </div>
-                    <div class="text-8xl opacity-20">${getCategoryIcon(category)}</div>
-                </div>
-            </div>
+            <!-- Hero de categoría -->
+            ${renderHeroCategory(category)}
             
             <!-- Contenido de la categoría -->
             <div id="categoryContent">
@@ -411,83 +396,6 @@ export function renderCategory(container, category) {
             </div>
         </div>
     `;
-
-    // 🟢 CORREGIDO: Agregar evento SPA al hero de categoría
-    const hero = document.getElementById('categoryHero');
-    if (hero) {
-        hero.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            // Ya estamos en la categoría, no hacer nada
-            console.log('Ya en categoría:', category);
-        });
-    }
-
-    // 🟢 CORREGIDO: Convertir todos los enlaces de series a SPA
-    document.querySelectorAll('[onclick*="window.history.pushState"]').forEach(el => {
-        // Remover onclick y usar addEventListener
-        const onclickAttr = el.getAttribute('onclick');
-        if (onclickAttr) {
-            el.removeAttribute('onclick');
-            // Extraer URL del onclick si es posible
-            const match = onclickAttr.match(/pushState[^,]*,\s*[^,]*,\s*['"]([^'"]+)['"]/);
-            if (match && match[1]) {
-                el.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.history.pushState(null, null, match[1]);
-                    window.dispatchEvent(new PopStateEvent('popstate'));
-                });
-            }
-        }
-    });
-
-    // 🟢 CORREGIDO: Agregar atributo data-link a elementos que deberían navegar con SPA
-    document.querySelectorAll('.grid-card, .series-card, [data-serie-url]').forEach(el => {
-        if (!el.hasAttribute('data-link')) {
-            el.setAttribute('data-link', 'true');
-        }
-    });
 }
 
-// Función auxiliar para obtener color de categoría
-function getCategoryColor(category) {
-    const colors = {
-        "Derecho": "from-blue-900 to-blue-700",
-        "Matemáticas": "from-green-900 to-green-700",
-        "Física y Astronomía": "from-purple-900 to-purple-700",
-        "Historia": "from-amber-900 to-amber-700",
-        "Filosofía": "from-emerald-900 to-emerald-700",
-        "Economía y Finanzas": "from-cyan-900 to-cyan-700",
-        "Ciencias Sociales": "from-pink-900 to-pink-700",
-        "Arte y Cultura": "from-orange-900 to-orange-700",
-        "Literatura y Audiolibros": "from-indigo-900 to-indigo-700",
-        "Cine y TV": "from-red-900 to-red-700",
-        "Documentales": "from-lime-900 to-lime-700",
-        "Ciencias Naturales": "from-teal-900 to-teal-700",
-        "Tecnología e Informática": "from-sky-900 to-sky-700",
-        "Otras Ciencias": "from-gray-900 to-gray-700"
-    };
-    return colors[category] || "from-gray-900 to-gray-700";
-}
-
-function getCategoryIcon(category) {
-    const icons = {
-        "Derecho": "⚖️",
-        "Matemáticas": "📐",
-        "Física y Astronomía": "🔭",
-        "Historia": "📜",
-        "Filosofía": "🤔",
-        "Economía y Finanzas": "📊",
-        "Ciencias Sociales": "👥",
-        "Arte y Cultura": "🎨",
-        "Literatura y Audiolibros": "📚",
-        "Cine y TV": "🎬",
-        "Documentales": "🎥",
-        "Ciencias Naturales": "🌿",
-        "Tecnología e Informática": "💻",
-        "Otras Ciencias": "🔬"
-    };
-    return icons[category] || "📁";
-}
 export const header = true; // Mostrar header por defecto
