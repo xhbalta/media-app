@@ -1,6 +1,6 @@
 // biblioteca.js
 import { userStorage } from './storage.js';
-import { episodios } from 'https://baltaestudiante.github.io/menu/episodios.js';
+import { episodios } from 'https://podcast.tenam.site/episodios.js';
 
 export function render(container) {
     const playlist = userStorage.playlist.get();
