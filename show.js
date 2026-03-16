@@ -1,5 +1,5 @@
 // show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN COMPLETA CORREGIDA
-import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from './episodios.js';
+import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from 'https://baltaestudiante.github.io/menu/episodios.js';
 import { userStorage } from './storage.js';
 import './player.js';
 
