@@ -1,6 +1,6 @@
 // main.js - Router principal con soporte completo para SPA
 import { DATA, renderFeed, renderGrid, renderEpisodio, renderSerie, renderCategoryPills } from './show.js';
-import { getEpisodioByDetailUrl, getSerieByUrl } from './episodios.js';
+import { getEpisodioByDetailUrl, getSerieByUrl } from 'https://podcast.tenam.site/episodios.js';
 import './player.js';
 
 const PAGES = [
