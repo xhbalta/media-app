@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Balta Media · Conocimiento en acción</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,168 +13,245 @@
     <link rel="icon" type="image/png" sizes="16x16" href="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png">
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="/styles.css">
-
-    <!-- ESTILOS BASE - SIN SIDEBAR -->
-    <style id="app-base-styles">
+    
+    <!-- ESTILOS BASE PARA MÓVIL -->
+    <style id="mobile-base-styles">
+        /* Reset */
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
+        
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             overflow-x: hidden;
+            background: #050505;
         }
+        
         body {
             min-height: 100vh;
-            background: #050505;
-            display: grid;
-            grid-template-columns: 1fr;
-            grid-template-rows: auto auto 1fr;
-            grid-template-areas:
-                "top-header"
-                "cat-filters"
-                "main-content";
+            padding-bottom: 60px; /* Espacio para la barra inferior */
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: white;
         }
-        /* HEADER PRINCIPAL */
-        #top-header {
-            grid-area: top-header;
+        
+        /* HEADER MÓVIL */
+        #main-header {
             position: sticky;
             top: 0;
-            background: rgba(5,5,5,0.82);
+            width: 100%;
+            z-index: 50;
+            background: rgba(5,5,5,0.8);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            z-index: 60;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        #top-header > div {
+        
+        #main-header > div {
+            width: 100%;
             padding: 0.75rem 1rem;
         }
-        /* BARRA DE CATEGORÍAS */
-        #cat-filters {
-            grid-area: cat-filters;
+        
+        /* BARRA DE CATEGORÍAS MÓVIL */
+        #category-filters {
             position: sticky;
             top: 0;
-            background: rgba(5,5,5,0.96);
+            width: 100%;
+            z-index: 40;
+            background: rgba(5,5,5,0.95);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            z-index: 55;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        #cat-filters > div {
+        
+        #category-filters > div {
+            width: 100%;
             padding: 0.5rem 1rem;
         }
-        /* CONTENIDO PRINCIPAL */
-        #main-content {
-            grid-area: main-content;
-            padding: 1rem 1rem;
-            min-height: 100vh;
+        
+        /* CONTENEDOR PRINCIPAL MÓVIL */
+        #content {
+            width: 100%;
+            padding: 1rem 1rem 80px 1rem;
+            min-height: calc(100vh - 120px);
         }
-    </style>
-
-    <!-- Estilos barra inferior móvil (renombrados) -->
-    <style id="mobile-bottom-nav-styles">
-        .nav-bottom-mobile {
+        
+        /* BARRA INFERIOR MÓVIL */
+        .bottom-bar-mobile {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 64px;
+            height: 60px;
             background: #0F0F0F;
             color: #fff;
-            z-index: 950;
+            z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: space-around;
-            box-shadow: 0 -3px 12px rgba(0,0,0,0.6);
-            transition: transform 0.3s ease;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
         }
-        @media (min-width: 769px) {
-            .nav-bottom-mobile {
-                display: none !important;
-            }
-        }
-        .nav-bottom-link {
+        
+        .bottom-bar-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: rgba(255,255,255,0.75);
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
             font-size: 11px;
             gap: 4px;
-            padding: 6px 10px;
-            border-radius: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
             transition: all 0.2s;
             flex: 1;
-            max-width: 78px;
+            max-width: 80px;
         }
-        .nav-bottom-link.active {
+        
+        .bottom-bar-item.active {
             color: white;
-            background: rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.15);
         }
-        .nav-bottom-link img {
-            width: 26px;
-            height: 26px;
-            filter: brightness(1.15);
+        
+        .bottom-bar-item img {
+            width: 24px;
+            height: 24px;
+            filter: brightness(1.2);
         }
-        .nav-bottom-link span {
+        
+        .bottom-bar-item span {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
+            font-weight: 500;
         }
-        /* Ajuste de márgenes para reproductor y contenido */
-        @media (max-width: 768px) {
-            body.has-mobile-bar {
-                padding-bottom: 64px;
-            }
-            #floating-player {
-                bottom: 64px !important;
-            }
+        
+        /* REPRODUCTOR UNIVERSAL MÓVIL */
+        .player-universal {
+            position: fixed;
+            bottom: 60px; /* Justo encima de la barra inferior */
+            left: 0;
+            width: 100%;
+            z-index: 950;
+        }
+        
+        .player-expanded {
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+        
+        /* UTILIDADES MÓVIL */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* BOTÓN FLOTANTE (opcional) */
+        .mobile-fab {
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            z-index: 951;
+            background: #7b2eda;
+            border-radius: 9999px;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(123, 46, 218, 0.3);
+        }
+        
+        /* ANIMACIONES */
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .bottom-bar-mobile {
+            animation: slideUp 0.3s ease;
         }
     </style>
 </head>
-<body class="bg-[#050505] text-white font-[Plus_Jakarta_Sans]">
+<body class="bg-[#050505] text-white">
 
-<!-- Header principal (renombrado) -->
-<header id="top-header">
+<!-- HEADER MÓVIL -->
+<header id="main-header">
     <div class="flex items-center justify-between">
         <a href="/" class="flex items-center gap-2" data-link>
-            <img src="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg object-cover" loading="lazy">
-            <span class="text-lg sm:text-xl font-bold text-white">Balta Media</span>
+            <img src="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-7 h-7 rounded-lg object-cover" loading="lazy">
+            <span class="text-lg font-bold text-white">Balta Media</span>
         </a>
-        <div class="flex items-center gap-3 sm:gap-4">
+
+        <div class="flex items-center gap-3">
             <a href="/novedades" class="relative text-gray-400 hover:text-white" data-link>
                 <img src="https://media.baltaanay.org/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
                 <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </a>
-            <a href="/my/home" class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
+            <a href="/my/home" class="w-7 h-7 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
                 <img src="https://media.baltaanay.org/web/image/793-902e5b33/Search%20%282%29.png" alt="Usuario" class="w-full h-full object-cover" loading="lazy">
             </a>
         </div>
     </div>
 </header>
 
-<!-- Barra de categorías (renombrada) -->
-<div id="cat-filters">
+<!-- BARRA DE CATEGORÍAS MÓVIL -->
+<div id="category-filters">
     <div class="overflow-x-auto no-scrollbar">
-        <div class="flex items-center gap-2 sm:gap-3" id="category-pills"></div>
+        <div class="flex items-center gap-2" id="category-pills"></div>
     </div>
 </div>
 
-<!-- Contenedor principal (renombrado) -->
-<main id="main-content"></main>
+<!-- ================================================ -->
+<!-- 🟢 REPRODUCTOR UNIVERSAL MÓVIL 🟢 -->
+<!-- ================================================ -->
+<!-- PEGA AQUÍ EL CÓDIGO DE TU REPRODUCTOR -->
+<!-- (el mismo código pero sin las etiquetas html/head/body) -->
+<!-- ================================================ -->
 
-<!-- Reproductor flotante (sin cambios) -->
-<div id="floating-player" class="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-[#333] p-3 flex items-center justify-between z-[10000] backdrop-blur hidden">
-    <!-- El contenido lo genera player.js -->
-</div>
+<!-- CONTENEDOR PRINCIPAL MÓVIL -->
+<main id="content">
+    <!-- Aquí se inyecta el contenido dinámico -->
+</main>
 
-<!-- Modal de error (sin cambios) -->
+<!-- BARRA INFERIOR MÓVIL -->
+<nav class="bottom-bar-mobile" id="bottomBarMobile">
+    <a href="/" class="bottom-bar-item" data-link id="navHome">
+        <img src="https://media.baltaanay.org/web/image/798-1b947c8d/Home%20%282%29.webp" alt="Inicio" loading="lazy">
+        <span>Inicio</span>
+    </a>
+    <a href="/buscar" class="bottom-bar-item" data-link id="navSearch">
+        <img src="https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp" alt="Buscar" loading="lazy">
+        <span>Buscar</span>
+    </a>
+    <a href="/subir" class="bottom-bar-item" data-link id="navUpload">
+        <img src="https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp" alt="Subir" loading="lazy">
+        <span>Subir</span>
+    </a>
+    <a href="https://www.baltaanay.org/solicitud" class="bottom-bar-item" id="navRequest">
+        <img src="https://www.baltaanay.org/web/image/922-f3d79ca9/xhbalta-aula.png" alt="Solicitar" loading="lazy">
+        <span>Solicitar</span>
+    </a>
+    <a href="/my/home" class="bottom-bar-item" data-link id="navProfile">
+        <img src="https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png" alt="Perfil" loading="lazy">
+        <span>Perfil</span>
+    </a>
+</nav>
+
+<!-- BOTÓN FLOTANTE PARA REPRODUCTOR (opcional) -->
+<button id="openPlayerBtn" onclick="window.togglePlayer ? window.togglePlayer() : window.updatePlayerVisibility?.(true)" 
+        class="mobile-fab lg:hidden">
+    <img src="https://nikichitonjes-home.odoo.com/web/image/478-0e3df8d3/reanudar.gif" alt="Reproductor" class="w-6 h-6">
+</button>
+
+<!-- MODAL DE ERROR -->
 <div id="errorModal" class="fixed inset-0 z-[10000] flex items-center justify-center hidden" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
-    <div class="bg-[#1e1e2f] rounded-2xl max-w-md w-full p-6 border border-white/10 shadow-2xl">
+    <div class="bg-[#1e1e2f] rounded-2xl max-w-md w-full p-6 border border-white/10 shadow-2xl mx-4">
         <h3 class="text-xl font-bold text-white mb-3" id="errorModalTitle">Error</h3>
         <p class="text-gray-300 mb-6" id="errorModalMessage"></p>
-        <div class="flex flex-col sm:flex-row gap-3 justify-end">
+        <div class="flex flex-col gap-3">
             <a href="https://www.baltaanay.org/contactus" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-semibold text-center">Reportar problema</a>
             <a href="https://www.baltaanay.org/solicitar" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-semibold text-center">Solicitar</a>
             <button id="closeErrorModal" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm font-semibold">Cerrar</button>
@@ -182,98 +259,234 @@
     </div>
 </div>
 
-<!-- Barra inferior solo para móvil -->
+<!-- SCRIPT DE LA BARRA INFERIOR MÓVIL -->
 <script>
 (function() {
-    const MOBILE_BAR_CONFIG = {
-        BREAKPOINT: 768,
-        HEIGHT: '64px'
+    // ==========================================================================
+    // CONFIGURACIÓN BARRA INFERIOR
+    // ==========================================================================
+    const BOTTOMBAR_CONFIG = {
+        HEIGHT: '60px',
+        ACTIVE_COLOR: 'rgba(255,255,255,0.15)'
     };
 
-    function injectMobileBarStyles() {
-        // Los estilos ya están en <style id="mobile-bottom-nav-styles">
-    }
-
-    function createMobileNav() {
-        const nav = document.createElement('nav');
-        nav.className = 'nav-bottom-mobile';
-        nav.id = 'mobileBottomNav';
-
-        const links = [
-            { href: '/', icon: 'https://media.baltaanay.org/web/image/798-1b947c8d/Home%20%282%29.webp', label: 'Home' },
-            { href: '/buscar', icon: 'https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp', label: 'Explorar' },
-            { href: '/subir', icon: 'https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp', label: 'Subir' },
-            { href: 'https://www.baltaanay.org/solicitud', icon: 'https://www.baltaanay.org/web/image/922-f3d79ca9/xhbalta-aula.png', label: 'Solicitar' },
-            { href: '/my/home', icon: 'https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png', label: 'Perfil' }
-        ];
-
-        links.forEach(linkData => {
-            const a = document.createElement('a');
-            a.href = linkData.href;
-            a.className = 'nav-bottom-link';
-            a.innerHTML = `
-                <img src="${linkData.icon}" alt="${linkData.label}" loading="lazy">
-                <span>${linkData.label}</span>
-            `;
-            nav.appendChild(a);
-        });
-
-        return nav;
-    }
-
-    function updateActiveLink() {
-        const path = window.location.pathname;
-        document.querySelectorAll('.nav-bottom-link').forEach(el => {
-            const href = el.getAttribute('href');
-            el.classList.toggle('active',
-                href === path ||
-                (href === '/' && path === '/') ||
-                (href === '/buscar' && path === '/buscar')
+    // ==========================================================================
+    // FUNCIONES DE LA BARRA INFERIOR
+    // ==========================================================================
+    function setActiveBottomItem() {
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.bottom-bar-item').forEach(item => {
+            const href = item.getAttribute('href');
+            item.classList.toggle('active', 
+                href === currentPath || 
+                (href === '/' && currentPath === '/') ||
+                (href === '/buscar' && currentPath === '/buscar')
             );
         });
     }
 
-    function manageMobileBar() {
-        const isMobile = window.innerWidth <= MOBILE_BAR_CONFIG.BREAKPOINT;
-        const existing = document.getElementById('mobileBottomNav');
-
-        if (isMobile) {
-            if (!existing) {
-                const bar = createMobileNav();
-                document.body.appendChild(bar);
-                document.body.classList.add('has-mobile-bar');
-                updateActiveLink();
-            }
-        } else {
-            if (existing) {
-                existing.remove();
-                document.body.classList.remove('has-mobile-bar');
-            }
+    function adjustForBottomBar() {
+        // Ajustar el padding inferior del body
+        document.body.style.paddingBottom = BOTTOMBAR_CONFIG.HEIGHT;
+        
+        // Ajustar el reproductor si existe
+        const player = document.querySelector('.player-universal');
+        if (player) {
+            player.style.bottom = BOTTOMBAR_CONFIG.HEIGHT;
         }
     }
 
-    // Inicialización
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', manageMobileBar);
-    } else {
-        manageMobileBar();
+    // ==========================================================================
+    // INICIALIZACIÓN
+    // ==========================================================================
+    function initBottomBar() {
+        adjustForBottomBar();
+        setActiveBottomItem();
+        
+        // Marcar ítem activo en la primera carga
+        console.log('✅ Barra inferior móvil inicializada');
     }
 
-    // Cambio de tamaño
-    window.addEventListener('resize', () => {
-        manageMobileBar();
-    });
+    // Inicializar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBottomBar);
+    } else {
+        initBottomBar();
+    }
 
-    // Soporte SPA / popstate
-    window.addEventListener('popstate', updateActiveLink);
-    document.addEventListener('spa-navigation', updateActiveLink);
+    // Actualizar ítem activo en navegación SPA
+    document.addEventListener('spa-navigation', setActiveBottomItem);
+    window.addEventListener('popstate', setActiveBottomItem);
 
+    // API pública
+    window.bottomBarAPI = {
+        setActive: setActiveBottomItem,
+        refresh: adjustForBottomBar
+    };
 })();
 </script>
 
-<!-- Módulos JS (sin cambios) -->
-<script type="module" src="/main.js"></script>
+<!-- SCRIPT PARA CATEGORÍAS MÓVIL (adaptado) -->
+<script>
+// Versión simplificada para móvil de las categorías
+const CATEGORIES = [
+    "Todos",
+    "Derecho",
+    "Física",
+    "Matemáticas",
+    "Historia",
+    "Filosofía",
+    "Economía",
+    "Sociales",
+    "Arte",
+    "Literatura",
+    "Cine",
+    "Documentales",
+    "Naturales",
+    "Tecnología",
+    "Otras"
+];
 
+function renderCategoryPills(activeCat = 'Todos') {
+    const container = document.getElementById('category-pills');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    CATEGORIES.forEach(cat => {
+        const isActive = cat === activeCat;
+        const btn = document.createElement('button');
+        btn.className = `whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold transition-all flex-shrink-0 ${
+            isActive ? 'bg-white text-black' : 'bg-white/10 text-gray-300 hover:bg-white/20'
+        }`;
+        btn.innerText = cat;
+        
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            let url;
+            if (cat === 'Todos') {
+                url = '/';
+            } else {
+                url = `/categoria/${encodeURIComponent(cat)}`;
+            }
+            
+            window.history.pushState(null, null, url);
+            window.dispatchEvent(new PopStateEvent('popstate'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        container.appendChild(btn);
+    });
+}
+
+// Inicializar categorías
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => renderCategoryPills());
+} else {
+    renderCategoryPills();
+}
+
+// Actualizar categorías en navegación
+document.addEventListener('spa-navigation', () => {
+    const path = window.location.pathname;
+    let activeCat = 'Todos';
+    if (path.startsWith('/categoria/')) {
+        activeCat = decodeURIComponent(path.replace('/categoria/', ''));
+    }
+    renderCategoryPills(activeCat);
+});
+</script>
+
+<!-- SCRIPT PRINCIPAL MÓVIL -->
+<script type="module">
+// main.js simplificado para móvil
+import { renderFeed, renderGrid, renderEpisodio, renderSerie } from './show.js';
+import { getEpisodioByDetailUrl, getSerieByUrl } from './episodios.js';
+
+const PAGES = [
+    { path: '/biblioteca', module: () => import('./biblioteca.js') },
+    { path: '/explorar', module: () => import('./explorar.js') },
+    { path: '/buscar', module: () => import('./buscar.js') }
+];
+
+async function router() {
+    const path = window.location.pathname;
+    const searchParams = new URLSearchParams(window.location.search);
+    const container = document.getElementById('content');
+
+    try {
+        if (path === '/') {
+            renderFeed(container);
+            document.title = 'Balta Media · Inicio';
+        } else {
+            const page = PAGES.find(p => p.path === path);
+            if (page) {
+                const module = await page.module();
+                if (page.path === '/buscar' && searchParams.has('q')) {
+                    module.renderSearch?.(container, searchParams.get('q'));
+                } else {
+                    module.render(container);
+                }
+                document.title = `${path.slice(1)} · Balta Media`;
+            } else if (path.startsWith('/categoria/')) {
+                const cat = decodeURIComponent(path.replace('/categoria/', ''));
+                const buscarModule = await import('./buscar.js');
+                buscarModule.renderCategory?.(container, cat);
+                document.title = `${cat} · Balta Media`;
+            } else {
+                const serie = getSerieByUrl(path);
+                if (serie) {
+                    renderSerie(container, path);
+                    document.title = `${serie.titulo_serie} · Balta Media`;
+                } else {
+                    const episodio = getEpisodioByDetailUrl(path);
+                    if (episodio) {
+                        renderEpisodio(container, episodio.id);
+                        document.title = `${episodio.title} · Balta Media`;
+                    } else if (path === '/novedades') {
+                        const { DATA } = await import('./show.js');
+                        const sorted = [...DATA].sort((a, b) => new Date(b.date) - new Date(a.date));
+                        renderGrid(container, sorted.slice(0, 20), 'Novedades');
+                        document.title = 'Novedades · Balta Media';
+                    } else {
+                        const module404 = await import('./404.js');
+                        module404.render(container);
+                        document.title = '404 · Balta Media';
+                    }
+                }
+            }
+        }
+
+        // Actualizar barra inferior
+        document.dispatchEvent(new Event('spa-navigation'));
+        
+    } catch (error) {
+        console.error('Error:', error);
+        container.innerHTML = '<div class="p-4 text-center">Error al cargar</div>';
+    }
+}
+
+// Eventos de navegación
+document.addEventListener('click', e => {
+    const link = e.target.closest('a[data-link]');
+    if (link) {
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        window.history.pushState(null, null, href);
+        router();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+});
+
+window.addEventListener('popstate', router);
+
+// Iniciar
+router();
+
+console.log('✅ Modo móvil activado');
+</script>
 </body>
 </html>
 
