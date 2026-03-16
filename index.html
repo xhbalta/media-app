@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Balta Media · Conocimiento en acción</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,274 +13,236 @@
     <link rel="icon" type="image/png" sizes="16x16" href="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png">
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="/styles.css">
-   
-    <!-- ESTILOS BASE (igual que antes) -->
-    <style id="sidebar-base-styles">
+    
+    <!-- ESTILOS BASE PARA MÓVIL -->
+    <style id="mobile-base-styles">
+        /* Reset */
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
+        
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
-            overflow: hidden;
+            overflow-x: hidden;
             background: #050505;
         }
-
+        
         body {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            grid-template-areas: 
-                "sidebar main-area";
-            grid-template-rows: 1fr;
-        }
-
-        /* SIDEBAR */
-        .sidebar-desktop {
-            grid-area: sidebar;
-            background: #0F0F0F;
-            color: #fff;
-            z-index: 900;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-x: hidden;
-            overflow-y: auto;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-            scrollbar-width: none;
-            transition: width 0.3s ease;
-            width: 70px;
-            min-width: 70px;
-        }
-        .sidebar-desktop::-webkit-scrollbar { display: none; }
-
-        .sidebar-desktop.expanded {
-            width: 220px;
-            min-width: 220px;
-        }
-        @media (min-width: 1280px) {
-            .sidebar-desktop.expanded {
-                width: 250px;
-                min-width: 250px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar-desktop { display: none !important; }
-        }
-
-        .sidebar-toggle {
-            display: flex;
-            justify-content: flex-end;
-            padding: 16px 12px;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 20px;
-        }
-        .sidebar-toggle svg { width: 24px; height: 24px; fill: white; transition: transform 0.2s; }
-        .sidebar-desktop.expanded .sidebar-toggle svg { transform: rotate(180deg); }
-
-        .sidebar-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 0 8px;
-            margin-bottom: 30px;
-        }
-        .sidebar-nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            min-height: 100vh;
+            padding-bottom: 60px; /* Espacio para la barra inferior */
+            font-family: 'Plus Jakarta Sans', sans-serif;
             color: white;
-            text-decoration: none;
-            padding: 10px;
-            border-radius: 8px;
-            white-space: nowrap;
-            transition: background 0.2s;
         }
-        .sidebar-nav-item:hover { background: rgba(255,255,255,0.1); }
-        .sidebar-nav-item.active { background: rgba(255,255,255,0.2); }
-        .sidebar-nav-item img { width: 24px; height: 24px; filter: brightness(1.2); flex-shrink: 0; }
-        .sidebar-nav-item span { font-size: 14px; font-weight: 500; }
-        .sidebar-desktop:not(.expanded) .sidebar-nav-item span { display: none; }
-        .sidebar-desktop:not(.expanded) .sidebar-rec-section { display: none; }
-
-        .sidebar-rec-section {
-            padding: 0 8px;
-            margin-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 16px;
-        }
-        .sidebar-rec-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-        .sidebar-rec-header a {
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .sidebar-rec-header svg { width: 16px; height: 16px; fill: white; }
-        .sidebar-rec-list { display: flex; flex-direction: column; gap: 12px; }
-
-        .sidebar-rec-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background 0.15s;
-            padding: 6px;
-            border-radius: 6px;
-        }
-        .sidebar-rec-item:hover { background: rgba(255,255,255,0.08); }
-        .sidebar-rec-item img {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 6px;
-            flex-shrink: 0;
-        }
-        .sidebar-rec-item-info { flex: 1; min-width: 0; }
-        .sidebar-rec-item-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .sidebar-rec-item-author { font-size: 11px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        .sidebar-rec-play-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-        }
-        .sidebar-rec-play-btn:hover { background: rgba(255,255,255,0.2); }
-        .sidebar-rec-play-btn svg { width: 18px; height: 18px; fill: white; }
-
-        /* MAIN AREA */
-        .main-area {
-            grid-area: main-area;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* HEADER Y FILTROS */
-        .header-container {
-            position: sticky;
-            top: 0;
-            z-index: 60;
-            width: 100%;
-            transition: transform 0.32s cubic-bezier(0.25, 0.1, 0.25, 1);
-            background: rgba(5,5,5,0.96);
-            backdrop-filter: blur(12px);
-        }
-
-        .header-container.hidden {
-            transform: translateY(-100%);
-        }
-
+        
+        /* HEADER MÓVIL */
         #main-header {
-            background: transparent;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 50;
+            background: rgba(5,5,5,0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-
+        
         #main-header > div {
+            width: 100%;
             padding: 0.75rem 1rem;
         }
-
+        
+        /* BARRA DE CATEGORÍAS MÓVIL */
         #category-filters {
-            background: rgba(5,5,5,0.96);
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 40;
+            background: rgba(5,5,5,0.95);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-            flex-shrink: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-
+        
         #category-filters > div {
+            width: 100%;
             padding: 0.5rem 1rem;
         }
-
+        
+        /* CONTENEDOR PRINCIPAL MÓVIL */
         #content {
-            flex: 1 1 auto;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding: 1.25rem 1rem;
+            width: 100%;
+            padding: 1rem 1rem 80px 1rem;
+            min-height: calc(100vh - 120px);
         }
-
-        @media (max-width: 768px) {
-            body {
-                grid-template-columns: 1fr;
-                grid-template-areas: "main-area";
-            }
+        
+        /* BARRA INFERIOR MÓVIL */
+        .bottom-bar-mobile {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: #0F0F0F;
+            color: #fff;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .bottom-bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 11px;
+            gap: 4px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            flex: 1;
+            max-width: 80px;
+        }
+        
+        .bottom-bar-item.active {
+            color: white;
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .bottom-bar-item img {
+            width: 24px;
+            height: 24px;
+            filter: brightness(1.2);
+        }
+        
+        .bottom-bar-item span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            font-weight: 500;
+        }
+        
+        /* REPRODUCTOR UNIVERSAL MÓVIL (se inyecta dinámicamente, pero reservamos espacio) */
+        #playerUniversal {
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            width: 100%;
+            z-index: 950;
+        }
+        
+        /* UTILIDADES MÓVIL */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* BOTÓN FLOTANTE */
+        .mobile-fab {
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            z-index: 951;
+            background: #7b2eda;
+            border-radius: 9999px;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(123, 46, 218, 0.3);
+        }
+        
+        /* ANIMACIONES */
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .bottom-bar-mobile {
+            animation: slideUp 0.3s ease;
         }
     </style>
 </head>
-<body class="bg-[#050505] text-white font-[Plus_Jakarta_Sans]">
+<body class="bg-[#050505] text-white">
 
-<!-- Sidebar (se genera dinámicamente con JS) -->
-<aside class="sidebar-desktop collapsed" id="sidebarDesktop"></aside>
+<!-- HEADER MÓVIL -->
+<header id="main-header">
+    <div class="flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2" data-link>
+            <img src="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-7 h-7 rounded-lg object-cover" loading="lazy">
+            <span class="text-lg font-bold text-white">Balta Media</span>
+        </a>
 
-<!-- Área principal -->
-<div class="main-area">
-
-    <!-- Header + Filtros - Contenedor unificado para sticky -->
-    <div class="header-container" id="headerContainer">
-        <!-- Header -->
-        <header id="main-header">
-            <div class="flex items-center justify-between">
-                <a href="/" class="flex items-center gap-2" data-link>
-                    <img src="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg object-cover" loading="lazy">
-                    <span class="text-lg sm:text-xl font-bold text-white">Balta Media</span>
-                </a>
-                <div class="flex items-center gap-3 sm:gap-4">
-                    <a href="/novedades" class="relative text-gray-400 hover:text-white" data-link>
-                        <img src="https://media.baltaanay.org/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
-                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                    </a>
-                    <a href="/my/home" class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
-                        <img src="https://media.baltaanay.org/web/image/793-902e5b33/Search%20%282%29.png" alt="Usuario" class="w-full h-full object-cover" loading="lazy">
-                    </a>
-                </div>
-            </div>
-        </header>
-
-        <!-- Filtros / categorías -->
-        <div id="category-filters">
-            <div class="overflow-x-auto no-scrollbar">
-                <div class="flex items-center gap-2 sm:gap-3" id="category-pills"></div>
-            </div>
+        <div class="flex items-center gap-3">
+            <a href="/novedades" class="relative text-gray-400 hover:text-white" data-link>
+                <img src="https://media.baltaanay.org/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
+                <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </a>
+            <a href="/my/home" class="w-7 h-7 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
+                <img src="https://media.baltaanay.org/web/image/793-902e5b33/Search%20%282%29.png" alt="Usuario" class="w-full h-full object-cover" loading="lazy">
+            </a>
         </div>
     </div>
+</header>
 
-    <!-- Contenido con scroll principal -->
-    <main id="content"></main>
-
+<!-- BARRA DE CATEGORÍAS MÓVIL -->
+<div id="category-filters">
+    <div class="overflow-x-auto no-scrollbar">
+        <div class="flex items-center gap-2" id="category-pills"></div>
+    </div>
 </div>
 
-<!-- Reproductor flotante (estructura vacía, player.js lo llena) -->
-<div id="floating-player" class="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-[#333] p-3 flex items-center justify-between z-[10000] backdrop-blur hidden"></div>
+<!-- CONTENEDOR PRINCIPAL MÓVIL -->
+<main id="content">
+    <!-- Aquí se inyecta el contenido dinámico -->
+</main>
 
-<!-- Modal de error -->
+<!-- BARRA INFERIOR MÓVIL -->
+<nav class="bottom-bar-mobile" id="bottomBarMobile">
+    <a href="/" class="bottom-bar-item" data-link id="navHome">
+        <img src="https://media.baltaanay.org/web/image/798-1b947c8d/Home%20%282%29.webp" alt="Inicio" loading="lazy">
+        <span>Inicio</span>
+    </a>
+    <a href="/buscar" class="bottom-bar-item" data-link id="navSearch">
+        <img src="https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp" alt="Buscar" loading="lazy">
+        <span>Buscar</span>
+    </a>
+    <a href="/subir" class="bottom-bar-item" data-link id="navUpload">
+        <img src="https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp" alt="Subir" loading="lazy">
+        <span>Subir</span>
+    </a>
+    <a href="https://www.baltaanay.org/solicitud" class="bottom-bar-item" id="navRequest">
+        <img src="https://www.baltaanay.org/web/image/922-f3d79ca9/xhbalta-aula.png" alt="Solicitar" loading="lazy">
+        <span>Solicitar</span>
+    </a>
+    <a href="/my/home" class="bottom-bar-item" data-link id="navProfile">
+        <img src="https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png" alt="Perfil" loading="lazy">
+        <span>Perfil</span>
+    </a>
+</nav>
+
+<!-- Contenedor para el reproductor universal (player.js lo llenará) -->
+<div id="playerUniversal"></div>
+
+<!-- BOTÓN FLOTANTE PARA REPRODUCTOR -->
+<button id="openPlayerBtn" onclick="window.togglePlayer ? window.togglePlayer() : (window.updatePlayerVisibility ? window.updatePlayerVisibility(true) : null)" 
+        class="mobile-fab lg:hidden">
+    <img src="https://nikichitonjes-home.odoo.com/web/image/478-0e3df8d3/reanudar.gif" alt="Reproductor" class="w-6 h-6">
+</button>
+
+<!-- MODAL DE ERROR -->
 <div id="errorModal" class="fixed inset-0 z-[10000] flex items-center justify-center hidden" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
-    <div class="bg-[#1e1e2f] rounded-2xl max-w-md w-full p-6 border border-white/10 shadow-2xl">
+    <div class="bg-[#1e1e2f] rounded-2xl max-w-md w-full p-6 border border-white/10 shadow-2xl mx-4">
         <h3 class="text-xl font-bold text-white mb-3" id="errorModalTitle">Error</h3>
         <p class="text-gray-300 mb-6" id="errorModalMessage"></p>
-        <div class="flex flex-col sm:flex-row gap-3 justify-end">
+        <div class="flex flex-col gap-3">
             <a href="https://www.baltaanay.org/contactus" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-semibold text-center">Reportar problema</a>
             <a href="https://www.baltaanay.org/solicitar" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-semibold text-center">Solicitar</a>
             <button id="closeErrorModal" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm font-semibold">Cerrar</button>
@@ -288,215 +250,251 @@
     </div>
 </div>
 
-<!-- Script sidebar (NO EL ROUTER) -->
-<script type="module">
-import { episodios, getSerieById } from '/episodios.js';
-
+<!-- SCRIPT DE LA BARRA INFERIOR MÓVIL (sin cambios) -->
+<script>
 (function() {
-    const SIDEBAR_CONFIG = { BREAKPOINT: 768 };
-    let sidebarInstance = {
-        initialized: false,
-        currentState: localStorage.getItem('sidebar_state') || 'collapsed',
-        isMobile: window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT
+    const BOTTOMBAR_CONFIG = {
+        HEIGHT: '60px',
+        ACTIVE_COLOR: 'rgba(255,255,255,0.15)'
     };
 
-    function getRandomEpisodes(count = 12) {
-        const shuffled = [...episodios].sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, count);
-    }
-
-    function renderSidebar() {
-        const sidebar = document.createElement('aside');
-        sidebar.className = `sidebar-desktop ${sidebarInstance.currentState}`;
-        sidebar.id = 'sidebarDesktop';
-
-        const toggle = document.createElement('div');
-        toggle.className = 'sidebar-toggle';
-        toggle.id = 'sidebarDesktopToggle';
-        toggle.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>';
-
-        const nav = document.createElement('div');
-        nav.className = 'sidebar-nav';
-        nav.innerHTML = `
-            <a href="/" class="sidebar-nav-item" title="Home" data-link>
-                <img src="https://media.baltaanay.org/web/image/798-1b947c8d/Home%20%282%29.webp" alt="Home" loading="lazy"><span>Home</span>
-            </a>
-            <a href="/buscar" class="sidebar-nav-item" title="Explorar" data-link>
-                <img src="https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp" alt="Explorar" loading="lazy"><span>Explorar</span>
-            </a>
-            <a href="/subir" class="sidebar-nav-item" title="Cargar" data-link>
-                <img src="https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp" alt="Cargar" loading="lazy"><span>Cargar</span>
-            </a>
-            <a href="https://www.baltaanay.org/solicitud" class="sidebar-nav-item" title="Solicitar">
-                <img src="https://www.baltaanay.org/web/image/922-f3d79ca9/xhbalta-aula.png" alt="Solicitar" loading="lazy"><span>Solicitar</span>
-            </a>
-            <a href="/my/home" class="sidebar-nav-item" title="Usuario" data-link>
-                <img src="https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png" alt="Usuario" loading="lazy"><span>Portal</span>
-            </a>
-        `;
-
-        const recSection = document.createElement('div');
-        recSection.className = 'sidebar-rec-section';
-        recSection.innerHTML = `
-            <div class="sidebar-rec-header">
-                <a href="/novedades" data-link>Recomendados<svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
-            </div>
-            <div class="sidebar-rec-list" id="sidebarRecList"></div>
-        `;
-
-        sidebar.appendChild(toggle);
-        sidebar.appendChild(nav);
-        sidebar.appendChild(recSection);
-        return sidebar;
-    }
-
-    function populateRecommendations() {
-        const container = document.getElementById('sidebarRecList');
-        if (!container) return;
-
-        container.innerHTML = '';
-
-        const selected = getRandomEpisodes(12);
-
-        if (!selected.length) {
-            container.innerHTML = '<div style="color:#aaa; padding:8px;">No hay episodios disponibles</div>';
-            return;
-        }
-
-        selected.forEach(ep => {
-            const serie = getSerieById(ep.seriesid) || {};
-            const item = document.createElement('div');
-            item.className = 'sidebar-rec-item';
-            item.innerHTML = `
-                <img src="${serie.portada_serie || ep.coverUrl || 'https://via.placeholder.com/40'}" alt="${ep.title}" loading="lazy">
-                <div class="sidebar-rec-item-info">
-                    <div class="sidebar-rec-item-title">${ep.title}</div>
-                    <div class="sidebar-rec-item-author">${ep.author || serie.titulo_serie || '—'}</div>
-                </div>
-                <button class="sidebar-rec-play-btn" data-url="${ep.detailUrl || '#'}">
-                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                </button>
-            `;
-
-            const btn = item.querySelector('button');
-            btn.addEventListener('click', e => {
-                e.preventDefault();
-                e.stopPropagation();
-                const url = btn.dataset.url;
-                if (url && url !== '#' && window.router) {
-                    window.history.pushState(null, null, url);
-                    window.router();
-                }
-            });
-
-            item.addEventListener('click', e => {
-                if (e.target.tagName !== 'BUTTON') {
-                    e.preventDefault();
-                    const url = ep.detailUrl;
-                    if (url && url !== '#' && window.router) {
-                        window.history.pushState(null, null, url);
-                        window.router();
-                    }
-                }
-            });
-
-            container.appendChild(item);
-        });
-    }
-
-    function setActiveNavItem() {
+    function setActiveBottomItem() {
         const currentPath = window.location.pathname;
-        document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+        document.querySelectorAll('.bottom-bar-item').forEach(item => {
             const href = item.getAttribute('href');
-            item.classList.toggle('active',
-                (href === currentPath) ||
+            item.classList.toggle('active', 
+                href === currentPath || 
                 (href === '/' && currentPath === '/') ||
                 (href === '/buscar' && currentPath === '/buscar')
             );
         });
     }
 
-    function initSidebarToggle() {
-        const sidebar = document.getElementById('sidebarDesktop');
-        const toggle = document.getElementById('sidebarDesktopToggle');
-        if (!sidebar || !toggle) return;
-
-        const newToggle = toggle.cloneNode(true);
-        toggle.parentNode.replaceChild(newToggle, toggle);
-
-        newToggle.addEventListener('click', e => {
-            e.stopPropagation();
-            e.preventDefault();
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            if (isCollapsed) {
-                sidebar.classList.remove('collapsed');
-                sidebar.classList.add('expanded');
-            } else {
-                sidebar.classList.add('collapsed');
-                sidebar.classList.remove('expanded');
-            }
-            localStorage.setItem('sidebar_state', isCollapsed ? 'expanded' : 'collapsed');
-        });
+    function adjustForBottomBar() {
+        document.body.style.paddingBottom = BOTTOMBAR_CONFIG.HEIGHT;
+        const player = document.querySelector('#playerUniversal');
+        if (player) {
+            player.style.bottom = BOTTOMBAR_CONFIG.HEIGHT;
+        }
     }
 
-    function initSidebar() {
-        sidebarInstance.isMobile = window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT;
-        const oldSidebar = document.querySelector('.sidebar-desktop');
-        if (oldSidebar) oldSidebar.remove();
-
-        if (sidebarInstance.isMobile) return;
-
-        const sidebar = renderSidebar();
-        document.body.insertBefore(sidebar, document.body.firstChild);
-
-        populateRecommendations();
-        initSidebarToggle();
-        setActiveNavItem();
-
-        sidebarInstance.initialized = true;
+    function initBottomBar() {
+        adjustForBottomBar();
+        setActiveBottomItem();
+        console.log('✅ Barra inferior móvil inicializada');
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSidebar);
+        document.addEventListener('DOMContentLoaded', initBottomBar);
     } else {
-        initSidebar();
+        initBottomBar();
     }
 
-    window.addEventListener('resize', () => {
-        const wasMobile = sidebarInstance.isMobile;
-        const isMobileNow = window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT;
-        if (wasMobile !== isMobileNow) {
-            sidebarInstance.isMobile = isMobileNow;
-            initSidebar();
-        }
-    });
+    document.addEventListener('spa-navigation', setActiveBottomItem);
+    window.addEventListener('popstate', setActiveBottomItem);
 
-    document.addEventListener('spa-navigation', setActiveNavItem);
-    window.addEventListener('popstate', setActiveNavItem);
-
-    window.sidebarAPI = {
-        refresh: populateRecommendations,
-        setActive: setActiveNavItem,
-        toggle: () => {
-            const sidebar = document.getElementById('sidebarDesktop');
-            if (sidebar) {
-                const isCollapsed = sidebar.classList.contains('collapsed');
-                if (isCollapsed) {
-                    sidebar.classList.remove('collapsed');
-                    sidebar.classList.add('expanded');
-                } else {
-                    sidebar.classList.add('collapsed');
-                    sidebar.classList.remove('expanded');
-                }
-                localStorage.setItem('sidebar_state', isCollapsed ? 'expanded' : 'collapsed');
-            }
-        }
+    window.bottomBarAPI = {
+        setActive: setActiveBottomItem,
+        refresh: adjustForBottomBar
     };
 })();
 </script>
 
-<!-- Cargar el router principal (main.js) -->
-<script type="module" src="/main.js"></script>
+<!-- SCRIPT PARA CATEGORÍAS MÓVIL (adaptado) -->
+<script>
+const CATEGORIES = [
+    "Todos",
+    "Derecho",
+    "Física",
+    "Matemáticas",
+    "Historia",
+    "Filosofía",
+    "Economía",
+    "Sociales",
+    "Arte",
+    "Literatura",
+    "Cine",
+    "Documentales",
+    "Naturales",
+    "Tecnología",
+    "Otras"
+];
+
+function renderCategoryPills(activeCat = 'Todos') {
+    const container = document.getElementById('category-pills');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    CATEGORIES.forEach(cat => {
+        const isActive = cat === activeCat;
+        const btn = document.createElement('button');
+        btn.className = `whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold transition-all flex-shrink-0 ${
+            isActive ? 'bg-white text-black' : 'bg-white/10 text-gray-300 hover:bg-white/20'
+        }`;
+        btn.innerText = cat;
+        
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            let url;
+            if (cat === 'Todos') {
+                url = '/';
+            } else {
+                url = `/categoria/${encodeURIComponent(cat)}`;
+            }
+            
+            window.history.pushState(null, null, url);
+            window.dispatchEvent(new PopStateEvent('popstate'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        container.appendChild(btn);
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => renderCategoryPills());
+} else {
+    renderCategoryPills();
+}
+
+document.addEventListener('spa-navigation', () => {
+    const path = window.location.pathname;
+    let activeCat = 'Todos';
+    if (path.startsWith('/categoria/')) {
+        activeCat = decodeURIComponent(path.replace('/categoria/', ''));
+    }
+    renderCategoryPills(activeCat);
+});
+</script>
+
+<!-- SCRIPT PRINCIPAL MÓVIL (CORREGIDO: normalización de ruta y orden de búsqueda) -->
+<script type="module">
+import { renderFeed, renderGrid, renderEpisodio, renderSerie } from './show.js';
+import { getEpisodioByDetailUrl, getSerieByUrl } from './episodios.js';
+import './player.js'; // Carga el reproductor
+
+const PAGES = [
+    { path: '/biblioteca', module: () => import('./biblioteca.js') },
+    { path: '/explorar', module: () => import('./explorar.js') },
+    { path: '/buscar', module: () => import('./buscar.js') }
+];
+
+// 🟢 NORMALIZACIÓN DE RUTA (clave para que funcionen las URLs directas)
+function normalizePath(path) {
+    let normalized = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
+    try {
+        normalized = decodeURIComponent(normalized);
+    } catch (e) {}
+    return normalized;
+}
+
+async function router() {
+    const path = window.location.pathname;
+    const normalizedPath = normalizePath(path);
+    const searchParams = new URLSearchParams(window.location.search);
+    const container = document.getElementById('content');
+
+    try {
+        // 1. Ruta raíz
+        if (normalizedPath === '/') {
+            renderFeed(container);
+            document.title = 'Balta Media · Inicio';
+        } else {
+            // 2. Páginas especiales
+            const page = PAGES.find(p => p.path === normalizedPath);
+            if (page) {
+                const module = await page.module();
+                if (page.path === '/buscar' && searchParams.has('q')) {
+                    module.renderSearch?.(container, searchParams.get('q'));
+                } else {
+                    module.render(container);
+                }
+                document.title = `${normalizedPath.slice(1)} · Balta Media`;
+            }
+            // 3. Categoría
+            else if (normalizedPath.startsWith('/categoria/')) {
+                const cat = decodeURIComponent(normalizedPath.replace('/categoria/', ''));
+                const buscarModule = await import('./buscar.js');
+                if (buscarModule.renderCategory) {
+                    buscarModule.renderCategory(container, cat);
+                } else {
+                    const { DATA } = await import('./show.js');
+                    const categoryEpisodes = DATA.filter(ep => ep.categories && ep.categories.includes(cat));
+                    renderGrid(container, categoryEpisodes, cat);
+                }
+                document.title = `${cat} · Balta Media`;
+            }
+            // 4. Serie (prioridad sobre episodio)
+            else {
+                const serie = getSerieByUrl(normalizedPath);
+                if (serie) {
+                    renderSerie(container, normalizedPath);
+                    document.title = `${serie.titulo_serie} · Balta Media`;
+                    return;
+                }
+
+                // 5. Episodio
+                const episodio = getEpisodioByDetailUrl(normalizedPath);
+                if (episodio) {
+                    renderEpisodio(container, episodio.id);
+                    document.title = `${episodio.title} · Balta Media`;
+                    return;
+                }
+
+                // 6. Novedades
+                else if (normalizedPath === '/novedades') {
+                    const { DATA } = await import('./show.js');
+                    const sorted = [...DATA].sort((a, b) => new Date(b.date) - new Date(a.date));
+                    renderGrid(container, sorted.slice(0, 20), 'Novedades');
+                    document.title = 'Novedades · Balta Media';
+                }
+                // 7. 404
+                else {
+                    const module404 = await import('./404.js');
+                    module404.render(container);
+                    document.title = '404 · Balta Media';
+                }
+            }
+        }
+
+        // Actualizar barra inferior y categorías
+        document.dispatchEvent(new Event('spa-navigation'));
+        
+    } catch (error) {
+        console.error('Error en router:', error);
+        container.innerHTML = '<div class="p-4 text-center text-red-500">Error al cargar la página</div>';
+    }
+}
+
+// Eventos de navegación
+document.addEventListener('click', e => {
+    const link = e.target.closest('a[data-link]');
+    if (link) {
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        window.history.pushState(null, null, href);
+        router();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+});
+
+window.addEventListener('popstate', router);
+
+// Iniciar
+router();
+
+console.log('✅ Modo móvil con router corregido');
+</script>
+
+<!-- Script para cerrar modal de error -->
+<script>
+document.getElementById('closeErrorModal')?.addEventListener('click', () => {
+    document.getElementById('errorModal').classList.add('hidden');
+});
+</script>
 
 </body>
 </html>
