@@ -124,6 +124,7 @@ async function router() {
         }
 
         updateActiveCategory();
+      updateCanonicalAndAlternate();
         document.dispatchEvent(new Event('spa-navigation'));
 
         if (window.sidebarAPI) {
