@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Balta Media · Conocimiento en acción</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,236 +13,112 @@
     <link rel="icon" type="image/png" sizes="16x16" href="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png">
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="/styles.css">
-    
-    <!-- ESTILOS BASE PARA MÓVIL -->
-    <style id="mobile-base-styles">
-        /* Reset */
+
+    <!-- ESTILOS BASE (adaptados sin sidebar) -->
+    <style>
         * {
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
-        
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
-            overflow-x: hidden;
+            height: 100%;
+            overflow: hidden;
             background: #050505;
         }
-        
         body {
-            min-height: 100vh;
-            padding-bottom: 60px; /* Espacio para la barra inferior */
             font-family: 'Plus Jakarta Sans', sans-serif;
-            color: white;
         }
-        
-        /* HEADER MÓVIL */
-        #main-header {
-            position: sticky;
-            top: 0;
-            width: 100%;
-            z-index: 50;
-            background: rgba(5,5,5,0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        #main-header > div {
-            width: 100%;
-            padding: 0.75rem 1rem;
-        }
-        
-        /* BARRA DE CATEGORÍAS MÓVIL */
-        #category-filters {
-            position: sticky;
-            top: 0;
-            width: 100%;
-            z-index: 40;
-            background: rgba(5,5,5,0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        #category-filters > div {
-            width: 100%;
-            padding: 0.5rem 1rem;
-        }
-        
-        /* CONTENEDOR PRINCIPAL MÓVIL */
-        #content {
-            width: 100%;
-            padding: 1rem 1rem 80px 1rem;
-            min-height: calc(100vh - 120px);
-        }
-        
-        /* BARRA INFERIOR MÓVIL */
-        .bottom-bar-mobile {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: #0F0F0F;
-            color: #fff;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-        }
-        
-        .bottom-bar-item {
+        .main-area {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            font-size: 11px;
-            gap: 4px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            flex: 1;
-            max-width: 80px;
-        }
-        
-        .bottom-bar-item.active {
-            color: white;
-            background: rgba(255,255,255,0.15);
-        }
-        
-        .bottom-bar-item img {
-            width: 24px;
-            height: 24px;
-            filter: brightness(1.2);
-        }
-        
-        .bottom-bar-item span {
-            white-space: nowrap;
+            height: 100vh;
             overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-            font-weight: 500;
+            position: relative;
         }
-        
-        /* REPRODUCTOR UNIVERSAL MÓVIL (se inyecta dinámicamente, pero reservamos espacio) */
-        #playerUniversal {
-            position: fixed;
-            bottom: 60px;
-            left: 0;
+        /* HEADER Y FILTROS */
+        .header-container {
+            position: sticky;
+            top: 0;
+            z-index: 60;
             width: 100%;
-            z-index: 950;
+            transition: transform 0.32s cubic-bezier(0.25, 0.1, 0.25, 1);
+            background: rgba(5,5,5,0.96);
+            backdrop-filter: blur(12px);
         }
-        
-        /* UTILIDADES MÓVIL */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
+        .header-container.hidden {
+            transform: translateY(-100%);
         }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        #main-header {
+            background: transparent;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
         }
-        
-        /* BOTÓN FLOTANTE */
-        .mobile-fab {
-            position: fixed;
-            bottom: 80px;
-            right: 16px;
-            z-index: 951;
-            background: #7b2eda;
-            border-radius: 9999px;
-            padding: 12px;
-            box-shadow: 0 4px 12px rgba(123, 46, 218, 0.3);
+        #main-header > div {
+            padding: 0.75rem 1rem;
         }
-        
-        /* ANIMACIONES */
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
+        #category-filters {
+            background: rgba(5,5,5,0.96);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            flex-shrink: 0;
         }
-        
-        .bottom-bar-mobile {
-            animation: slideUp 0.3s ease;
+        #category-filters > div {
+            padding: 0.5rem 1rem;
+        }
+        #content {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 1.25rem 1rem;
         }
     </style>
 </head>
-<body class="bg-[#050505] text-white">
+<body class="bg-[#050505] text-white font-[Plus_Jakarta_Sans]">
 
-<!-- HEADER MÓVIL -->
-<header id="main-header">
-    <div class="flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2" data-link>
-            <img src="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-7 h-7 rounded-lg object-cover" loading="lazy">
-            <span class="text-lg font-bold text-white">Balta Media</span>
-        </a>
-
-        <div class="flex items-center gap-3">
-            <a href="/novedades" class="relative text-gray-400 hover:text-white" data-link>
-                <img src="https://media.baltaanay.org/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
-                <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </a>
-            <a href="/my/home" class="w-7 h-7 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
-                <img src="https://media.baltaanay.org/web/image/793-902e5b33/Search%20%282%29.png" alt="Usuario" class="w-full h-full object-cover" loading="lazy">
-            </a>
+<!-- Área principal (ahora ocupa todo el viewport) -->
+<div class="main-area">
+    <!-- Header + Filtros - Contenedor unificado para sticky -->
+    <div class="header-container" id="headerContainer">
+        <!-- Header -->
+        <header id="main-header">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center gap-2" data-link>
+                    <img src="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg object-cover" loading="lazy">
+                    <span class="text-lg sm:text-xl font-bold text-white">Balta Media</span>
+                </a>
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <a href="/novedades" class="relative text-gray-400 hover:text-white" data-link>
+                        <img src="https://media.baltaanay.org/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
+                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </a>
+                    <a href="/my/home" class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
+                        <img src="https://media.baltaanay.org/web/image/793-902e5b33/Search%20%282%29.png" alt="Usuario" class="w-full h-full object-cover" loading="lazy">
+                    </a>
+                </div>
+            </div>
+        </header>
+        <!-- Filtros / categorías -->
+        <div id="category-filters">
+            <div class="overflow-x-auto no-scrollbar">
+                <div class="flex items-center gap-2 sm:gap-3" id="category-pills"></div>
+            </div>
         </div>
     </div>
-</header>
 
-<!-- BARRA DE CATEGORÍAS MÓVIL -->
-<div id="category-filters">
-    <div class="overflow-x-auto no-scrollbar">
-        <div class="flex items-center gap-2" id="category-pills"></div>
-    </div>
+    <!-- Contenido con scroll principal -->
+    <main id="content"></main>
 </div>
 
-<!-- CONTENEDOR PRINCIPAL MÓVIL -->
-<main id="content">
-    <!-- Aquí se inyecta el contenido dinámico -->
-</main>
+<!-- Reproductor flotante (estructura vacía, player.js lo llena) -->
+<div id="floating-player" class="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-[#333] p-3 flex items-center justify-between z-[10000] backdrop-blur hidden"></div>
 
-<!-- BARRA INFERIOR MÓVIL -->
-<nav class="bottom-bar-mobile" id="bottomBarMobile">
-    <a href="/" class="bottom-bar-item" data-link id="navHome">
-        <img src="https://media.baltaanay.org/web/image/798-1b947c8d/Home%20%282%29.webp" alt="Inicio" loading="lazy">
-        <span>Inicio</span>
-    </a>
-    <a href="/buscar" class="bottom-bar-item" data-link id="navSearch">
-        <img src="https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp" alt="Buscar" loading="lazy">
-        <span>Buscar</span>
-    </a>
-    <a href="/subir" class="bottom-bar-item" data-link id="navUpload">
-        <img src="https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp" alt="Subir" loading="lazy">
-        <span>Subir</span>
-    </a>
-    <a href="https://www.baltaanay.org/solicitud" class="bottom-bar-item" id="navRequest">
-        <img src="https://www.baltaanay.org/web/image/922-f3d79ca9/xhbalta-aula.png" alt="Solicitar" loading="lazy">
-        <span>Solicitar</span>
-    </a>
-    <a href="/my/home" class="bottom-bar-item" data-link id="navProfile">
-        <img src="https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png" alt="Perfil" loading="lazy">
-        <span>Perfil</span>
-    </a>
-</nav>
-
-<!-- Contenedor para el reproductor universal (player.js lo llenará) -->
-<div id="playerUniversal"></div>
-
-<!-- BOTÓN FLOTANTE PARA REPRODUCTOR -->
-<button id="openPlayerBtn" onclick="window.togglePlayer ? window.togglePlayer() : (window.updatePlayerVisibility ? window.updatePlayerVisibility(true) : null)" 
-        class="mobile-fab lg:hidden">
-    <img src="https://nikichitonjes-home.odoo.com/web/image/478-0e3df8d3/reanudar.gif" alt="Reproductor" class="w-6 h-6">
-</button>
-
-<!-- MODAL DE ERROR -->
+<!-- Modal de error -->
 <div id="errorModal" class="fixed inset-0 z-[10000] flex items-center justify-center hidden" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
-    <div class="bg-[#1e1e2f] rounded-2xl max-w-md w-full p-6 border border-white/10 shadow-2xl mx-4">
+    <div class="bg-[#1e1e2f] rounded-2xl max-w-md w-full p-6 border border-white/10 shadow-2xl">
         <h3 class="text-xl font-bold text-white mb-3" id="errorModalTitle">Error</h3>
         <p class="text-gray-300 mb-6" id="errorModalMessage"></p>
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col sm:flex-row gap-3 justify-end">
             <a href="https://www.baltaanay.org/contactus" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-semibold text-center">Reportar problema</a>
             <a href="https://www.baltaanay.org/solicitar" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-semibold text-center">Solicitar</a>
             <button id="closeErrorModal" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm font-semibold">Cerrar</button>
@@ -250,251 +126,194 @@
     </div>
 </div>
 
-<!-- SCRIPT DE LA BARRA INFERIOR MÓVIL (sin cambios) -->
+<!-- BARRA INFERIOR MÓVIL -->
 <script>
 (function() {
-    const BOTTOMBAR_CONFIG = {
-        HEIGHT: '60px',
-        ACTIVE_COLOR: 'rgba(255,255,255,0.15)'
-    };
+  // ==========================================================================
+  // CONFIGURACIÓN BARRA INFERIOR
+  // ==========================================================================
+  const BOTTOMBAR_CONFIG = {
+    BREAKPOINT: 768, // px - solo visible en móvil
+    HEIGHT: '60px',
+    BACKGROUND: '#0F0F0F',
+    Z_INDEX: 950
+  };
 
-    function setActiveBottomItem() {
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.bottom-bar-item').forEach(item => {
-            const href = item.getAttribute('href');
-            item.classList.toggle('active', 
-                href === currentPath || 
-                (href === '/' && currentPath === '/') ||
-                (href === '/buscar' && currentPath === '/buscar')
-            );
-        });
+  // ==========================================================================
+  // ESTILOS EXCLUSIVOS BARRA INFERIOR
+  // ==========================================================================
+  const bottomBarStyles = `
+    /* ===== BARRA INFERIOR MÓVIL ===== */
+    .bottom-bar-mobile {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: ${BOTTOMBAR_CONFIG.HEIGHT};
+      background: ${BOTTOMBAR_CONFIG.BACKGROUND};
+      color: #fff;
+      z-index: ${BOTTOMBAR_CONFIG.Z_INDEX};
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
     }
-
-    function adjustForBottomBar() {
-        document.body.style.paddingBottom = BOTTOMBAR_CONFIG.HEIGHT;
-        const player = document.querySelector('#playerUniversal');
-        if (player) {
-            player.style.bottom = BOTTOMBAR_CONFIG.HEIGHT;
-        }
+    /* Mostrar solo en móvil */
+    @media (min-width: ${BOTTOMBAR_CONFIG.BREAKPOINT + 1}px) {
+      .bottom-bar-mobile {
+        display: none !important;
+      }
     }
-
-    function initBottomBar() {
-        adjustForBottomBar();
-        setActiveBottomItem();
-        console.log('✅ Barra inferior móvil inicializada');
+    /* Items de navegación */
+    .bottom-bar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 11px;
+      gap: 4px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      flex: 1;
+      max-width: 80px;
     }
+    .bottom-bar-item.active {
+      color: white;
+      background: rgba(255,255,255,0.15);
+    }
+    .bottom-bar-item img {
+      width: 24px;
+      height: 24px;
+      filter: brightness(1.2);
+    }
+    .bottom-bar-item span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    /* Ajuste para el reproductor y contenido */
+    body {
+      margin-bottom: 0;
+      transition: margin-bottom 0.3s ease;
+    }
+    @media (max-width: ${BOTTOMBAR_CONFIG.BREAKPOINT}px) {
+      body.with-bottom-bar {
+        margin-bottom: ${BOTTOMBAR_CONFIG.HEIGHT};
+      }
+      #floating-player {
+        bottom: ${BOTTOMBAR_CONFIG.HEIGHT} !important;
+      }
+    }
+  `;
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initBottomBar);
+  // ==========================================================================
+  // FUNCIONES BARRA INFERIOR
+  // ==========================================================================
+  function injectBottomBarStyles() {
+    if (document.getElementById('bottom-bar-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'bottom-bar-styles';
+    style.textContent = bottomBarStyles;
+    document.head.appendChild(style);
+  }
+
+  function renderBottomBar() {
+    const bar = document.createElement('nav');
+    bar.className = 'bottom-bar-mobile';
+    bar.id = 'bottomBarMobile';
+    bar.setAttribute('aria-label', 'Navegación móvil');
+
+    const items = [
+      { href: '/', icon: 'https://media.baltaanay.org/web/image/798-1b947c8d/Home%20%282%29.webp', label: 'Home' },
+      { href: '/buscar', icon: 'https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp', label: 'Explorar' },
+      { href: '/subir', icon: 'https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp', label: 'Subir' },
+      { href: 'https://www.baltaanay.org/solicitud', icon: 'https://www.baltaanay.org/web/image/922-f3d79ca9/xhbalta-aula.png', label: 'Solicitar' },
+      { href: '/my/home', icon: 'https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png', label: 'Perfil' }
+    ];
+
+    items.forEach(item => {
+      const link = document.createElement('a');
+      link.href = item.href;
+      link.className = 'bottom-bar-item';
+      link.innerHTML = `
+        <img src="${item.icon}" alt="${item.label}" loading="lazy">
+        <span>${item.label}</span>
+      `;
+      bar.appendChild(link);
+    });
+
+    return bar;
+  }
+
+  function setActiveBottomItem() {
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.bottom-bar-item').forEach(item => {
+      const href = item.getAttribute('href');
+      item.classList.toggle('active', href === currentPath || (href === '/' && currentPath === '/'));
+    });
+  }
+
+  function adjustForBottomBar(visible) {
+    if (visible) {
+      document.body.classList.add('with-bottom-bar');
     } else {
-        initBottomBar();
+      document.body.classList.remove('with-bottom-bar');
+    }
+  }
+
+  function removeExistingBottomBar() {
+    const oldBar = document.querySelector('.bottom-bar-mobile');
+    if (oldBar) oldBar.remove();
+    adjustForBottomBar(false);
+  }
+
+  function initBottomBar() {
+    const isMobile = window.matchMedia(`(max-width: ${BOTTOMBAR_CONFIG.BREAKPOINT}px)`).matches;
+    
+    removeExistingBottomBar();
+    
+    if (!isMobile) {
+      adjustForBottomBar(false);
+      return;
     }
 
-    document.addEventListener('spa-navigation', setActiveBottomItem);
-    window.addEventListener('popstate', setActiveBottomItem);
+    injectBottomBarStyles();
+    
+    const bar = renderBottomBar();
+    document.body.appendChild(bar);
+    
+    setActiveBottomItem();
+    adjustForBottomBar(true);
+  }
 
-    window.bottomBarAPI = {
-        setActive: setActiveBottomItem,
-        refresh: adjustForBottomBar
-    };
+  // Inicializar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBottomBar);
+  } else {
+    initBottomBar();
+  }
+
+  // Escuchar cambios de tamaño
+  const mql = window.matchMedia(`(max-width: ${BOTTOMBAR_CONFIG.BREAKPOINT}px)`);
+  if (mql.addEventListener) {
+    mql.addEventListener('change', initBottomBar);
+  } else {
+    mql.addListener(initBottomBar);
+  }
+
+  // Actualizar activo en SPA / navegación
+  window.addEventListener('popstate', setActiveBottomItem);
+  document.addEventListener('spa-navigation', setActiveBottomItem);
 })();
 </script>
 
-<!-- SCRIPT PARA CATEGORÍAS MÓVIL (adaptado) -->
-<script>
-const CATEGORIES = [
-    "Todos",
-    "Derecho",
-    "Física",
-    "Matemáticas",
-    "Historia",
-    "Filosofía",
-    "Economía",
-    "Sociales",
-    "Arte",
-    "Literatura",
-    "Cine",
-    "Documentales",
-    "Naturales",
-    "Tecnología",
-    "Otras"
-];
-
-function renderCategoryPills(activeCat = 'Todos') {
-    const container = document.getElementById('category-pills');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    CATEGORIES.forEach(cat => {
-        const isActive = cat === activeCat;
-        const btn = document.createElement('button');
-        btn.className = `whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold transition-all flex-shrink-0 ${
-            isActive ? 'bg-white text-black' : 'bg-white/10 text-gray-300 hover:bg-white/20'
-        }`;
-        btn.innerText = cat;
-        
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            let url;
-            if (cat === 'Todos') {
-                url = '/';
-            } else {
-                url = `/categoria/${encodeURIComponent(cat)}`;
-            }
-            
-            window.history.pushState(null, null, url);
-            window.dispatchEvent(new PopStateEvent('popstate'));
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-        
-        container.appendChild(btn);
-    });
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => renderCategoryPills());
-} else {
-    renderCategoryPills();
-}
-
-document.addEventListener('spa-navigation', () => {
-    const path = window.location.pathname;
-    let activeCat = 'Todos';
-    if (path.startsWith('/categoria/')) {
-        activeCat = decodeURIComponent(path.replace('/categoria/', ''));
-    }
-    renderCategoryPills(activeCat);
-});
-</script>
-
-<!-- SCRIPT PRINCIPAL MÓVIL (CORREGIDO: normalización de ruta y orden de búsqueda) -->
-<script type="module">
-import { renderFeed, renderGrid, renderEpisodio, renderSerie } from './show.js';
-import { getEpisodioByDetailUrl, getSerieByUrl } from './episodios.js';
-import './player.js'; // Carga el reproductor
-
-const PAGES = [
-    { path: '/biblioteca', module: () => import('./biblioteca.js') },
-    { path: '/explorar', module: () => import('./explorar.js') },
-    { path: '/buscar', module: () => import('./buscar.js') }
-];
-
-// 🟢 NORMALIZACIÓN DE RUTA (clave para que funcionen las URLs directas)
-function normalizePath(path) {
-    let normalized = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
-    try {
-        normalized = decodeURIComponent(normalized);
-    } catch (e) {}
-    return normalized;
-}
-
-async function router() {
-    const path = window.location.pathname;
-    const normalizedPath = normalizePath(path);
-    const searchParams = new URLSearchParams(window.location.search);
-    const container = document.getElementById('content');
-
-    try {
-        // 1. Ruta raíz
-        if (normalizedPath === '/') {
-            renderFeed(container);
-            document.title = 'Balta Media · Inicio';
-        } else {
-            // 2. Páginas especiales
-            const page = PAGES.find(p => p.path === normalizedPath);
-            if (page) {
-                const module = await page.module();
-                if (page.path === '/buscar' && searchParams.has('q')) {
-                    module.renderSearch?.(container, searchParams.get('q'));
-                } else {
-                    module.render(container);
-                }
-                document.title = `${normalizedPath.slice(1)} · Balta Media`;
-            }
-            // 3. Categoría
-            else if (normalizedPath.startsWith('/categoria/')) {
-                const cat = decodeURIComponent(normalizedPath.replace('/categoria/', ''));
-                const buscarModule = await import('./buscar.js');
-                if (buscarModule.renderCategory) {
-                    buscarModule.renderCategory(container, cat);
-                } else {
-                    const { DATA } = await import('./show.js');
-                    const categoryEpisodes = DATA.filter(ep => ep.categories && ep.categories.includes(cat));
-                    renderGrid(container, categoryEpisodes, cat);
-                }
-                document.title = `${cat} · Balta Media`;
-            }
-            // 4. Serie (prioridad sobre episodio)
-            else {
-                const serie = getSerieByUrl(normalizedPath);
-                if (serie) {
-                    renderSerie(container, normalizedPath);
-                    document.title = `${serie.titulo_serie} · Balta Media`;
-                    return;
-                }
-
-                // 5. Episodio
-                const episodio = getEpisodioByDetailUrl(normalizedPath);
-                if (episodio) {
-                    renderEpisodio(container, episodio.id);
-                    document.title = `${episodio.title} · Balta Media`;
-                    return;
-                }
-
-                // 6. Novedades
-                else if (normalizedPath === '/novedades') {
-                    const { DATA } = await import('./show.js');
-                    const sorted = [...DATA].sort((a, b) => new Date(b.date) - new Date(a.date));
-                    renderGrid(container, sorted.slice(0, 20), 'Novedades');
-                    document.title = 'Novedades · Balta Media';
-                }
-                // 7. 404
-                else {
-                    const module404 = await import('./404.js');
-                    module404.render(container);
-                    document.title = '404 · Balta Media';
-                }
-            }
-        }
-
-        // Actualizar barra inferior y categorías
-        document.dispatchEvent(new Event('spa-navigation'));
-        
-    } catch (error) {
-        console.error('Error en router:', error);
-        container.innerHTML = '<div class="p-4 text-center text-red-500">Error al cargar la página</div>';
-    }
-}
-
-// Eventos de navegación
-document.addEventListener('click', e => {
-    const link = e.target.closest('a[data-link]');
-    if (link) {
-        e.preventDefault();
-        const href = link.getAttribute('href');
-        window.history.pushState(null, null, href);
-        router();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-});
-
-window.addEventListener('popstate', router);
-
-// Iniciar
-router();
-
-console.log('✅ Modo móvil con router corregido');
-</script>
-
-<!-- Script para cerrar modal de error -->
-<script>
-document.getElementById('closeErrorModal')?.addEventListener('click', () => {
-    document.getElementById('errorModal').classList.add('hidden');
-});
-</script>
+<!-- Cargar el router principal (main.js) -->
+<script type="module" src="/main.js"></script>
 
 </body>
 </html>
