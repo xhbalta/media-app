@@ -1,5 +1,5 @@
 // buscar.js - Página de búsqueda profesional con vistas integradas
-import { getEpisodiosConSerie, series } from 'https://podcast.tenam.site/episodios.js';
+import { getEpisodiosConSerie, series } from 'https://baltaestudiante.github.io/menu/episodios.js';
 import { createGridCard } from './show.js';
 
 // ---------- CONSTANTES ----------
