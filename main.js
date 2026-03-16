@@ -2,17 +2,6 @@
 import { DATA, renderFeed, renderGrid, renderEpisodio, renderSerie, renderCategoryPills } from './show.js';
 import { getEpisodioByDetailUrl, getSerieByUrl } from './episodios.js';
 import './player.js';
-function updateCanonicalAndAlternate() {
-  const path = window.location.pathname;
-  const canonical = document.getElementById('canonicalLink');
-  const alternate = document.getElementById('alternateLink');
-  if (canonical) {
-    canonical.href = `https://media.baltaanay.org${path}`;
-  }
-  if (alternate) {
-    alternate.href = `https://app.baltaanay.org${path}`;
-  }
-}
 
 const PAGES = [
     { path: '/biblioteca', module: () => import('./biblioteca.js'), header: true },
@@ -124,7 +113,7 @@ async function router() {
         }
 
         updateActiveCategory();
-      updateCanonicalAndAlternate();
+      
         document.dispatchEvent(new Event('spa-navigation'));
 
         if (window.sidebarAPI) {
