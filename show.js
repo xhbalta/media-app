@@ -1,4 +1,4 @@
-// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN COMPLETA CON TRY/CATCH
+// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN COMPLETA Y CORREGIDA
 import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from './episodios.js';
 import { userStorage } from './storage.js';
 import './player.js';
@@ -104,26 +104,25 @@ export function createListItem(ep, idx) {
     const inPlaylist = userStorage.playlist.has(ep.id);
     const addIcon = inPlaylist ? ICONS.added : ICONS.add;
 
+    // List item con diseño horizontal: cover, título+autor a la par, y botón añadir al final
     return `
-        <div class="list-item group flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors w-full min-h-[60px]"
+        <div class="list-item group flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors w-full"
              data-episodio-id="${ep.id}">
             
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-                <span class="text-gray-400 font-semibold w-6 text-center text-sm flex-shrink-0">${idx + 1}</span>
-                
-                <div class="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-md overflow-hidden cursor-pointer"
-                     onclick="window.goToDetail('${ep.detailUrl}')">
-                    <img src="${ep.coverUrl}" class="w-full h-full object-cover" loading="lazy">
-                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                         onclick="window.handlePlay(event, '${ep.id}'); return false;">
-                        <img src="${ICONS.play}" class="w-5 h-5">
-                    </div>
+            <span class="text-gray-400 font-semibold w-6 text-center text-sm flex-shrink-0">${idx + 1}</span>
+            
+            <div class="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-md overflow-hidden cursor-pointer"
+                 onclick="window.goToDetail('${ep.detailUrl}')">
+                <img src="${ep.coverUrl}" class="w-full h-full object-cover" loading="lazy">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                     onclick="window.handlePlay(event, '${ep.id}'); return false;">
+                    <img src="${ICONS.play}" class="w-5 h-5">
                 </div>
-                
-                <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-medium text-white truncate group-hover:text-blue-400">${ep.title}</h4>
-                    <p class="text-xs text-gray-400 truncate">${ep.author}</p>
-                </div>
+            </div>
+            
+            <div class="flex-1 min-w-0 cursor-pointer" onclick="window.goToDetail('${ep.detailUrl}')">
+                <h4 class="text-sm font-medium text-white truncate group-hover:text-blue-400">${ep.title}</h4>
+                <p class="text-xs text-gray-400 truncate">${ep.author}</p>
             </div>
             
             <button onclick="window.handleAdd(event, '${ep.id}'); return false;"
@@ -169,6 +168,7 @@ function createCarousel(title, type, items, categoryContext) {
             `</div>`;
     } else if (type === 'list') {
         content = `<div id="${id}" class="flex gap-6 sm:gap-10 overflow-x-auto no-scrollbar scroll-smooth pb-6 snap-x snap-mandatory">`;
+        // Agrupar de 4 en 4 para formar columnas en el carrusel
         for (let i = 0; i < items.length; i += 4) {
             content += `<div class="flex flex-col min-w-[320px] sm:min-w-[380px] md:min-w-[420px] snap-start space-y-2 md:space-y-3">` +
                 (items[i] ? createListItem(items[i], i) : '<div class="h-16"></div>') +
@@ -187,13 +187,15 @@ function createCarousel(title, type, items, categoryContext) {
             items.map(ep => createStandardCard(ep)).join('') +
             `</div>`;
     }
-    const verTodoHandler = categoryContext !== 'Todos'
+    // Título clicable: redirige a la categoría correspondiente o al feed principal si es "Todos"
+    const titleClickHandler = categoryContext !== 'Todos'
         ? `window.handleCategoryClick('${categoryContext}')`
         : `window.location.href='/'`;
+    // Botón "Ver todo" también clicable a lo mismo
     return `<section class="carousel-wrapper relative group/section mb-8 sm:mb-12">
         <div class="flex items-end justify-between mb-3 sm:mb-5 px-1">
-            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition-colors cursor-default">${title}</h2>
-            <button onclick="${verTodoHandler}" class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">Ver todo</button>
+            <h2 onclick="${titleClickHandler}" class="text-xl sm:text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition-colors cursor-pointer">${title}</h2>
+            <button onclick="${titleClickHandler}" class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">Ver todo</button>
         </div>
         <div class="relative">
             <div class="nav-btn left" onclick="document.getElementById('${id}').scrollLeft -= 600"><button>❮</button></div>
@@ -240,10 +242,11 @@ function createSeriesCarousel() {
         </div>`;
     });
     content += `</div>`;
+    // Título clicable a una página que muestre todas las series (si existiera) o a una categoría genérica
     return `<section class="carousel-wrapper relative group/section mb-8 sm:mb-12">
         <div class="flex items-end justify-between mb-3 sm:mb-5 px-1">
-            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition-colors cursor-default">Series y Cursos Académicos</h2>
-            <button class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">Ver todo</button>
+            <h2 onclick="window.location.href='/series'" class="text-xl sm:text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition-colors cursor-pointer">Series y Cursos Académicos</h2>
+            <button onclick="window.location.href='/series'" class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">Ver todo</button>
         </div>
         <div class="relative">
             <div class="nav-btn left" onclick="document.getElementById('${id}').scrollLeft -= 600"><button>❮</button></div>
@@ -253,7 +256,7 @@ function createSeriesCarousel() {
     </section>`;
 }
 
-// ---------- VISTAS DE DETALLE (protegidas con try/catch) ----------
+// ---------- VISTAS DE DETALLE ----------
 export function renderEpisodio(container, episodioId) {
     try {
         const ep = DATA.find(e => e.id === episodioId);
