@@ -1,4 +1,4 @@
-// main.js - Router principal con soporte completo para SPA (versión corregida y mejorada)
+// main.js - Router principal con soporte completo para SPA (versión corregida)
 import { DATA, renderFeed, renderGrid, renderEpisodio, renderSerie, renderCategoryPills } from './show.js';
 import { getEpisodioByDetailUrl, getSerieByUrl } from './episodios.js';
 import './player.js';
@@ -42,12 +42,13 @@ async function router() {
     try {
         if (categoryFilters) categoryFilters.classList.remove('hidden');
 
-        // 1. Páginas estáticas
+        // 1. Ruta raíz
         if (normalizedPath === '/') {
             renderFeed(container);
             document.title = 'Balta Media · Conocimiento en acción';
         }
         else {
+            // 2. Páginas especiales
             const page = PAGES.find(p => p.path === normalizedPath);
             if (page) {
                 const module = await page.module();
@@ -60,7 +61,7 @@ async function router() {
                 }
                 document.title = `${normalizedPath.slice(1).charAt(0).toUpperCase() + normalizedPath.slice(2)} · Balta Media`;
             }
-            // 2. Categorías
+            // 3. Categoría
             else if (normalizedPath.startsWith('/categoria/')) {
                 const cat = decodeURIComponent(normalizedPath.replace('/categoria/', ''));
                 const buscarModule = await import('./buscar.js');
@@ -72,7 +73,7 @@ async function router() {
                 }
                 document.title = `${cat} · Balta Media`;
             }
-            // 3. Serie (prioridad sobre episodio)
+            // 4. Serie (prioridad sobre episodio)
             else {
                 const serie = getSerieByUrl(normalizedPath);
                 if (serie) {
@@ -81,7 +82,7 @@ async function router() {
                     return;
                 }
 
-                // 4. Episodio
+                // 5. Episodio
                 const episodio = getEpisodioByDetailUrl(normalizedPath);
                 if (episodio) {
                     renderEpisodio(container, episodio.id);
@@ -89,7 +90,7 @@ async function router() {
                     return;
                 }
 
-                // 5. Novedades
+                // 6. Novedades
                 else if (normalizedPath === '/novedades') {
                     const sorted = [...DATA].sort((a, b) => new Date(b.date) - new Date(a.date));
                     const recientes = sorted.slice(0, 20);
@@ -98,7 +99,7 @@ async function router() {
                     renderGrid(container, combined, 'Novedades y Recomendaciones');
                     document.title = 'Novedades · Balta Media';
                 }
-                // 6. 404
+                // 7. 404
                 else {
                     const module404 = await import('./404.js');
                     module404.render(container);
