@@ -1,4 +1,4 @@
-// player.js - Reproductor Universal Móvil (Full Features) - Versión Mejorada
+// player.js - Reproductor Universal Móvil (Versión Profesional)
 (function() {
   // Evitar múltiples instancias
   if (document.getElementById('playerUniversal')) return;
@@ -6,82 +6,84 @@
   // ==================== ESTILOS ====================
   const style = document.createElement('style');
   style.textContent = `
-    body { margin: 0; font-family: Arial, sans-serif; background: #111 !important; color: white !important; }
-    .player-universal { display: none; position: fixed; bottom: 0; width: 100%; z-index: 1001; }
-    .player-expanded {
-      background: #333 !important;
-      height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
+    /* Variables y reset */
+    #playerUniversal * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    #playerUniversal {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Contenedor principal */
+    .player-universal {
+      display: none; /* se muestra al cargar un medio */
       position: fixed;
-      top: env(safe-area-inset-top);
+      bottom: 0;
       left: 0;
-      right: 0;
-      overflow-y: auto;
-      z-index: 1001;
-    }
-    .content-wrapper {
-      display: flex;
-      flex-direction: column;
       width: 100%;
-      max-width: 300px;
-      flex-grow: 1;
+      z-index: 9999;
     }
-    .complex2, .complex3 { width: 100%; }
+    /* ===== MODO MINIMIZADO ===== */
     .player-minimized {
-      background: #222;
-      height: 70px;
-      display: flex;
-      align-items: center;
-      padding: 8px 12px;
-      box-sizing: border-box;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(10px);
+      color: white;
+      border-radius: 16px 16px 0 0;
+      box-shadow: 0 -8px 25px rgba(0,0,0,0.5);
+      overflow: hidden;
       position: relative;
-      cursor: pointer;
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
     }
-    .player-hidden { display: none; }
+    .minimized-progress {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      cursor: pointer;
+    }
+    .minimized-progress-bar {
+      height: 100%;
+      background: #ec5b13;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
     .minimized-content {
       display: flex;
       align-items: center;
-      width: 100%;
-      height: 100%;
+      padding: 8px 16px;
+      gap: 12px;
     }
     .minimized-cover {
-      flex: 0 0 50px;
-      margin-right: 12px;
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #333;
+      flex-shrink: 0;
     }
     .minimized-cover img {
-      width: 50px;
-      height: 50px;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      border-radius: 6px;
     }
-    .minimized-title-container {
+    .minimized-info {
       flex: 1;
-      overflow: hidden;
-      margin-right: 10px;
+      min-width: 0;
     }
     .minimized-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: white;
+      font-weight: 600;
+      font-size: 14px;
       white-space: nowrap;
-      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .minimized-title.scrolling {
-      display: inline-block;
-      animation: scrollMinimizedTitle 20s linear infinite;
-    }
-    @keyframes scrollMinimizedTitle {
-      0%, 10% { transform: translateX(0); }
-      90% { transform: translateX(-100%); }
-      90.01% { transform: translateX(100%); }
-      100% { transform: translateX(0); }
+    .minimized-author {
+      font-size: 12px;
+      opacity: 0.7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .minimized-controls {
       display: flex;
@@ -92,60 +94,91 @@
     .minimized-controls button {
       background: transparent;
       border: none;
-      padding: 0;
-      margin: 0;
+      color: white;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 4px;
+    }
+    .minimized-controls button svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+      stroke: currentColor;
+    }
+    .minimized-controls button.active svg {
+      color: #ec5b13;
+      fill: #ec5b13;
+    }
+    .minimized-controls .play-pause-mini {
+      background: #ec5b13;
       border-radius: 50%;
-      -webkit-tap-highlight-color: transparent;
+      width: 36px;
+      height: 36px;
     }
-    .minimized-controls button img {
-      width: 28px;
-      height: 28px;
-      user-select: none;
+    .minimized-controls .play-pause-mini svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+
+    /* ===== MODO EXPANDIDO ===== */
+    .player-expanded {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(180deg, #4b2b1a 0%, #000000 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      z-index: 10000;
+      overflow-y: auto;
+      padding: 20px 16px 30px;
+      box-sizing: border-box;
+    }
+    /* capa adicional de gradiente */
+    .expanded-bg-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.8) 100%);
       pointer-events: none;
+      z-index: -1;
     }
-    .top-controls {
+    .expanded-header {
       display: flex;
       justify-content: space-between;
-      width: 100%;
-      max-width: 300px;
-      margin-bottom: 10px;
+      align-items: center;
+      margin-bottom: 20px;
     }
     .media-mode-toggle {
-      background: #444;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 12px;
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
       display: flex;
-      align-items: center;
-      white-space: nowrap;
-      transition: all 0.3s ease;
-      opacity: 1;
+      background: rgba(34,34,34,0.8);
+      border-radius: 30px;
+      padding: 4px;
     }
-    .media-mode-toggle.disabled {
-      opacity: 0.5;
+    .media-mode-toggle button {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      font-weight: 600;
+      font-size: 14px;
+      padding: 6px 16px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .media-mode-toggle button.active {
       background: #333;
-      cursor: not-allowed;
-      pointer-events: none;
+      color: white;
     }
-    .media-mode-toggle.audio.active-left {
-      background: linear-gradient(to right, #ff0000 50%, #444 50%);
-    }
-    .media-mode-toggle.video.active-right {
-      background: linear-gradient(to right, #444 50%, #ff0000 50%);
-    }
-    .mode-left, .mode-right { padding: 0 8px; transition: color 0.3s ease; }
-    .media-mode-toggle.disabled .mode-right { color: #888; }
-    .media-mode-toggle:not(.disabled) .mode-left.active,
-    .media-mode-toggle:not(.disabled) .mode-right.active { font-weight: bold; color: white; }
     .minimize-btn {
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0,0,0,0.5);
       border: none;
       border-radius: 50%;
       width: 40px;
@@ -154,891 +187,664 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      z-index: 1003;
+      color: white;
     }
-    .minimize-btn img { width: 24px; height: 24px; }
-    .media-container {
+    .minimize-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: white;
+    }
+
+    .expanded-cover {
+      max-width: 300px;
+      margin: 0 auto 24px;
       width: 100%;
-      background: #000;
-      position: relative;
+      aspect-ratio: 1/1;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+    .expanded-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .expanded-info {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .expanded-info h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      padding: 0 20px;
+    }
+    .expanded-info p {
+      font-size: 16px;
+      opacity: 0.8;
+    }
+    .add-to-playlist {
+      margin-top: 8px;
+      background: transparent;
+      border: none;
+      color: white;
       cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 10px;
-      aspect-ratio: 16 / 9;
-      -webkit-tap-highlight-color: transparent;
     }
-    .media-container video, .media-container img {
+    .add-to-playlist svg {
+      width: 28px;
+      height: 28px;
+      stroke: white;
+    }
+
+    .expanded-progress {
+      margin-bottom: 20px;
+    }
+    .progress-bar {
       width: 100%;
-      height: 100%;
-      object-fit: contain;
-      z-index: 1000;
-      border-radius: 10px;
+      height: 5px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
     }
-    .overlay-gradient {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
+    .progress-fill {
       height: 100%;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.3) 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 1001;
+      background: #ec5b13;
+      width: 0%;
+      border-radius: 3px;
+      position: relative;
     }
-    .media-container.show-controls .overlay-gradient { opacity: 1; }
-    .media-controls-center { display: flex; justify-content: center; align-items: center; flex-grow: 1; }
-    .media-controls-bottom { display: flex; justify-content: flex-end; padding: 10px; }
-    .fullscreen-controls {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: none;
-      flex-direction: column;
-      justify-content: space-between;
-      z-index: 1002;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.5) 100%);
-    }
-    .fullscreen-title { color: white; font-size: 18px; font-weight: bold; text-align: center; padding: 10px; background: transparent; }
-    .fullscreen-center-controls { display: flex; justify-content: center; align-items: center; gap: 20px; }
-    .fullscreen-bottom-bar { display: flex; align-items: center; padding: 10px; background: transparent; }
-    .video-progress-container-fullscreen { flex-grow: 1; height: 6px; background: #555; border-radius: 3px; position: relative; cursor: pointer; }
-    .progress-bar-fullscreen { height: 100%; background: #ff0000; width: 0; border-radius: 3px; position: relative; }
-    .progress-knob-fullscreen {
-      position: absolute;
-      right: -8px;
-      top: 50%;
-      width: 16px;
-      height: 16px;
-      background: #ff0000;
+    .progress-handle {
+      width: 14px;
+      height: 14px;
+      background: white;
       border-radius: 50%;
-      transform: translateY(-50%) scale(0);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease, opacity 0.2s ease;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .video-progress-container-fullscreen:hover .progress-knob-fullscreen,
-    .video-progress-container-fullscreen.dragging .progress-knob-fullscreen { transform: translateY(-50%) scale(1); opacity: 1; }
-    #currentTimeFullscreen, #durationFullscreen { color: white; font-size: 12px; margin: 0 5px; }
-    .seek-indicator-left, .seek-indicator-right {
       position: absolute;
       top: 50%;
+      right: -7px;
       transform: translateY(-50%);
-      background: rgba(0,0,0,0.7);
-      padding: 10px;
-      border-radius: 5px;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 5px;
       opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 1003;
+      transition: opacity 0.2s;
     }
-    .seek-indicator-left { left: 10px; }
-    .seek-indicator-right { right: 10px; }
-    .seek-indicator-left.show, .seek-indicator-right.show { opacity: 1; }
-    .seek-indicator-left img, .seek-indicator-right img { width: 32px; height: 32px; }
-    .volume-btn, .fullscreen-btn, .control-btn {
-      background: rgba(0,0,0,0.5);
-      border: none;
-      border-radius: 50%;
-      width: 48px;
-      height: 48px;
+    .progress-bar:hover .progress-handle {
+      opacity: 1;
+    }
+    .time-info {
       display: flex;
-      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-top: 6px;
+      opacity: 0.8;
+    }
+
+    .expanded-controls {
+      display: flex;
       justify-content: center;
-      cursor: pointer;
-      z-index: 1001;
-      transition: background 0.2s;
-      -webkit-tap-highlight-color: transparent;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 24px;
     }
-    .volume-btn img, .fullscreen-btn img, .control-btn img { width: 32px; height: 32px; }
-    .video-progress-container-expanded {
-      width: 100%;
-      height: 6px;
-      background: #555;
-      border-radius: 3px;
-      position: relative;
-      cursor: pointer;
-      transition: height 0.2s ease;
-      margin: 2px 0;
-    }
-    .video-progress-container-expanded:hover { height: 8px; }
-    .progress-bar-expanded { height: 100%; background: #ff0000; width: 0; border-radius: 3px; position: relative; transition: width 0.1s ease; }
-    .progress-knob-expanded {
-      position: absolute;
-      right: -8px;
-      top: 50%;
-      width: 16px;
-      height: 16px;
-      background: #ff0000;
-      border-radius: 50%;
-      transform: translateY(-50%) scale(0);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease, opacity 0.2s ease;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .video-progress-container-expanded:hover .progress-knob-expanded,
-    .video-progress-container-expanded.dragging .progress-knob-expanded { transform: translateY(-50%) scale(1); opacity: 1; }
-    .progress-bar-expanded::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 100%;
-      width: 100%;
-      background: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, transparent 100%);
-      border-radius: 3px;
-    }
-    .video-progress-container-minimized {
-      width: 100%;
-      height: 6px;
-      background: #555;
-      border-radius: 3px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      margin: 0;
-      cursor: pointer;
-      transition: height 0.2s ease;
-    }
-    .video-progress-container-minimized:hover { height: 8px; }
-    .progress-bar-minimized { height: 100%; background: #ff0000; width: 0; border-radius: 3px; position: relative; transition: width 0.1s ease; }
-    .progress-knob-minimized {
-      position: absolute;
-      right: -8px;
-      top: 50%;
-      width: 16px;
-      height: 16px;
-      background: #ff0000;
-      border-radius: 50%;
-      transform: translateY(-50%) scale(0);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease, opacity 0.2s ease;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .video-progress-container-minimized:hover .progress-knob-minimized,
-    .video-progress-container-minimized.dragging .progress-knob-minimized { transform: translateY(-50%) scale(1); opacity: 1; }
-    .progress-bar-minimized::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 100%;
-      width: 100%;
-      background: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, transparent 100%);
-      border-radius: 3px;
-    }
-    .controls { display: flex; justify-content: center; align-items: center; width: 100%; margin: 2px 0; gap: 5px; }
-    .controls button, .minimized-controls button, #minimizeBtn {
+    .expanded-controls button {
       background: transparent;
       border: none;
-      padding: 0;
-      margin: 0;
+      color: white;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    .expanded-controls button svg {
+      width: 30px;
+      height: 30px;
+      stroke: currentColor;
+      fill: currentColor;
+    }
+    .expanded-controls .play-pause-expanded {
+      background: #ec5b13;
       border-radius: 50%;
-      -webkit-tap-highlight-color: transparent;
+      width: 60px;
+      height: 60px;
     }
-    .controls img, .minimized-controls img, .action-buttons img { width: 24px; height: 24px; user-select: none; -webkit-user-select: none; pointer-events: none; }
-    .controls #rewindExpanded img, .controls #forwardExpanded img { width: 35px; height: 35px; }
-    .controls #previousExpanded img, .controls #nextExpanded img { width: 33px; height: 33px; }
-    .controls #playPauseExpanded img { width: 49px; height: 49px; }
-    .minimized-controls #playPauseMinimized img { width: 28px; height: 28px; }
-    #timerIcon, #speedIcon, #previousIcon, #nextIcon { width: 28px; height: 28px; }
-    .episode-info {
+    .expanded-controls .play-pause-expanded svg {
+      width: 30px;
+      height: 30px;
+      fill: white;
+    }
+    .speed-timer {
       display: flex;
-      align-items: center;
-      color: white !important;
-      background: transparent !important;
-      margin: 10px 0 5px 0;
-      cursor: pointer;
-      width: 100%;
-      position: relative;
+      gap: 16px;
+      margin-bottom: 24px;
+      justify-content: center;
     }
-    .left-section { flex: 0 0 50px; }
-    .center-section { flex: 1; overflow: hidden; padding: 0 10px; }
-    .right-section { flex: 0 0 50px; text-align: right; }
-    .episode-info img { width: 40px; height: 40px; z-index: 3; user-select: none; }
-    .episode-info .center-section span { font-size: 18px; font-weight: bold; white-space: nowrap; color: white !important; display: block; }
-    .episode-info .center-section .author { font-size: 14px; font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white !important; }
-    .episode-info .scrolling-title { display: inline-block; animation: scrollTitle 40s linear infinite; }
-    @keyframes scrollTitle { 0%, 20% { transform: translateX(0); } 80% { transform: translateX(-100%); } 80.01% { transform: translateX(100%); } 100% { transform: translateX(0); } }
-    .episode-info #addToPlaylistBtn {
-      background: transparent;
+    .speed-timer button {
+      background: rgba(34,34,34,0.8);
       border: none;
-      border-radius: 5px;
-      padding: 5px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .episode-info #addToPlaylistBtn img { width: 20px; height: 20px; transition: transform 0.2s ease; user-select: none; }
-    .episode-info #addToPlaylistBtn:active img { transform: scale(1.2); }
-    .time-info { display: flex; justify-content: space-between; width: 100%; color: white; margin: 0 0 5px 0; font-size: 12px; }
-    .action-buttons-container { width: 100%; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; margin-bottom: 5px; }
-    .action-buttons-container::-webkit-scrollbar { display: none; }
-    .action-buttons { display: flex; gap: 10px; padding: 5px 0; }
-    .action-btn {
-      background: #444;
       color: white;
-      border: none;
-      border-radius: 15px;
-      padding: 6px 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      white-space: nowrap;
-      min-width: fit-content;
-      transition: transform 0.2s ease;
-    }
-    .action-btn:active { transform: scale(0.95); }
-    .action-btn img { width: 15px; height: 15px; user-select: none; }
-    .action-btn.disabled { opacity: 0.5; cursor: not-allowed; }
-    .action-btn.disabled img { filter: grayscale(1); }
-    .program-container { width: 100%; margin-top: 5px; margin-bottom: 5px; }
-    .full-width-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      background: #666;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .full-width-btn:hover { background: #777; }
-    .full-width-btn img { width: 20px; height: 20px; user-select: none; }
-    .full-width-btn span { margin-left: 10px; font-size: 16px; }
-    .tabs-text { width: 100%; display: flex; justify-content: space-around; margin-top: 5px; margin-bottom: 5px; }
-    .tabs-text a {
-      color: #edebeb;
-      font-weight: bold;
-      text-decoration: none;
-      cursor: pointer;
+      border-radius: 30px;
+      padding: 8px 20px;
       font-size: 14px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      transition: background 0.2s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .tabs-text a:active { background: rgba(255,255,255,0.1); transform: scale(0.95); }
-    .timer-container, .speed-container {
-      position: relative;
+      font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
+      cursor: pointer;
     }
-    .timer-container.active, .speed-container.active { background: #ff0000; border-radius: 5px; padding: 2px; }
-    .speed-container:active, .timer-container:active { transform: scale(0.9); }
-    .panel-container {
-      position: absolute;
+    .speed-timer button svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 24px;
+      scrollbar-width: none;
+    }
+    .action-buttons::-webkit-scrollbar {
+      display: none;
+    }
+    .action-btn {
+      flex: 0 0 auto;
+      background: rgba(34,34,34,0.8);
+      border: none;
+      color: white;
+      border-radius: 30px;
+      padding: 10px 18px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .action-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: currentColor;
+    }
+    .action-btn.active svg {
+      color: #ec5b13;
+      fill: #ec5b13;
+    }
+
+    .highlight-bar {
+      background: rgba(34,34,34,0.8);
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .highlight-bar span {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+    .tabs a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 8px 0;
+      cursor: pointer;
+    }
+    .tabs a.active {
+      color: white;
+      border-bottom: 2px solid #ec5b13;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+    .next-items, .recomendados-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .next-item, .recomendado-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      background: rgba(34,34,34,0.6);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .next-item img, .recomendado-item img {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    .next-item span, .recomendado-item span {
+      font-size: 14px;
+      flex: 1;
+    }
+    .next-item button, .recomendado-item button {
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    .detalles-content {
+      background: rgba(34,34,34,0.6);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .detalles-content h4 {
+      margin-bottom: 8px;
+    }
+    .detalles-content p {
+      font-size: 14px;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    .biblioteca-section {
+      background: rgba(34,34,34,0.6);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .biblioteca-section h4 {
+      margin-bottom: 12px;
+    }
+    .likes-view {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .likes-view .likes-item {
+      flex: 0 0 80px;
+      text-align: center;
+    }
+    .likes-view .likes-item img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+      margin-bottom: 4px;
+    }
+    .likes-view .likes-item span {
+      font-size: 12px;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .playlist-items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .playlist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+    }
+    .playlist-item img {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    .playlist-item span {
+      flex: 1;
+      font-size: 14px;
+    }
+    .playlist-item .item-controls {
+      display: flex;
+      gap: 8px;
+    }
+    .playlist-item button {
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* Panel de temporizador y velocidad */
+    .panel-overlay {
+      position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 60vh;
-      background: rgba(0, 0, 0, 0.9);
-      z-index: 1004;
-      display: none;
-      flex-direction: column;
-      padding: 10px;
-      box-sizing: border-box;
-      overflow: hidden;
-    }
-    .panel-container.full-height { height: 100vh; }
-    .panel-header {
-      display: flex !important;
-      justify-content: space-between !important;
-      align-items: center !important;
-      padding: 20px 20px 10px 20px !important;
-      margin-bottom: 0 !important;
-      position: relative;
-      z-index: 1004;
-    }
-    .tabs {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .tabs a {
-      color: white !important;
-      font-size: 20px !important;
-      font-weight: bold !important;
-      text-decoration: none;
-      padding: 8px 12px;
-      border-radius: 8px;
-      transition: background 0.2s;
-      display: none; /* Ocultos por defecto, se muestran según grupo */
-    }
-    .tabs a.active {
-      color: #ff0000 !important;
-      background: rgba(255, 0, 0, 0.2);
-    }
-    .tabs a.visible {
-      display: inline-block;
-    }
-    .panel-controls {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    #togglePanelHeightBtn,
-    #closePanelBtn {
-      background: rgba(0, 0, 0, 0.7) !important;
+      background: rgba(0,0,0,0.95);
       backdrop-filter: blur(10px);
-      border-radius: 50% !important;
-      width: 44px !important;
-      height: 44px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
+      border-radius: 20px 20px 0 0;
+      padding: 24px;
+      z-index: 10010;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    .panel-overlay.active {
+      transform: translateY(0);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .panel-header h3 {
+      font-size: 18px;
+    }
+    .close-panel {
+      background: transparent;
       border: none;
+      color: white;
       cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    #togglePanelHeightBtn:hover,
-    #closePanelBtn:hover {
-      transform: scale(1.1);
-    }
-    #togglePanelHeightBtn img,
-    #closePanelBtn img {
-      width: 28px !important;
-      height: 28px !important;
-    }
-    #closePanelBtn {
-      position: static !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-    }
-    .panel-section {
-      display: none;
-    }
-    .panel-section.active {
-      display: block;
     }
     .timer-options {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      gap: 10px !important;
-      padding: 10px !important;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
     }
     .timer-options button {
-      width: 100% !important;
-      padding: 12px !important;
-      border-radius: 8px !important;
-      font-size: 18px !important;
-      color: white !important;
-      border: none !important;
-      cursor: pointer !important;
-      transition: background 0.2s !important;
-    }
-    .timer-options button:nth-child(odd) {
-      background: #444 !important;
-    }
-    .timer-options button:nth-child(even) {
-      background: #555 !important;
+      background: #333;
+      border: none;
+      color: white;
+      border-radius: 30px;
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      flex: 1 0 auto;
+      max-width: 150px;
     }
     .timer-options button.selected {
-      background: #ff0000 !important;
+      background: #ec5b13;
     }
     #timerCountdown {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      gap: 15px !important;
-      padding: 20px !important;
+      text-align: center;
     }
-    #countdownDisplay {
-      font-size: 48px !important;
-      font-weight: bold !important;
-      color: white !important;
+    #timerCountdown span {
+      font-size: 48px;
+      font-weight: bold;
     }
     #deactivateTimer {
-      background: white !important;
-      color: #111 !important;
-      padding: 12px 20px !important;
-      border-radius: 8px !important;
-      font-size: 16px !important;
-      border: none !important;
-      cursor: pointer !important;
-      transition: background 0.2s !important;
-    }
-    #deactivateTimer:hover {
-      background: #eee !important;
-    }
-    #velocidadContent .options-panel {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      gap: 15px !important;
-      padding: 20px !important;
-    }
-    #currentSpeed {
-      font-size: 32px !important;
-      font-weight: bold !important;
-      color: white !important;
-    }
-    #speedSlider {
-      width: 100% !important;
-      height: 4px !important;
-      background: #ccc !important;
-      appearance: none !important;
-      border-radius: 2px !important;
-      cursor: pointer !important;
-    }
-    #speedSlider::-webkit-slider-thumb {
-      appearance: none !important;
-      width: 20px !important;
-      height: 20px !important;
-      background: white !important;
-      border-radius: 50% !important;
-      border: 2px solid #ff0000 !important;
-      transition: transform 0.2s !important;
-    }
-    #speedSlider::-webkit-slider-thumb:hover,
-    #speedSlider:active::-webkit-slider-thumb {
-      transform: scale(1.2) !important;
-    }
-    .speed-labels {
-      display: flex !important;
-      justify-content: space-between !important;
-      width: 100% !important;
-      font-size: 14px !important;
-      color: #ddd !important;
-    }
-    @media (max-width: 600px) {
-      .panel-header {
-        padding: 10px 10px 5px 10px !important;
-      }
-      .tabs {
-        gap: 10px !important;
-      }
-      .tabs a {
-        font-size: 14px !important;
-        padding: 6px 8px !important;
-      }
-      .panel-controls button {
-        width: 36px !important;
-        height: 36px !important;
-      }
-      .panel-controls button img {
-        width: 20px !important;
-        height: 20px !important;
-      }
-      .complex3 > div {
-        margin-bottom: 16px !important;
-      }
-      .video-progress-container-expanded { margin-bottom: 8px !important; }
-      .time-info { margin-bottom: 12px !important; }
-      .controls { margin-bottom: 16px !important; }
-      .action-buttons-container { margin-bottom: 16px !important; }
-      .program-container { margin-bottom: 16px !important; }
-      .tabs-text { margin-bottom: 10px !important; margin-top: 10px !important; }
-      .media-container {
-        aspect-ratio: 1 / 1 !important;
-        max-height: none !important;
-        width: 100% !important;
-        height: auto !important;
-      }
-      .content-wrapper {
-        gap: 20px !important;
-        padding: 0 10px !important;
-      }
-      .complex2 {
-        flex: 0 0 auto !important;
-      }
-      body, .player-expanded, .content-wrapper {
-        overflow-x: hidden !important;
-        box-sizing: border-box !important;
-      }
-    }
-    @media (max-width: 768px) {
-      .top-controls, .content-wrapper, .episode-info, .controls, .action-buttons-container, .time-info, .video-progress-container-expanded, .program-container, .tabs-text {
-        max-width: 100% !important;
-        width: 100% !important;
-      }
-      .player-expanded {
-        width: 100vw !important;
-        height: 100vh !important;
-        left: 0 !important;
-        right: 0 !important;
-        box-sizing: border-box !important;
-      }
-      .complex3 > div {
-        margin-bottom: 16px !important;
-      }
-      .action-buttons-container {
-        overflow-x: auto !important;
-        scrollbar-width: none !important;
-      }
-      .player-minimized {
-        border-top-left-radius: 12px !important;
-        border-top-right-radius: 12px !important;
-        border-bottom-left-radius: 0 !important;
-        border-bottom-right-radius: 0 !important;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.5) !important;
-      }
-    }
-    .player-expanded .content-wrapper {
-      justify-content: flex-start !important;
-      height: auto !important;
-    }
-    .media-container {
-      flex: 1 1 auto !important;
-    }
-    @media (min-width: 769px) {
-      .content-wrapper { align-items: center; }
-      .media-container { aspect-ratio: 16 / 9; max-height: calc(100vh - 200px); }
-    }
-    @media (min-width: 769px) {
-      .content-wrapper { flex-direction: row; max-width: 100%; gap: 20px; align-items: center; justify-content: center; }
-      .complex2 { width: 60%; max-width: 60%; }
-      .complex3 { width: 40%; max-width: 40%; overflow-y: auto; max-height: calc(100vh - 100px); }
-      .panel-container { width: 40%; right: 0; left: auto; }
-      .video-progress-container-expanded, .controls, .action-buttons-container, .episode-info, .time-info, .program-container, .tabs-text { width: 100%; max-width: none; }
-    }
-    .player-expanded {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      width: 100% !important;
-      height: 100vh !important;
-      padding: max(12px, env(safe-area-inset-top)) 10px max(20px, env(safe-area-inset-bottom)) 10px !important;
-      background: #111 !important;
-      z-index: 2147483647 !important;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      box-sizing: border-box;
-      flex-direction: column;
-      gap: 5px;
-    }
-    .player-expanded .media-container { flex: 1 1 auto; min-height: 0; margin: 0 !important; max-height: none !important; aspect-ratio: 16 / 9 !important; }
-    .player-expanded #minimizeBtn { position: fixed !important; top: max(12px, env(safe-area-inset-top)) !important; right: 12px !important; z-index: 1003 !important; background: rgba(0,0,0,0.7) !important; backdrop-filter: blur(10px); }
-    .player-expanded #closePanelBtn { z-index: 1004 !important; }
-    img { user-select: none; -webkit-user-select: none; pointer-events: none; }
-    *, *:active, *:focus { -webkit-tap-highlight-color: transparent; -webkit-tap-highlight-color: rgba(0,0,0,0); outline: none; }
-    .episode-info, #addToPlaylistBtn, #addToPlaylistBtn img, .tabs-text a, .action-btn, .full-width-btn { -webkit-tap-highlight-color: transparent !important; }
-    .mute-indicator {
-      position: absolute;
-      bottom: 20px;
-      right: 60px;
-      background: rgba(255,0,0,0.7);
-      color: white;
-      padding: 5px 10px;
-      border-radius: 5px;
-      z-index: 1003;
+      background: white;
+      color: black;
+      border: none;
+      border-radius: 30px;
+      padding: 12px 24px;
+      margin-top: 20px;
       cursor: pointer;
     }
-    .media-controls-center { justify-content: center; }
-    .control-btn { align-self: center; }
-    .fullscreen-center-controls { height: 100% !important; display: flex !important; justify-content: center !important; align-items: center !important; gap: 20px; }
-    .media-controls-center { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
-    .overlay-gradient, .fullscreen-controls { transition: opacity 0.3s ease !important; }
-    .media-container:not(.show-controls) .overlay-gradient, .fullscreen-controls:not(.show-controls) { opacity: 0 !important; pointer-events: none !important; }
-    .media-container.show-controls .overlay-gradient, .fullscreen-controls.show-controls { opacity: 1 !important; pointer-events: auto !important; }
-    .fullscreen-controls { background: transparent !important; opacity: 1 !important; }
-    .fullscreen-controls { 
-      background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 20%, transparent 30%, transparent 70%, rgba(0,0,0,0.3) 80%, rgba(0,0,0,0.7) 100%) !important;
-      background-image: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 20%, transparent 30%, transparent 70%, rgba(0,0,0,0.3) 80%, rgba(0,0,0,0.7) 100%), linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%) !important;
-      transition: background 0.3s ease, opacity 0.3s ease !important;
-    }
-    .fullscreen-controls:not(.show-controls) { background: transparent !important; }
-    #exitFullscreenBtn { pointer-events: auto !important; z-index: 1007 !important; }
-    @media (min-width: 769px) {
-      .content-wrapper { justify-content: center; align-items: center; height: 100%; }
-    }
-    #timerCountdown, #timerOptions {
+    .speed-slider {
       width: 100%;
+      margin: 20px 0;
     }
-    #timerCountdown[style*="none"], #timerOptions[style*="none"] {
+    .speed-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    /* utilidades */
+    .hidden {
       display: none !important;
     }
   `;
   document.head.appendChild(style);
 
-  // ==================== HTML del reproductor ====================
+  // ==================== HTML ====================
   const playerHTML = `
     <div id="playerUniversal" class="player-universal">
-      <div id="playerExpanded" class="player-expanded" style="display: none;">
-        <div class="complex1 top-controls">
-          <button id="mediaModeToggle" class="media-mode-toggle">
-            <span class="mode-left">Audio</span>
-            <span class="mode-right">Video</span>
-          </button>
-          <button id="minimizeBtn" class="minimize-btn">
-            <img src="https://marca1.odoo.com/web/image/490-b15e1d52/minimizar.svg" alt="Minimize" loading="lazy">
-          </button>
-        </div>
-        <div class="content-wrapper">
-          <div class="complex2">
-            <div id="mediaContainer" class="media-container">
-              <video id="mediaElement" style="display: none;" controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture preload="metadata"></video>
-              <img id="mediaCover" style="display: block;" src="" loading="lazy">
-              <div class="overlay-gradient" id="overlayGradient">
-                <div class="media-controls-center">
-                  <button id="playPauseMedia" class="control-btn">
-                    <img id="playPauseIconMedia" src="https://nikichitonjesus.odoo.com/web/image/1140-f876320c/play.svg" alt="Play" loading="lazy">
-                  </button>
-                </div>
-                <div class="media-controls-bottom">
-                  <button id="volumeBtn" class="volume-btn">
-                    <img id="volumeIcon" src="https://marca1.odoo.com/web/image/505-b00aeb8e/volumen.svg" alt="Volume" loading="lazy">
-                  </button>
-                  <button id="fullscreenBtn" class="fullscreen-btn">
-                    <img src="https://marca1.odoo.com/web/image/499-48202209/full.svg" alt="Fullscreen" loading="lazy">
-                  </button>
-                </div>
-              </div>
-              <div class="seek-indicator-left" id="seekIndicatorLeft">
-                <span id="seekSecondsLeft">15s</span>
-                <img src="https://marca1.odoo.com/web/image/506-1607e7a0/retroceder%2015.svg" alt="Rewind" loading="lazy">
-              </div>
-              <div class="seek-indicator-right" id="seekIndicatorRight">
-                <img src="https://marca1.odoo.com/web/image/504-db1a8f7a/avanzar%2015s.svg" alt="Forward" loading="lazy">
-                <span id="seekSecondsRight">15s</span>
-              </div>
-              <div id="fullscreenControls" class="fullscreen-controls" style="display: none;">
-                <div class="fullscreen-title" id="fullscreenTitle"></div>
-                <div class="fullscreen-center-controls">
-                  <button id="previousFullscreen" class="control-btn">
-                    <img src="https://nikichitonjesus.odoo.com/web/image/1072-2fba0e95/ant.webp" alt="Previous" loading="lazy">
-                  </button>
-                  <button id="rewindFullscreen" class="control-btn">
-                    <img src="https://marca1.odoo.com/web/image/503-ed98d111/retroceder15.svg" alt="Rewind" loading="lazy">
-                  </button>
-                  <button id="playPauseFullscreen" class="control-btn">
-                    <img id="playPauseIconFullscreen" src="https://nikichitonjesus.odoo.com/web/image/1140-f876320c/play.svg" alt="Play" loading="lazy">
-                  </button>
-                  <button id="forwardFullscreen" class="control-btn">
-                    <img src="https://marca1.odoo.com/web/image/507-089c3773/avanzar15.svg" alt="Forward" loading="lazy">
-                  </button>
-                  <button id="nextFullscreen" class="control-btn">
-                    <img src="https://nikichitonjesus.odoo.com/web/image/1068-bc302591/sig.webp" alt="Next" loading="lazy">
-                  </button>
-                </div>
-                <div class="fullscreen-bottom-bar">
-                  <span id="currentTimeFullscreen">00:00</span>
-                  <div class="video-progress-container-fullscreen" id="progressContainerFullscreen">
-                    <div class="progress-bar-fullscreen" id="progressBarFullscreen"></div>
-                  </div>
-                  <span id="durationFullscreen">00:00</span>
-                  <button id="volumeFullscreen" class="volume-btn">
-                    <img id="volumeIconFullscreen" src="https://marca1.odoo.com/web/image/505-b00aeb8e/volumen.svg" alt="Volume" loading="lazy">
-                  </button>
-                  <button id="exitFullscreenBtn" class="fullscreen-btn">
-                    <img src="https://marca1.odoo.com/web/image/501-7b0e44ac/Exitfull.svg" alt="Exit Fullscreen" loading="lazy">
-                  </button>
-                </div>
-              </div>
-              <div id="muteIndicator" class="mute-indicator" style="display: none;">Silenciado</div>
-            </div>
-          </div>
-          <div class="complex3">
-            <div class="episode-info" id="episodeInfo">
-              <div class="left-section">
-                <img src="" alt="Portada" loading="lazy">
-              </div>
-              <div class="center-section">
-                <span id="episodeTitle"></span>
-                <span class="author" id="episodeAuthor"></span>
-              </div>
-              <div class="right-section">
-                <button id="addToPlaylistBtn">
-                  <img id="addToPlaylistIcon" src="https://nikichitonjesus.odoo.com/web/image/772-ea85aa4b/a%C3%B1adir%20a.png" alt="Add to Playlist" loading="lazy">
-                </button>
-              </div>
-            </div>
-            <div class="video-progress-container-expanded" id="progressContainerExpanded">
-              <div class="progress-bar-expanded" id="progressBarExpanded">
-                <div class="progress-knob-expanded"></div>
-              </div>
-            </div>
-            <div class="time-info">
-              <span id="currentTimeExpanded">00:00</span>
-              <span id="durationExpanded">00:00</span>
-            </div>
-            <div class="controls">
-              <div class="speed-container">
-                <img id="speedIcon" src="https://nikichitonjesus.odoo.com/web/image/1113-9a93ad3a/speed.png" alt="Velocidad" loading="lazy">
-              </div>
-              <button id="previousExpanded">
-                <img src="https://marca1.odoo.com/web/image/502-e1f7bc1b/ant.svg" alt="Previous" loading="lazy">
-              </button>
-              <button id="rewindExpanded">
-                <img src="https://marca1.odoo.com/web/image/503-ed98d111/retroceder15.svg" alt="Rewind" loading="lazy">
-              </button>
-              <button id="playPauseExpanded">
-                <img id="playPauseIconExpanded" src="https://nikichitonjesus.odoo.com/web/image/984-ba35a699/play.webp" alt="Play" loading="lazy">
-              </button>
-              <button id="forwardExpanded">
-                <img src="https://marca1.odoo.com/web/image/507-089c3773/avanzar15.svg" alt="Forward" loading="lazy">
-              </button>
-              <button id="nextExpanded">
-                <img src="https://marca1.odoo.com/web/image/500-1957f422/sig.svg" alt="Next" loading="lazy">
-              </button>
-              <div class="timer-container">
-                <img id="timerIcon" src="https://marca1.odoo.com/web/image/512-4489ad50/tempo.svg" alt="Timer" loading="lazy">
-              </div>
-            </div>
-            <div class="action-buttons-container">
-              <div class="action-buttons" id="actionButtons">
-                <button id="likesBtn" class="action-btn">
-                  <img id="likesIcon" src="https://marca1.odoo.com/web/image/511-0363beb5/meg.svg" alt="Me gusta" loading="lazy">
-                  <span>Me gusta</span>
-                </button>
-                <button id="downloadBtn" class="action-btn">
-                  <img id="downloadIcon" src="https://nikichitonjesus.odoo.com/web/image/624-ec376d7f/descargar.png" alt="Download" loading="lazy">
-                  <span>Descargar</span>
-                </button>
-                <button id="shareBtn" class="action-btn">
-                  <img src="https://nikichitonjesus.odoo.com/web/image/585-036b7961/cpmartir.png" alt="Share" loading="lazy">
-                  <span>Compartir</span>
-                </button>
-                <button id="repeatBtn" class="action-btn">
-                  <img src="https://nikichitonjesus.odoo.com/web/image/771-e8de83ec/repetir-.png" alt="Repeat" loading="lazy">
-                  <span>Repetir</span>
-                </button>
-                <button id="colaBtn" class="action-btn">
-                  <img src="https://marca1.odoo.com/web/image/515-2e6082a5/cola.svg" alt="Cola" loading="lazy">
-                  <span>Cola</span>
-                </button>
-                <button id="detallesBtn" class="action-btn">
-                  <img src="https://nikichitonjesus.odoo.com/web/image/995-7301139c/trasncrip.webp" alt="Detalles" loading="lazy">
-                  <span>Detalles</span>
-                </button>
-                <button id="bibliotecaBtn" class="action-btn">
-                  <img src="https://marca1.odoo.com/web/image/517-7bde9b69/Archive.svg" alt="Biblioteca" loading="lazy">
-                  <span>Biblioteca</span>
-                </button>
-              </div>
-            </div>
-            <div class="program-container">
-              <button id="programBtn" class="full-width-btn">
-                <img src="https://nikichitonjes-home.odoo.com/web/image/478-0e3df8d3/reanudar.gif" alt="Program" loading="lazy">
-                <span>Programa del Día</span>
-              </button>
-            </div>
-            <div class="tabs-text">
-              <a id="linkCola"><b><span style="color: white;">A continuación</span></b></a>
-              <a id="linkDetalles"><b><span style="color: white;">Detalles</span></b></a>
-              <a id="linkBiblioteca"><b><span style="color: white;">Biblioteca</span></b></a>
-            </div>
-          </div>
-        </div>
-        <div class="panel-container" id="panelContainer" style="display: none;">
-          <div class="panel-header">
-            <div class="tabs">
-              <a id="tabCola" class="tab-content active">Cola</a>
-              <a id="tabDetalles" class="tab-content">Detalles</a>
-              <a id="tabBiblioteca" class="tab-content">Biblioteca</a>
-              <a id="tabVelocidad" class="tab-speed">Velocidad</a>
-              <a id="tabTemporizador" class="tab-timer">Temporizador</a>
-            </div>
-            <div class="panel-controls">
-              <button id="togglePanelHeightBtn">
-                <img src="https://marca1.odoo.com/web/image/513-e0bcd17f/maz.svg" alt="Ampliar/Minimizar" loading="lazy">
-              </button>
-              <button id="closePanelBtn">
-                <img src="https://marca1.odoo.com/web/image/518-a62b303e/cierra.svg" alt="Cerrar" loading="lazy">
-              </button>
-            </div>
-          </div>
-          <div class="panel-content">
-            <div id="colaContent" class="panel-section active">
-              <div class="next-items" id="nextItems"></div>
-              <div class="separator" id="recomendadosSeparator" style="display: none;">
-                <hr>
-                <h4>Recomendados</h4>
-              </div>
-              <div class="recomendados-items" id="recomendadosItems"></div>
-            </div>
-            <div id="detallesContent" class="panel-section">
-              <div class="text-content" id="textContent"></div>
-            </div>
-            <div id="bibliotecaContent" class="panel-section">
-              <div class="likes-section">
-                <h4>Tus me gusta</h4>
-                <button id="viewAllLikes">Ver todo</button>
-                <div id="likesView" class="likes-view carousel">
-                  <div class="likes-carousel" id="likesCarousel"></div>
-                </div>
-              </div>
-              <div class="playlist-section">
-                <h4>Tu lista</h4>
-                <div class="playlist-items" id="playlistItems"></div>
-                <button id="playUserPlaylistBtn">Reproducir esta lista</button>
-              </div>
-            </div>
-            <div id="velocidadContent" class="panel-section">
-              <div class="options-panel">
-                <span id="currentSpeed">1x</span>
-                <input type="range" id="speedSlider" min="0.25" max="2" step="0.25" value="1">
-                <div class="speed-labels">
-                  <span>0.25x</span><span>0.5x</span><span>0.75x</span><span>1x</span><span>1.25x</span><span>1.5x</span><span>1.75x</span><span>2x</span>
-                </div>
-              </div>
-            </div>
-            <div id="temporizadorContent" class="panel-section">
-              <div id="timerCountdown" style="display: none;">
-                <span id="countdownDisplay"></span>
-                <button id="deactivateTimer">Desactivar temporizador</button>
-              </div>
-              <div id="timerOptions" class="options-panel timer-options">
-                <button data-value="5">5 min</button>
-                <button data-value="10">10 min</button>
-                <button data-value="15">15 min</button>
-                <button data-value="30">30 min</button>
-                <button data-value="45">45 min</button>
-                <button data-value="60">1 hora</button>
-                <button data-value="end">Fin del episodio</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="playerMinimized" class="player-minimized">
-        <div class="video-progress-container-minimized" id="progressContainerMinimized">
-          <div class="progress-bar-minimized" id="progressBarMinimized">
-            <div class="progress-knob-minimized"></div>
-          </div>
+      <!-- MODO MINIMIZADO -->
+      <div id="playerMinimized" class="player-minimized hidden">
+        <div class="minimized-progress" id="minimizedProgressContainer">
+          <div class="minimized-progress-bar" id="minimizedProgressBar"></div>
         </div>
         <div class="minimized-content">
           <div class="minimized-cover">
-            <img id="minimizedCover" src="" alt="Portada" loading="lazy">
+            <img id="minimizedCover" src="" alt="cover">
           </div>
-          <div class="minimized-title-container">
-            <span id="episodeTitleMinimized" class="minimized-title"></span>
+          <div class="minimized-info">
+            <div class="minimized-title" id="minimizedTitle"></div>
+            <div class="minimized-author" id="minimizedAuthor"></div>
           </div>
           <div class="minimized-controls">
-            <button id="rewindMinimized">
-              <img src="https://marca1.odoo.com/web/image/503-ed98d111/retroceder15.svg" alt="Rewind" loading="lazy">
+            <button id="minimizedFavorite" class="favorite-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" stroke-width="2"/>
+              </svg>
             </button>
-            <button id="playPauseMinimized">
-              <img id="playPauseIconMinimized" src="https://marca1.odoo.com/web/image/508-f876320c/play.svg" alt="Play" loading="lazy">
+            <button class="play-pause-mini" id="minimizedPlayPause">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
             </button>
-            <button id="forwardMinimized">
-              <img src="https://marca1.odoo.com/web/image/507-089c3773/avanzar15.svg" alt="Fast Forward" loading="lazy">
+            <button id="minimizedNext">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/>
+              </svg>
             </button>
-            <button id="expandBtn">
-              <img src="https://marca1.odoo.com/web/image/516-3ecd56b1/full-2.svg" alt="Expand" loading="lazy">
+            <button id="minimizedExpand">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 15l7 7 7-7M5 9l7-7 7 7" stroke-width="2"/>
+              </svg>
             </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODO EXPANDIDO -->
+      <div id="playerExpanded" class="player-expanded hidden">
+        <div class="expanded-bg-overlay"></div>
+        <div class="expanded-header">
+          <div class="media-mode-toggle" id="mediaModeToggle">
+            <button class="active" data-mode="audio">Audio</button>
+            <button data-mode="video">Video</button>
+          </div>
+          <button class="minimize-btn" id="expandedMinimize">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M19 9l-7 7-7-7" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="expanded-cover">
+          <img id="expandedCover" src="" alt="cover">
+        </div>
+
+        <div class="expanded-info">
+          <h1 id="expandedTitle">Cargando...</h1>
+          <p id="expandedAuthor"></p>
+          <button class="add-to-playlist" id="expandedAddPlaylist">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="expanded-progress">
+          <div class="progress-bar" id="expandedProgressContainer">
+            <div class="progress-fill" id="expandedProgressFill">
+              <div class="progress-handle"></div>
+            </div>
+          </div>
+          <div class="time-info">
+            <span id="expandedCurrentTime">00:00</span>
+            <span id="expandedDuration">00:00</span>
+          </div>
+        </div>
+
+        <div class="expanded-controls">
+          <button id="expandedRewind">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="1.5"/>
+            </svg>
+          </button>
+          <button id="expandedPrevious">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 6h2v12H6zm3.5 6L18 6v12z"/>
+            </svg>
+          </button>
+          <button class="play-pause-expanded" id="expandedPlayPause">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+          <button id="expandedNext">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/>
+            </svg>
+          </button>
+          <button id="expandedForward">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M20 4v5h-.582m0 0a8.001 8.001 0 00-15.356 2m15.356-2H15M4 20v-5h.581m0 0a8.003 8.003 0 0015.357-2m-15.357 2H9" stroke-width="1.5"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="speed-timer">
+          <button id="speedButton">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/>
+            </svg>
+            <span id="speedValue">1x</span>
+          </button>
+          <button id="timerButton">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/>
+            </svg>
+            <span id="timerLabel">Temporizador</span>
+          </button>
+        </div>
+
+        <div class="action-buttons">
+          <button class="action-btn" id="actionLike">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" stroke-width="2"/>
+            </svg>
+            <span>Me gusta</span>
+          </button>
+          <button class="action-btn" id="actionDownload">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-width="2"/>
+            </svg>
+            <span>Descargar</span>
+          </button>
+          <button class="action-btn" id="actionShare">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" stroke-width="2"/>
+            </svg>
+            <span>Compartir</span>
+          </button>
+          <button class="action-btn" id="actionRepeat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2"/>
+            </svg>
+            <span>Repetir</span>
+          </button>
+          <button class="action-btn" id="actionQueue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M4 6h16M4 12h8m-8 6h16" stroke-width="2"/>
+            </svg>
+            <span>Cola</span>
+          </button>
+          <button class="action-btn" id="actionDetails">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/>
+            </svg>
+            <span>Detalles</span>
+          </button>
+          <button class="action-btn" id="actionLibrary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-width="2"/>
+            </svg>
+            <span>Biblioteca</span>
+          </button>
+        </div>
+
+        <div class="highlight-bar" id="programaDelDia">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24">
+            <path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" stroke-width="2"/>
+          </svg>
+          <span>Programa del Día</span>
+        </div>
+
+        <div class="tabs">
+          <a href="#" class="active" data-tab="next">A continuación</a>
+          <a href="#" data-tab="details">Detalles</a>
+          <a href="#" data-tab="library">Biblioteca</a>
+        </div>
+
+        <!-- Paneles de pestañas -->
+        <div id="tabNext" class="tab-panel active">
+          <div class="next-items" id="nextList"></div>
+          <div class="recomendados-items" id="recomendadosList"></div>
+        </div>
+        <div id="tabDetails" class="tab-panel">
+          <div class="detalles-content" id="detailsContent">
+            <h4>Descripción</h4>
+            <p id="episodeDescription"></p>
+          </div>
+        </div>
+        <div id="tabLibrary" class="tab-panel">
+          <div class="biblioteca-section">
+            <h4>Tus me gusta</h4>
+            <div class="likes-view" id="likesView"></div>
+            <h4 style="margin-top: 16px;">Tu lista</h4>
+            <div class="playlist-items" id="playlistView"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel flotante para temporizador/velocidad -->
+      <div id="panelOverlay" class="panel-overlay">
+        <div class="panel-header">
+          <h3 id="panelTitle">Temporizador</h3>
+          <button class="close-panel" id="closePanel">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="white">
+              <path d="M6 18L18 6M6 6l12 12" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+        <div id="timerPanel" class="panel-content">
+          <div class="timer-options" id="timerOptions">
+            <button data-minutes="5">5 min</button>
+            <button data-minutes="10">10 min</button>
+            <button data-minutes="15">15 min</button>
+            <button data-minutes="30">30 min</button>
+            <button data-minutes="45">45 min</button>
+            <button data-minutes="60">1 hora</button>
+            <button data-minutes="end">Fin del episodio</button>
+          </div>
+          <div id="timerCountdown" style="display: none;">
+            <span id="countdownDisplay">00:00</span>
+            <button id="deactivateTimer">Desactivar</button>
+          </div>
+        </div>
+        <div id="speedPanel" class="panel-content" style="display: none;">
+          <input type="range" id="speedSlider" min="0.25" max="2" step="0.25" value="1" class="speed-slider">
+          <div class="speed-labels">
+            <span>0.25x</span><span>0.5x</span><span>0.75x</span><span>1x</span><span>1.25x</span><span>1.5x</span><span>1.75x</span><span>2x</span>
           </div>
         </div>
       </div>
@@ -1046,1997 +852,515 @@
   `;
   document.body.insertAdjacentHTML('beforeend', playerHTML);
 
-  // ==================== JavaScript del reproductor ====================
-  const script = document.createElement('script');
-  script.textContent = `
-    (function() {
-      let specialPlayer = null;
-      let playlist = JSON.parse(localStorage.getItem('playlist')) || [];
-      let likes = JSON.parse(localStorage.getItem('likes')) || [];
-      let historyList = JSON.parse(localStorage.getItem('history')) || [];
-      let currentIndex = -1;
-      let nextList = [];
-      let recomendados = window.RECOMENDADOS || [];
-      let cachedRecomendados = []; 
-      let episodeText = '';
-      let episodeAuthor = 'Roberto';
-      let activeList = 'next';
-      let userPlaylistAutoPlay = false;
-      let timerValue = 0;
-      let timerId = null;
-      let timerCountdownInterval = null;
-      let tapCount = 0;
-      let tapSide = '';
-      let lastTapTime = 0;
-      let tapTimeout = null;
-      let isAudioMode = true;
-      let isFullscreenMode = false;
-      let repeatMode = 0;
-      let currentEpisodeId = null;
-      let showControls = false;
-      let isAutoMuted = false;
-      let isUserMuted = false;
-      let likesViewMode = 'carousel';
-      const playerUniversal = document.getElementById('playerUniversal');
-      const playerExpanded = document.getElementById('playerExpanded');
-      const playerMinimized = document.getElementById('playerMinimized');
-      let mediaElement = document.getElementById('mediaElement');
-      const mediaCover = document.getElementById('mediaCover');
-      const mediaContainer = document.getElementById('mediaContainer');
-      const minimizeBtn = document.getElementById('minimizeBtn');
-      const mediaModeToggle = document.getElementById('mediaModeToggle');
-      const fullscreenBtn = document.getElementById('fullscreenBtn');
-      const volumeBtn = document.getElementById('volumeBtn');
-      const volumeIcon = document.getElementById('volumeIcon');
-      const expandBtn = document.getElementById('expandBtn');
-      const episodeInfo = document.getElementById('episodeInfo');
-      const episodeTitle = document.getElementById('episodeTitle');
-      const episodeTitleMinimized = document.getElementById('episodeTitleMinimized');
-      const episodeAuthorElem = document.getElementById('episodeAuthor');
-      const minimizedCover = document.getElementById('minimizedCover');
-      const progressContainerExpanded = document.getElementById('progressContainerExpanded');
-      const progressBarExpanded = document.getElementById('progressBarExpanded');
-      const progressContainerMinimized = document.getElementById('progressContainerMinimized');
-      const progressBarMinimized = document.getElementById('progressBarMinimized');
-      const currentTimeExpanded = document.getElementById('currentTimeExpanded');
-      const durationExpanded = document.getElementById('durationExpanded');
-      const playPauseExpanded = document.getElementById('playPauseExpanded');
-      const playPauseIconExpanded = document.getElementById('playPauseIconExpanded');
-      const playPauseMinimized = document.getElementById('playPauseMinimized');
-      const playPauseIconMinimized = document.getElementById('playPauseIconMinimized');
-      const rewindExpanded = document.getElementById('rewindExpanded');
-      const forwardExpanded = document.getElementById('forwardExpanded');
-      const previousExpanded = document.getElementById('previousExpanded');
-      const nextExpanded = document.getElementById('nextExpanded');
-      const rewindMinimized = document.getElementById('rewindMinimized');
-      const forwardMinimized = document.getElementById('forwardMinimized');
-      const speedIcon = document.getElementById('speedIcon');
-      const speedSlider = document.getElementById('speedSlider');
-      const currentSpeed = document.getElementById('currentSpeed');
-      const timerIcon = document.getElementById('timerIcon');
-      const timerOptions = document.getElementById('timerOptions');
-      const timerCountdown = document.getElementById('timerCountdown');
-      const countdownDisplay = document.getElementById('countdownDisplay');
-      const deactivateTimer = document.getElementById('deactivateTimer');
-      const downloadBtn = document.getElementById('downloadBtn');
-      const downloadIcon = document.getElementById('downloadIcon');
-      const shareBtn = document.getElementById('shareBtn');
-      const programBtn = document.getElementById('programBtn');
-      const repeatBtn = document.getElementById('repeatBtn');
-      const addToPlaylistBtn = document.getElementById('addToPlaylistBtn');
-      const addToPlaylistIcon = document.getElementById('addToPlaylistIcon');
-      const colaBtn = document.getElementById('colaBtn');
-      const detallesBtn = document.getElementById('detallesBtn');
-      const bibliotecaBtn = document.getElementById('bibliotecaBtn');
-      const likesBtn = document.getElementById('likesBtn');
-      const likesIcon = document.getElementById('likesIcon');
-      const panelContainer = document.getElementById('panelContainer');
-      const likesCarousel = document.getElementById('likesCarousel');
-      const playlistItems = document.getElementById('playlistItems');
-      const closePanelBtn = document.getElementById('closePanelBtn');
-      const togglePanelHeightBtn = document.getElementById('togglePanelHeightBtn');
-      const nextItems = document.getElementById('nextItems');
-      const recomendadosItems = document.getElementById('recomendadosItems');
-      const recomendadosSeparator = document.getElementById('recomendadosSeparator');
-      const textContent = document.getElementById('textContent');
-      const tabCola = document.getElementById('tabCola');
-      const tabDetalles = document.getElementById('tabDetalles');
-      const tabBiblioteca = document.getElementById('tabBiblioteca');
-      const tabVelocidad = document.getElementById('tabVelocidad');
-      const tabTemporizador = document.getElementById('tabTemporizador');
-      const colaContent = document.getElementById('colaContent');
-      const detallesContent = document.getElementById('detallesContent');
-      const bibliotecaContent = document.getElementById('bibliotecaContent');
-      const velocidadContent = document.getElementById('velocidadContent');
-      const temporizadorContent = document.getElementById('temporizadorContent');
-      const linkCola = document.getElementById('linkCola');
-      const linkDetalles = document.getElementById('linkDetalles');
-      const linkBiblioteca = document.getElementById('linkBiblioteca');
-      const speedContainer = document.querySelector('.speed-container');
-      const timerContainer = document.querySelector('.timer-container');
-      const overlayGradient = document.getElementById('overlayGradient');
-      const playPauseMedia = document.getElementById('playPauseMedia');
-      const playPauseIconMedia = document.getElementById('playPauseIconMedia');
-      const seekIndicatorLeft = document.getElementById('seekIndicatorLeft');
-      const seekSecondsLeft = document.getElementById('seekSecondsLeft');
-      const seekIndicatorRight = document.getElementById('seekIndicatorRight');
-      const seekSecondsRight = document.getElementById('seekSecondsRight');
-      const fullscreenControls = document.getElementById('fullscreenControls');
-      const fullscreenTitle = document.getElementById('fullscreenTitle');
-      const progressContainerFullscreen = document.getElementById('progressContainerFullscreen');
-      const progressBarFullscreen = document.getElementById('progressBarFullscreen');
-      const progressKnobFullscreen = progressBarFullscreen.appendChild(document.createElement('div'));
-      progressKnobFullscreen.className = 'progress-knob-fullscreen';
-      const currentTimeFullscreen = document.getElementById('currentTimeFullscreen');
-      const durationFullscreen = document.getElementById('durationFullscreen');
-      const playPauseFullscreen = document.getElementById('playPauseFullscreen');
-      const playPauseIconFullscreen = document.getElementById('playPauseIconFullscreen');
-      const rewindFullscreen = document.getElementById('rewindFullscreen');
-      const forwardFullscreen = document.getElementById('forwardFullscreen');
-      const previousFullscreen = document.getElementById('previousFullscreen');
-      const nextFullscreen = document.getElementById('nextFullscreen');
-      const volumeFullscreen = document.getElementById('volumeFullscreen');
-      const volumeIconFullscreen = document.getElementById('volumeIconFullscreen');
-      const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
-      const muteIndicator = document.getElementById('muteIndicator');
-      const viewAllLikes = document.getElementById('viewAllLikes');
-      const likesView = document.getElementById('likesView');
-      let currentMedia = null;
-      let isExpanded = false;
-      let isHidden = false;
-      let isLooping = false;
-      let isMuted = false;
-      let isDraggingExpanded = false;
-      let isDraggingMinimized = false;
-      let isDraggingFullscreen = false;
-      let touchStartY = 0;
-      let touchEndY = 0;
-      let swipeThreshold = 100;
-      let isSwiping = false;
-      let isPanelFullHeight = false;
-      const groups = {
-        content: ['cola', 'detalles', 'biblioteca'],
-        speed: ['velocidad'],
-        timer: ['temporizador']
-      };
-      const getGroup = (tab) => {
-        for (let g in groups) {
-          if (groups[g].includes(tab)) return g;
-        }
-        return 'content';
-      };
-      const updateVisibleTabs = (group) => {
-        document.querySelectorAll('.tabs a').forEach(t => {
-          t.classList.remove('visible');
-          const tabName = t.id.replace('tab', '').toLowerCase();
-          if (groups[group].includes(tabName)) {
-            t.classList.add('visible');
-          }
-        });
-      };
-      const saveState = () => {
-        const state = {
-          mediaUrl: currentMedia?.mediaUrl,
-          mediaType: currentMedia?.mediaType,
-          coverUrlContainer: currentMedia?.coverUrlContainer,
-          coverUrlInfo: currentMedia?.coverUrlInfo,
-          title: currentMedia?.title,
-          detailUrl: currentMedia?.detailUrl,
-          author: currentMedia?.author,
-          next: currentMedia?.next,
-          text: currentMedia?.text,
-          allowDownload: currentMedia?.allowDownload,
-          currentTime: mediaElement.currentTime,
-          isPlaying: !mediaElement.paused,
-          playbackRate: mediaElement.playbackRate,
-          isExpanded: isExpanded,
-          isHidden: isHidden,
-          isLooping: isLooping,
-          isMuted: mediaElement.muted,
-          isAudioMode: isAudioMode,
-          activeList: activeList,
-          userPlaylistAutoPlay: userPlaylistAutoPlay,
-          timerValue: timerValue,
-          repeatMode: repeatMode,
-        };
-        localStorage.setItem('playerState', JSON.stringify(state));
+  // ==================== CONSTANTES Y VARIABLES ====================
+  const playerUniversal = document.getElementById('playerUniversal');
+  const playerMinimized = document.getElementById('playerMinimized');
+  const playerExpanded = document.getElementById('playerExpanded');
+  const panelOverlay = document.getElementById('panelOverlay');
+
+  // Elementos minimizados
+  const minimizedCover = document.getElementById('minimizedCover');
+  const minimizedTitle = document.getElementById('minimizedTitle');
+  const minimizedAuthor = document.getElementById('minimizedAuthor');
+  const minimizedPlayPause = document.getElementById('minimizedPlayPause');
+  const minimizedFavorite = document.getElementById('minimizedFavorite');
+  const minimizedNext = document.getElementById('minimizedNext');
+  const minimizedExpand = document.getElementById('minimizedExpand');
+  const minimizedProgressContainer = document.getElementById('minimizedProgressContainer');
+  const minimizedProgressBar = document.getElementById('minimizedProgressBar');
+
+  // Elementos expandidos
+  const expandedCover = document.getElementById('expandedCover');
+  const expandedTitle = document.getElementById('expandedTitle');
+  const expandedAuthor = document.getElementById('expandedAuthor');
+  const expandedPlayPause = document.getElementById('expandedPlayPause');
+  const expandedRewind = document.getElementById('expandedRewind');
+  const expandedPrevious = document.getElementById('expandedPrevious');
+  const expandedNext = document.getElementById('expandedNext');
+  const expandedForward = document.getElementById('expandedForward');
+  const expandedProgressContainer = document.getElementById('expandedProgressContainer');
+  const expandedProgressFill = document.getElementById('expandedProgressFill');
+  const expandedCurrentTime = document.getElementById('expandedCurrentTime');
+  const expandedDuration = document.getElementById('expandedDuration');
+  const expandedAddPlaylist = document.getElementById('expandedAddPlaylist');
+  const speedValue = document.getElementById('speedValue');
+  const speedSlider = document.getElementById('speedSlider');
+  const timerButton = document.getElementById('timerButton');
+  const timerOptions = document.getElementById('timerOptions');
+  const timerCountdown = document.getElementById('timerCountdown');
+  const countdownDisplay = document.getElementById('countdownDisplay');
+  const deactivateTimer = document.getElementById('deactivateTimer');
+  const actionLike = document.getElementById('actionLike');
+  const actionDownload = document.getElementById('actionDownload');
+  const actionShare = document.getElementById('actionShare');
+  const actionRepeat = document.getElementById('actionRepeat');
+  const actionQueue = document.getElementById('actionQueue');
+  const actionDetails = document.getElementById('actionDetails');
+  const actionLibrary = document.getElementById('actionLibrary');
+  const programaDelDia = document.getElementById('programaDelDia');
+  const mediaModeButtons = document.querySelectorAll('.media-mode-toggle button');
+  const minimizeBtn = document.getElementById('expandedMinimize');
+  const closePanel = document.getElementById('closePanel');
+  const tabs = document.querySelectorAll('.tabs a');
+  const nextListEl = document.getElementById('nextList');
+  const recomendadosListEl = document.getElementById('recomendadosList');
+  const detailsContent = document.getElementById('detailsContent');
+  const likesView = document.getElementById('likesView');
+  const playlistView = document.getElementById('playlistView');
+
+  // Estado del reproductor
+  let currentMedia = null;
+  let isPlaying = false;
+  let isMuted = false;
+  let currentVolume = 1;
+  let playbackRate = 1;
+  let repeatMode = 0; // 0: no repeat, 1: repeat one, 2: repeat all
+  let timerEndTime = null;
+  let timerInterval = null;
+  let isFavorite = false;
+  let playlist = JSON.parse(localStorage.getItem('playlist')) || [];
+  let likes = JSON.parse(localStorage.getItem('likes')) || [];
+  let history = JSON.parse(localStorage.getItem('history')) || [];
+  let nextList = [];
+  let recomendados = [];
+
+  // Elemento de audio/vídeo
+  const audioElement = new Audio();
+  audioElement.volume = currentVolume;
+  audioElement.preload = 'metadata';
+
+  // ==================== FUNCIONES AUXILIARES ====================
+  function formatTime(seconds) {
+    if (isNaN(seconds)) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function updateProgress() {
+    if (!audioElement.duration) return;
+    const percent = (audioElement.currentTime / audioElement.duration) * 100;
+    minimizedProgressBar.style.width = percent + '%';
+    expandedProgressFill.style.width = percent + '%';
+    expandedCurrentTime.textContent = formatTime(audioElement.currentTime);
+    expandedDuration.textContent = formatTime(audioElement.duration);
+  }
+
+  function setPlaying(playing) {
+    isPlaying = playing;
+    if (playing) {
+      audioElement.play();
+      minimizedPlayPause.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+      expandedPlayPause.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+    } else {
+      audioElement.pause();
+      minimizedPlayPause.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+      expandedPlayPause.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+    }
+  }
+
+  function loadMedia(media) {
+    currentMedia = media;
+    audioElement.src = media.mediaUrl;
+    audioElement.load();
+    // Actualizar portadas y textos
+    minimizedCover.src = media.coverUrl || '';
+    expandedCover.src = media.coverUrl || '';
+    minimizedTitle.textContent = media.title || '';
+    expandedTitle.textContent = media.title || '';
+    minimizedAuthor.textContent = media.author || '';
+    expandedAuthor.textContent = media.author || '';
+    detailsContent.querySelector('p').textContent = media.description || 'Sin descripción';
+    // Verificar si está en favoritos
+    isFavorite = likes.some(item => item.mediaUrl === media.mediaUrl);
+    updateFavoriteButton();
+    // Mostrar el reproductor
+    playerUniversal.style.display = 'block';
+    playerMinimized.classList.remove('hidden');
+    playerExpanded.classList.add('hidden');
+    setPlaying(true);
+  }
+
+  function updateFavoriteButton() {
+    const color = isFavorite ? '#ec5b13' : 'white';
+    minimizedFavorite.style.color = color;
+    actionLike.style.color = color;
+    actionLike.querySelector('span').textContent = isFavorite ? 'Te gusta' : 'Me gusta';
+  }
+
+  function toggleFavorite() {
+    if (!currentMedia) return;
+    if (isFavorite) {
+      likes = likes.filter(item => item.mediaUrl !== currentMedia.mediaUrl);
+    } else {
+      likes.unshift(currentMedia);
+    }
+    localStorage.setItem('likes', JSON.stringify(likes));
+    isFavorite = !isFavorite;
+    updateFavoriteButton();
+    renderLikes();
+  }
+
+  function renderLikes() {
+    likesView.innerHTML = '';
+    if (likes.length === 0) {
+      likesView.innerHTML = '<div class="no-items">No hay episodios con me gusta</div>';
+      return;
+    }
+    likes.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'likes-item';
+      div.innerHTML = `
+        <img src="${item.coverUrl || ''}" alt="cover">
+        <span>${item.title || ''}</span>
+      `;
+      div.addEventListener('click', () => loadMedia(item));
+      likesView.appendChild(div);
+    });
+  }
+
+  function renderPlaylist() {
+    playlistView.innerHTML = '';
+    if (playlist.length === 0) {
+      playlistView.innerHTML = '<div class="no-items">Tu lista está vacía</div>';
+      return;
+    }
+    playlist.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = 'playlist-item';
+      div.innerHTML = `
+        <img src="${item.coverUrl || ''}" alt="cover">
+        <span>${item.title || ''}</span>
+        <div class="item-controls">
+          <button class="playlist-play" data-index="${index}">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+          <button class="playlist-remove" data-index="${index}">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor">
+              <path d="M6 18L18 6M6 6l12 12" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+      `;
+      div.querySelector('.playlist-play').addEventListener('click', (e) => {
+        e.stopPropagation();
+        loadMedia(item);
+      });
+      div.querySelector('.playlist-remove').addEventListener('click', (e) => {
+        e.stopPropagation();
+        playlist.splice(index, 1);
         localStorage.setItem('playlist', JSON.stringify(playlist));
-        localStorage.setItem('likes', JSON.stringify(likes));
-        localStorage.setItem('history', JSON.stringify(historyList));
-      };
-      const throttle = (func, limit) => {
-        let lastCall = null;
-        return (...args) => {
-          const now = Date.now();
-          if (!lastCall || now - lastCall > limit) {
-            lastCall = now;
-            return func(...args);
-          }
-        };
-      };
-      const throttledSaveState = throttle(saveState, 500);
-      const loadImageWithFallback = (imgElement, src, alt, fallbackSrc) => {
-        imgElement.src = src;
-        imgElement.alt = alt;
-        imgElement.onerror = () => {
-          imgElement.src = fallbackSrc || 'https://via.placeholder.com/24';
-          imgElement.onerror = null;
-        };
-      };
-      const cleanEvents = () => {
-        mediaElement.removeEventListener('timeupdate', updateProgress);
-        mediaElement.removeEventListener('loadedmetadata', updateProgress);
-        mediaElement.removeEventListener('volumechange', checkMute);
-        mediaElement.removeEventListener('ended', handleMediaEnd);
-        const newMediaElement = mediaElement.cloneNode(true);
-        mediaElement.parentNode.replaceChild(newMediaElement, mediaElement);
-        mediaElement = newMediaElement;
-        mediaElement.addEventListener('timeupdate', updateProgress);
-        mediaElement.addEventListener('loadedmetadata', updateProgress);
-        mediaElement.addEventListener('volumechange', checkMute);
-        mediaElement.addEventListener('ended', handleMediaEnd);
-      };
-      const mapEpisodeToMedia = (item) => {
-        return {
-          mediaUrl: item.mediaUrl || '',
-          mediaType: item.type || 'audio',
-          coverUrlContainer: item.coverUrl || '',
-          coverUrlInfo: item.series?.portada_serie || item.coverUrl || '',
-          title: item.title || '',
-          detailUrl: item.detailUrl || '',
-          author: item.series?.titulo_serie || 'Unknown',
-          next: [],
-          text: item.description || '',
-          allowDownload: true
-        };
-      };
-      const loadState = () => {
-        const state = JSON.parse(localStorage.getItem('playerState')) || {};
-        if (state.mediaUrl) {
-          loadMedia(
-            state.mediaUrl,
-            state.mediaType,
-            state.coverUrlContainer,
-            state.coverUrlInfo,
-            state.title,
-            state.detailUrl,
-            state.author || 'Roberto',
-            state.next || [],
-            state.text || '',
-            state.allowDownload || true
-          );
-          mediaElement.addEventListener('canplay', () => {
-            mediaElement.currentTime = state.currentTime || 0;
-            mediaElement.playbackRate = state.playbackRate || 1;
-            mediaElement.muted = state.isMuted || false;
-            isAudioMode = state.isAudioMode || true;
-            updateMediaMode();
-            if (state.isPlaying) {
-              playWithFallback();
-              updateIcons(true);
-              updateOpenPlayerButton(true);
-            } else {
-              mediaElement.pause();
-              updateIcons(false);
-              updateOpenPlayerButton(false);
-            }
-          }, { once: true });
-          updateSpeedButtons(state.playbackRate || 1);
-          repeatMode = state.repeatMode || 0;
-          updateRepeatButton();
-          activeList = state.activeList || 'next';
-          userPlaylistAutoPlay = state.userPlaylistAutoPlay || false;
-          timerValue = state.timerValue || 0;
-          if (timerValue !== 0) {
-            setupTimer();
-          }
-          showMinimized();
-          updatePlaylist();
-          updateLikes();
-          updateModeToggleState();
-          cachedRecomendados = [...window.RECOMENDADOS];
-        } else {
-          const programa = window.PROGRAMA_DEL_DIA || {
-            mediaUrl: 'https://awscdn.podcasts.com/audio-vhhlggMJNysHnLYW8KXAQwu4w.mp3',
-            mediaType: 'audio',
-            coverUrlContainer: 'https://s3.amazonaws.com/podcasts-image-uploads/el-populismo-y-la-democracia-jesus-huerta-de-soto-1400x1400.png',
-            coverUrlInfo: 'https://www.edu.balta.lat/web/image/415-8ae27244/media.png',
-            title: 'El populismo y la democracia',
-            detailUrl: '#',
-            author: "Jesús Huerta de Soto",
-            text: "No disponible",
-            allowDownload: true
-          };
-          loadMedia(programa.mediaUrl, programa.mediaType, programa.coverUrlContainer, programa.coverUrlInfo, programa.title, programa.detailUrl, programa.author, [], programa.text, programa.allowDownload);
-          showMinimized();
-          cachedRecomendados = [...window.RECOMENDADOS];
-        }
-        updateMediaSession();
-      };
-      const playWithFallback = () => {
-        mediaElement.muted = isMuted;
-        mediaElement.play().then(() => {
-          updateIcons(true);
-          updateAllItemIcons(true);
-          isAutoMuted = false;
-          updateMediaSession();
-          updateOpenPlayerButton(true);
-        }).catch((error) => {
-          console.log("Autoplay blocked, trying muted:", error);
-          mediaElement.muted = true;
-          isMuted = true;
-          isAutoMuted = true;
-          isUserMuted = false;
-          mediaElement.play().then(() => {
-            updateIcons(true);
-            updateAllItemIcons(true);
-            showMuteIndicator();
-            updateMediaSession();
-            updateOpenPlayerButton(true);
-          }).catch((err) => {
-            console.log("Play failed:", err);
-          });
-        });
-      };
-      const showMuteIndicator = () => {
-        if (isAutoMuted && !isUserMuted) {
-          muteIndicator.style.display = 'block';
-        } else {
-          muteIndicator.style.display = 'none';
-        }
-      };
-      const updateMediaMode = () => {
-        mediaModeToggle.classList.toggle('audio', isAudioMode);
-        mediaModeToggle.classList.toggle('video', !isAudioMode);
-        if (isAudioMode) {
-          mediaElement.style.display = 'none';
-          mediaCover.style.display = 'block';
-          mediaModeToggle.querySelector('.mode-right').classList.add('disabled');
-        } else {
-          if (currentMedia.mediaType === 'video') {
-            mediaElement.style.display = 'block';
-            mediaCover.style.display = 'none';
-            mediaModeToggle.querySelector('.mode-right').classList.remove('disabled');
-          } else {
-            mediaElement.style.display = 'none';
-            mediaCover.style.display = 'block';
-            mediaModeToggle.querySelector('.mode-right').classList.add('disabled');
-          }
-        }
-      };
-      const toggleMediaMode = () => {
-        if (currentMedia.mediaType === 'video') {
-          isAudioMode = !isAudioMode;
-          updateMediaMode();
-          updateModeToggleState();
-          throttledSaveState();
-        }
-      };
-      const updateModeToggleState = () => {
-        const toggle = document.getElementById('mediaModeToggle');
-        if (!toggle) return;
-        const left = toggle.querySelector('.mode-left');
-        const right = toggle.querySelector('.mode-right');
-        toggle.classList.remove('disabled', 'audio', 'video', 'active-left', 'active-right');
-        left.classList.remove('active');
-        right.classList.remove('active');
-        if (!currentMedia || currentMedia.mediaType !== 'video') {
-          toggle.classList.add('disabled');
-          toggle.classList.add('audio');
-          left.classList.add('active');
-        } else {
-          toggle.classList.remove('disabled');
-          if (isAudioMode) {
-            toggle.classList.add('audio', 'active-left');
-            left.classList.add('active');
-          } else {
-            toggle.classList.add('video', 'active-right');
-            right.classList.add('active');
-          }
-        }
-      };
-      const loadMedia = (mediaUrl, mediaType, coverUrlContainer, coverUrlInfo, title, detailUrl, author = 'Roberto', next = [], text = '', allowDownload = true, isFromRecomendados = false, recIndex = -1) => {
-        try {
-          currentEpisodeId = mediaUrl;
-          if (timerId && timerValue === 'end') {
-            clearTimeout(timerId);
-            timerId = null;
-            updateTimerButtons(0);
-            timerContainer.classList.remove('active');
-          }
-          cleanEvents();
-          currentMedia = { mediaUrl, mediaType, coverUrlContainer, coverUrlInfo, title, detailUrl, author, next, text, allowDownload };
-          mediaElement.src = mediaUrl;
-          mediaElement.load();
-          loadImageWithFallback(
-            mediaCover,
-            coverUrlContainer || 'https://niki-chiton-jesus.odoo.com/web/image/slide.channel/1/image_1024/Cuando%20comenz%C3%B3%20todo?unique=6ba13cc',
-            'Cover',
-            'https://via.placeholder.com/300'
-          );
-          episodeTitle.textContent = title || '';
-          episodeTitle.setAttribute('data-text', title || '');
-          episodeTitleMinimized.textContent = title || '';
-          episodeTitleMinimized.setAttribute('data-text', title || '');
-          fullscreenTitle.textContent = title || '';
-          episodeAuthorElem.textContent = author;
-          loadImageWithFallback(
-            episodeInfo.querySelector('.left-section img'),
-            coverUrlInfo || 'https://i.pinimg.com/280x280_RS/2a/ec/33/2aec332af056fc746a0a3552a6f97fc5.jpg',
-            'Portada',
-            'https://via.placeholder.com/40'
-          );
-          loadImageWithFallback(
-            minimizedCover,
-            coverUrlInfo || 'https://i.pinimg.com/280x280_RS/2a/ec/33/2aec332af056fc746a0a3552a6f97fc5.jpg',
-            'Portada',
-            'https://via.placeholder.com/40'
-          );
-          playerUniversal.style.display = 'block';
-          nextList = next;
-          episodeText = text;
-          currentIndex = nextList.findIndex(item => item.mediaUrl === mediaUrl);
-          if (currentIndex === -1) currentIndex = 0;
-          if (next.length === 0) {
-            if (isFromRecomendados && recIndex >= 0) {
-              nextList = cachedRecomendados.slice(recIndex + 1).map(mapEpisodeToMedia);
-              activeList = 'next';
-            } else {
-              nextList = cachedRecomendados.map(mapEpisodeToMedia);
-              activeList = 'next';
-            }
-          }
-          updateNextList();
-          updateRecomendadosList();
-          updateTextContent();
-          updateAddButton();
-          updateDownloadButton();
-          updateLikesButton();
-          const playEvent = new CustomEvent('universalVideoPlay', { detail: { playerId: 'universal-player' } });
-          window.dispatchEvent(playEvent);
-          updatePlaylist();
-          updateLikes();
-          checkTitleOverflow();
-          checkMinimizedTitleOverflow();
-          if (!historyList.some(item => item.mediaUrl === mediaUrl)) {
-            historyList.push(currentMedia);
-            throttledSaveState();
-          }
-          isAudioMode = mediaType !== 'video';
-          updateMediaMode();
-          updateModeToggleState();
-          updateMediaSession();
-          updateOpenPlayerButton(!mediaElement.paused);
-        } catch (error) {
-          console.error('Error loading media:', error);
-        }
-      };
-      const updateDownloadButton = () => {
-        if (currentMedia.allowDownload) {
-          downloadBtn.classList.remove('disabled');
-          loadImageWithFallback(downloadIcon, 'https://nikichitonjesus.odoo.com/web/image/624-ec376d7f/descargar.png', 'Download', 'https://via.placeholder.com/20');
-        } else {
-          downloadBtn.classList.add('disabled');
-          loadImageWithFallback(downloadIcon, 'https://nikichitonjesus.odoo.com/web/image/1051-622a3db3/no-desc.webp', 'Download Disabled', 'https://via.placeholder.com/20');
-        }
-      };
-      const updateAddButton = () => {
-        if (playlist.some(item => item.mediaUrl === currentMedia?.mediaUrl)) {
-          loadImageWithFallback(addToPlaylistIcon, 'https://nikichitonjesus.odoo.com/web/image/1112-d141b3eb/a%C3%B1adido.png', 'Added', 'https://via.placeholder.com/20');
-        } else {
-          loadImageWithFallback(addToPlaylistIcon, 'https://nikichitonjesus.odoo.com/web/image/772-ea85aa4b/a%C3%B1adir%20a.png', 'Add to Playlist', 'https://via.placeholder.com/20');
-        }
-      };
-      const updateLikesButton = () => {
-        if (likes.some(item => item.mediaUrl === currentMedia?.mediaUrl)) {
-          loadImageWithFallback(likesIcon, 'https://nikichitonjesus.odoo.com/web/image/1069-2ad205f2/megus.webp', 'Liked', 'https://via.placeholder.com/20');
-          likesBtn.querySelector('span').textContent = 'Te gusta';
-        } else {
-          loadImageWithFallback(likesIcon, 'https://marca1.odoo.com/web/image/511-0363beb5/meg.svg', 'Me gusta', 'https://via.placeholder.com/20');
-          likesBtn.querySelector('span').textContent = 'Me gusta';
-        }
-      };
-      const toggleLikes = () => {
-        if (!currentMedia) return;
-        const index = likes.findIndex(item => item.mediaUrl === currentMedia.mediaUrl);
-        if (index > -1) {
-          likes.splice(index, 1);
-        } else {
-          likes.unshift({ ...currentMedia, addedDate: Date.now() });
-        }
-        localStorage.setItem('likes', JSON.stringify(likes));
-        updateLikes();
-        updateLikesButton();
-        throttledSaveState();
-      };
-      const updateLikes = () => {
-        likesCarousel.innerHTML = '';
-        likes.sort((a, b) => b.addedDate - a.addedDate);
-        likesView.className = 'likes-view ' + likesViewMode;
-        if (likes.length > 0) {
-          likes.forEach((item) => {
-            const div = document.createElement('div');
-            div.className = 'likes-item';
-            div.innerHTML = \`
-              <img src="\${item.coverUrlInfo || 'https://via.placeholder.com/80'}" alt="Cover" loading="lazy">
-              <span>\${item.title}</span>
-            \`;
-            div.addEventListener('click', (e) => {
-              e.stopPropagation();
-              loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, item.next, item.text, item.allowDownload);
-              togglePlayPause(true);
-              throttledSaveState();
-            });
-            likesCarousel.appendChild(div);
-          });
-        } else {
-          likesCarousel.innerHTML = '<div class="no-items">No hay me gusta</div>';
-        }
-      };
-      const toggleLikesView = () => {
-        likesViewMode = likesViewMode === 'carousel' ? 'grid' : 'carousel';
-        updateLikes();
-        viewAllLikes.textContent = likesViewMode === 'grid' ? 'Ver carrusel' : 'Ver todo';
-      };
-      const updatePlaylist = () => {
-        playlistItems.innerHTML = '';
-        if (playlist.length > 0) {
-          playlist.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = 'playlist-item';
-            div.draggable = true;
-            div.dataset.index = index;
-            if (item.mediaUrl === currentMedia?.mediaUrl) {
-              div.classList.add('active');
-            }
-            div.innerHTML = \`
-              <img class="cover" src="\${item.coverUrlInfo || 'https://via.placeholder.com/30'}" alt="Cover" loading="lazy">
-              <span>\${item.title}</span>
-              <div class="item-controls">
-                <button class="item-play-pause">
-                  <img src="\${(item.mediaUrl === currentMedia?.mediaUrl) ? (mediaElement.paused ? 'https://marca1.odoo.com/web/image/508-f876320c/play.svg' : 'https://nikichitonjesus.odoo.com/web/image/983-5c0bffd9/Pause.webp') : 'https://marca1.odoo.com/web/image/508-f876320c/play.svg'}" alt="Play/Pause" loading="lazy">
-                </button>
-                <button class="remove-playlist-item" data-index="\${index}">
-                  <img src="https://niki-chiton-jesus.odoo.com/web/image/457-5d13d269/remove.webp" alt="Remove" loading="lazy">
-                </button>
-                <div class="drag-handle">
-                  <img src="https://nikichitonjesus.odoo.com/web/image/813-b2644056/listbtn.webp" alt="Drag" loading="lazy">
-                </div>
-              </div>
-            \`;
-            div.addEventListener('click', (e) => {
-              if (!e.target.closest('.remove-playlist-item') && !e.target.closest('.drag-handle') && !e.target.closest('.item-play-pause')) {
-                e.stopPropagation();
-                currentIndex = index;
-                loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, playlist, item.text, item.allowDownload);
-                togglePlayPause(true);
-                throttledSaveState();
-              }
-            });
-            div.querySelector('.item-play-pause').addEventListener('click', (e) => {
-              e.stopPropagation();
-              if (item.mediaUrl !== currentMedia?.mediaUrl) {
-                currentIndex = index;
-                loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, playlist, item.text, item.allowDownload);
-              }
-              togglePlayPause();
-            });
-            playlistItems.appendChild(div);
-          });
-          document.querySelectorAll('.remove-playlist-item').forEach(button => {
-            button.addEventListener('click', (e) => {
-              e.stopPropagation();
-              const index = parseInt(e.target.closest('button').dataset.index);
-              playlist.splice(index, 1);
-              localStorage.setItem('playlist', JSON.stringify(playlist));
-              if (index <= currentIndex) {
-                currentIndex--;
-              }
-              updatePlaylist();
-              updateAddButton();
-            });
-          });
-          setupPlaylistDrag();
-        } else {
-          playlistItems.innerHTML = '<div class="no-items">No has agregado tus episodios</div>';
-        }
-      };
-      const setupPlaylistDrag = () => {
-        const items = playlistItems.querySelectorAll('.playlist-item');
-        items.forEach(item => {
-          item.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', item.dataset.index);
-            item.classList.add('dragging');
-          });
-          item.addEventListener('dragend', (e) => {
-            item.classList.remove('dragging');
-          });
-          item.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            const dragging = playlistItems.querySelector('.dragging');
-            if (dragging !== item) {
-              const from = parseInt(dragging.dataset.index);
-              const to = parseInt(item.dataset.index);
-              if (from < to) {
-                item.after(dragging);
-              } else {
-                item.before(dragging);
-              }
-              const newItems = playlistItems.querySelectorAll('.playlist-item');
-              newItems.forEach((it, idx) => it.dataset.index = idx);
-              const temp = playlist[from];
-              playlist.splice(from, 1);
-              playlist.splice(to, 0, temp);
-              localStorage.setItem('playlist', JSON.stringify(playlist));
-              currentIndex = playlist.findIndex(p => p.mediaUrl === currentMedia.mediaUrl);
-            }
-          });
-          item.addEventListener('drop', (e) => {
-            e.preventDefault();
-          });
-          item.addEventListener('touchstart', (e) => {
-            if (e.target.closest('.drag-handle')) {
-              item.classList.add('dragging');
-            }
-          });
-          item.addEventListener('touchmove', (e) => {
-            if (item.classList.contains('dragging')) {
-              e.preventDefault();
-            }
-          });
-          item.addEventListener('touchend', (e) => {
-            item.classList.remove('dragging');
-          });
-        });
-      };
-      const updateNextList = () => {
-        nextItems.innerHTML = '';
-        if (nextList.length > 0) {
-          nextList.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = 'next-item';
-            if (item.mediaUrl === currentMedia?.mediaUrl) {
-              div.classList.add('active');
-            }
-            div.innerHTML = \`
-              <img class="cover" src="\${item.coverUrlInfo || 'https://via.placeholder.com/30'}" alt="Cover" loading="lazy">
-              <span>\${item.title}</span>
-              <div class="item-controls">
-                <button class="item-play-pause">
-                  <img src="\${(item.mediaUrl === currentMedia?.mediaUrl) ? (mediaElement.paused ? 'https://marca1.odoo.com/web/image/508-f876320c/play.svg' : 'https://nikichitonjesus.odoo.com/web/image/983-5c0bffd9/Pause.webp') : 'https://marca1.odoo.com/web/image/508-f876320c/play.svg'}" alt="Play/Pause" loading="lazy">
-                </button>
-              </div>
-            \`;
-            div.addEventListener('click', (e) => {
-              e.stopPropagation();
-              currentIndex = index;
-              loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, nextList, item.text, item.allowDownload);
-              togglePlayPause(true);
-              throttledSaveState();
-            });
-            div.querySelector('.item-play-pause').addEventListener('click', (e) => {
-              e.stopPropagation();
-              if (item.mediaUrl !== currentMedia?.mediaUrl) {
-                currentIndex = index;
-                loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, nextList, item.text, item.allowDownload);
-              }
-              togglePlayPause();
-            });
-            nextItems.appendChild(div);
-          });
-        } else {
-          nextItems.innerHTML = '<div class="no-items">Episodio único</div>';
-        }
-      };
-      const updateRecomendadosList = () => {
-        if (cachedRecomendados.length === 0) {
-          cachedRecomendados = [...window.RECOMENDADOS];
-        }
-        recomendadosItems.innerHTML = '';
-        if (cachedRecomendados.length > 0) {
-          recomendadosSeparator.style.display = 'block';
-          cachedRecomendados.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = 'next-item';
-            div.innerHTML = \`
-              <img class="cover" src="\${item.coverUrl || 'https://via.placeholder.com/30'}" alt="Cover" loading="lazy">
-              <span>\${item.title}</span>
-              <div class="item-controls">
-                <button class="item-play-pause">
-                  <img src="\${(item.mediaUrl === currentMedia?.mediaUrl) ? (mediaElement.paused ? 'https://marca1.odoo.com/web/image/508-f876320c/play.svg' : 'https://nikichitonjesus.odoo.com/web/image/983-5c0bffd9/Pause.webp') : 'https://marca1.odoo.com/web/image/508-f876320c/play.svg'}" alt="Play/Pause" loading="lazy">
-                </button>
-              </div>
-            \`;
-            div.addEventListener('click', (e) => {
-              e.stopPropagation();
-              const mappedItem = mapEpisodeToMedia(item);
-              loadMedia(
-                mappedItem.mediaUrl,
-                mappedItem.mediaType,
-                mappedItem.coverUrlContainer,
-                mappedItem.coverUrlInfo,
-                mappedItem.title,
-                mappedItem.detailUrl,
-                mappedItem.author,
-                mappedItem.next,
-                mappedItem.text,
-                mappedItem.allowDownload,
-                true,
-                index
-              );
-              togglePlayPause(true);
-              throttledSaveState();
-            });
-            div.querySelector('.item-play-pause').addEventListener('click', (e) => {
-              e.stopPropagation();
-              if (item.mediaUrl !== currentMedia?.mediaUrl) {
-                const mappedItem = mapEpisodeToMedia(item);
-                loadMedia(
-                  mappedItem.mediaUrl,
-                  mappedItem.mediaType,
-                  mappedItem.coverUrlContainer,
-                  mappedItem.coverUrlInfo,
-                  mappedItem.title,
-                  mappedItem.detailUrl,
-                  mappedItem.author,
-                  mappedItem.next,
-                  mappedItem.text,
-                  mappedItem.allowDownload,
-                  true,
-                  index
-                );
-              }
-              togglePlayPause();
-            });
-            recomendadosItems.appendChild(div);
-          });
-        } else {
-          recomendadosSeparator.style.display = 'none';
-        }
-      };
-      const updateTextContent = () => {
-        textContent.innerHTML = \`<h4>\${currentMedia?.title || ''}</h4><p>\${episodeText || 'No hay texto disponible'}</p>\`;
-      };
-      const showExpanded = () => {
-        isExpanded = true;
-        isHidden = false;
-        playerExpanded.style.display = 'flex';
-        playerMinimized.style.display = 'none';
-        throttledSaveState();
-        updatePlaylist();
-        updateLikes();
-        updateNextList();
-        updateRecomendadosList();
-        updateTextContent();
-        checkTitleOverflow();
-        checkMinimizedTitleOverflow();
-      };
-      const showMinimized = () => {
-        isExpanded = false;
-        isHidden = false;
-        playerExpanded.style.display = 'none';
-        playerMinimized.style.display = 'flex';
-        panelContainer.style.display = 'none';
-        throttledSaveState();
-        checkTitleOverflow();
-        checkMinimizedTitleOverflow();
-      };
-      const hidePlayer = () => {
-        isHidden = true;
-        playerExpanded.style.display = 'none';
-        playerMinimized.style.display = 'none';
-        panelContainer.style.display = 'none';
-        throttledSaveState();
-      };
-      const togglePanel = (tab = 'cola') => {
-        const wasVisible = panelContainer.style.display === 'flex';
-        panelContainer.style.display = wasVisible ? 'none' : 'flex';
-        if (panelContainer.style.display === 'flex') {
-          const group = getGroup(tab);
-          updateVisibleTabs(group);
-          switchTab(tab);
-          closePanelBtn.classList.add('visible');
-          isPanelFullHeight = false;
-          panelContainer.classList.remove('full-height');
-          togglePanelHeightBtn.querySelector('img').src = 'https://marca1.odoo.com/web/image/513-e0bcd17f/maz.svg';
-          minimizeBtn.style.position = 'fixed';
-          minimizeBtn.style.bottom = 'auto';
-          minimizeBtn.style.top = 'max(12px, env(safe-area-inset-top))';
-        } else {
-          closePanelBtn.classList.remove('visible');
-        }
-      };
-      const togglePanelHeight = () => {
-        isPanelFullHeight = !isPanelFullHeight;
-        panelContainer.classList.toggle('full-height', isPanelFullHeight);
-        togglePanelHeightBtn.querySelector('img').src = isPanelFullHeight ? 'https://marca1.odoo.com/web/image/514-efa5e8dd/minimizar.svg' : 'https://marca1.odoo.com/web/image/513-e0bcd17f/maz.svg';
-        if (isPanelFullHeight) {
-          minimizeBtn.style.position = 'absolute';
-          minimizeBtn.style.bottom = '10px';
-          minimizeBtn.style.top = 'auto';
-        } else {
-          minimizeBtn.style.position = 'fixed';
-          minimizeBtn.style.bottom = 'auto';
-          minimizeBtn.style.top = 'max(12px, env(safe-area-inset-top))';
-        }
-      };
-      const switchTab = (tab) => {
-        document.querySelectorAll('.tabs a').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.panel-section').forEach(s => s.classList.remove('active'));
-        if (tab === 'cola') {
-          tabCola.classList.add('active');
-          colaContent.classList.add('active');
-        } else if (tab === 'detalles') {
-          tabDetalles.classList.add('active');
-          detallesContent.classList.add('active');
-        } else if (tab === 'biblioteca') {
-          tabBiblioteca.classList.add('active');
-          bibliotecaContent.classList.add('active');
-        } else if (tab === 'velocidad') {
-          tabVelocidad.classList.add('active');
-          velocidadContent.classList.add('active');
-        } else if (tab === 'temporizador') {
-          tabTemporizador.classList.add('active');
-          temporizadorContent.classList.add('active');
-          updateTimerView();
-        }
-      };
-      const updateTimerView = () => {
-        if (timerValue !== 0 && timerValue !== '0') {
-          timerCountdown.style.display = 'flex';
-          timerOptions.style.display = 'none';
-        } else {
-          timerCountdown.style.display = 'none';
-          timerOptions.style.display = 'block';
-        }
-      };
-      const updateIcons = (isPlaying) => {
-        const playIcon = 'https://marca1.odoo.com/web/image/508-f876320c/play.svg';
-        const pauseIcon = 'https://nikichitonjesus.odoo.com/web/image/983-5c0bffd9/Pause.webp';
-        loadImageWithFallback(playPauseIconExpanded, isPlaying ? pauseIcon : playIcon, isPlaying ? 'Pause' : 'Play', 'https://via.placeholder.com/24');
-        loadImageWithFallback(playPauseIconMinimized, isPlaying ? pauseIcon : playIcon, isPlaying ? 'Pause' : 'Play', 'https://via.placeholder.com/24');
-        loadImageWithFallback(playPauseIconMedia, isPlaying ? pauseIcon : playIcon, isPlaying ? 'Pause' : 'Play', 'https://via.placeholder.com/24');
-        loadImageWithFallback(playPauseIconFullscreen, isPlaying ? pauseIcon : playIcon, isPlaying ? 'Pause' : 'Play', 'https://via.placeholder.com/24');
-      };
-      const updateAllItemIcons = (isPlaying) => {
-        document.querySelectorAll('.item-play-pause img').forEach(icon => {
-          const item = icon.closest('.playlist-item, .next-item');
-          const isCurrent = item.classList.contains('active');
-          loadImageWithFallback(icon, isCurrent ? (isPlaying ? 'https://nikichitonjesus.odoo.com/web/image/983-5c0bffd9/Pause.webp' : 'https://nikichitonjesus.odoo.com/web/image/984-ba35a699/play.webp') : 'https://marca1.odoo.com/web/image/508-f876320c/play.svg', isPlaying ? 'Pause' : 'Play', 'https://via.placeholder.com/20');
-        });
-      };
-      const togglePlayPause = (forcePlay = false) => {
-        if (mediaElement.dataset.isToggling === 'true') return;
-        mediaElement.dataset.isToggling = 'true';
-        if (forcePlay || mediaElement.paused) {
-          playWithFallback();
-          updateOpenPlayerButton(true);
-        } else {
-          mediaElement.pause();
-          updateIcons(false);
-          updateAllItemIcons(false);
-          updateOpenPlayerButton(false);
-        }
-        checkMute();
-        throttledSaveState();
-        setTimeout(() => {
-          mediaElement.dataset.isToggling = 'false';
-        }, 100);
-      };
-      const rewind = (seconds = 15) => {
-        if (isNaN(mediaElement.duration)) return;
-        mediaElement.currentTime = Math.max(0, mediaElement.currentTime - seconds);
-        showSeekIndicator('left', seconds);
-        throttledSaveState();
-      };
-      const forward = (seconds = 15) => {
-        if (isNaN(mediaElement.duration)) return;
-        mediaElement.currentTime = Math.min(mediaElement.duration, mediaElement.currentTime + seconds);
-        showSeekIndicator('right', seconds);
-        throttledSaveState();
-      };
-      const previous = () => {
-        if (repeatMode !== 0) return;
-        if (activeList === 'playlist' && userPlaylistAutoPlay && currentIndex > 0) {
-          currentIndex--;
-          const item = playlist[currentIndex];
-          loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, playlist, item.text, item.allowDownload);
-          togglePlayPause(true);
-        } else if (activeList === 'next' && currentIndex > 0) {
-          currentIndex--;
-          const item = nextList[currentIndex];
-          loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, nextList, item.text, item.allowDownload);
-          togglePlayPause(true);
-        } else if (historyList.length > 0) {
-          const prevItem = historyList.pop();
-          loadMedia(prevItem.mediaUrl, prevItem.mediaType, prevItem.coverUrlContainer, prevItem.coverUrlInfo, prevItem.title, prevItem.detailUrl, prevItem.author, prevItem.next, prevItem.text, prevItem.allowDownload);
-          togglePlayPause(true);
-        } else {
-          mediaElement.currentTime = 0;
-        }
-        throttledSaveState();
-      };
-      const next = () => {
-        if (repeatMode !== 0) return;
-        if (activeList === 'next' && currentIndex < nextList.length - 1) {
-          currentIndex++;
-          const item = nextList[currentIndex];
-          loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, nextList, item.text, item.allowDownload);
-          togglePlayPause(true);
-        } else if (activeList === 'playlist' && userPlaylistAutoPlay && currentIndex < playlist.length - 1) {
-          currentIndex++;
-          const item = playlist[currentIndex];
-          loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, playlist, item.text, item.allowDownload);
-          togglePlayPause(true);
-        } else if (userPlaylistAutoPlay && playlist.length > 0) {
-          activeList = 'playlist';
-          currentIndex = 0;
-          const item = playlist[currentIndex];
-          loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, playlist, item.text, item.allowDownload);
-          togglePlayPause(true);
-        } else if (cachedRecomendados.length > 0) {
-          const nextRecItem = cachedRecomendados.shift();
-          const mappedRec = mapEpisodeToMedia(nextRecItem);
-          loadMedia(
-            mappedRec.mediaUrl,
-            mappedRec.mediaType,
-            mappedRec.coverUrlContainer,
-            mappedRec.coverUrlInfo,
-            mappedRec.title,
-            mappedRec.detailUrl,
-            mappedRec.author,
-            cachedRecomendados.map(mapEpisodeToMedia),
-            mappedRec.text,
-            mappedRec.allowDownload,
-            true,
-            0
-          );
-          togglePlayPause(true);
-        }
-        throttledSaveState();
-      };
-      const handleMediaEnd = () => {
-        if (repeatMode === 2) {
-          mediaElement.play();
-        } else if (repeatMode === 1) {
-          mediaElement.play();
-          repeatMode = 0;
-          updateRepeatButton();
-        } else {
-          if (activeList === 'next' && currentIndex < nextList.length - 1) {
-            currentIndex++;
-            const nextItem = nextList[currentIndex];
-            loadMedia(nextItem.mediaUrl, nextItem.mediaType, nextItem.coverUrlContainer, nextItem.coverUrlInfo, nextItem.title, nextItem.detailUrl, nextItem.author, nextList, nextItem.text, nextItem.allowDownload);
-            togglePlayPause(true);
-          } else if (activeList === 'playlist' && userPlaylistAutoPlay && currentIndex < playlist.length - 1) {
-            currentIndex++;
-            const nextItem = playlist[currentIndex];
-            loadMedia(nextItem.mediaUrl, nextItem.mediaType, nextItem.coverUrlContainer, nextItem.coverUrlInfo, nextItem.title, nextItem.detailUrl, nextItem.author, playlist, nextItem.text, nextItem.allowDownload);
-            togglePlayPause(true);
-          } else if (userPlaylistAutoPlay && playlist.length > 0) {
-            activeList = 'playlist';
-            currentIndex = 0;
-            const nextItem = playlist[currentIndex];
-            loadMedia(nextItem.mediaUrl, nextItem.mediaType, nextItem.coverUrlContainer, nextItem.coverUrlInfo, nextItem.title, nextItem.detailUrl, nextItem.author, playlist, nextItem.text, nextItem.allowDownload);
-            togglePlayPause(true);
-          } else if (cachedRecomendados.length > 0) {
-            const nextRecItem = cachedRecomendados.shift();
-            const mappedRec = mapEpisodeToMedia(nextRecItem);
-            loadMedia(
-              mappedRec.mediaUrl,
-              mappedRec.mediaType,
-              mappedRec.coverUrlContainer,
-              mappedRec.coverUrlInfo,
-              mappedRec.title,
-              mappedRec.detailUrl,
-              mappedRec.author,
-              cachedRecomendados.map(mapEpisodeToMedia),
-              mappedRec.text,
-              mappedRec.allowDownload,
-              true,
-              0
-            );
-            togglePlayPause(true);
-          }
-        }
-        throttledSaveState();
-      };
-      const handleMediaTap = (e) => {
-        if (e.target.closest('button')) return;
-        e.preventDefault();
-        e.stopPropagation();
-        const now = Date.now();
-        if (now - lastTapTime < 250) {
-          tapCount++;
-        } else {
-          tapCount = 1;
-        }
-        lastTapTime = now;
-        const rect = mediaContainer.getBoundingClientRect();
-        let x;
-        if (e.changedTouches) {
-          x = e.changedTouches[0].clientX - rect.left;
-        } else {
-          x = e.clientX - rect.left;
-        }
-        tapSide = x < rect.width / 2 ? 'left' : 'right';
-        if (tapTimeout) clearTimeout(tapTimeout);
-        tapTimeout = setTimeout(() => {
-          if (tapCount === 1) {
-            showControls = !showControls;
-            mediaContainer.classList.toggle('show-controls', showControls);
-            if (showControls) {
-              muteIndicator.style.display = 'none';
-            } else if (isAutoMuted && !isUserMuted) {
-              showMuteIndicator();
-            }
-          } else if (tapCount > 1) {
-            const seconds = 15 * (tapCount - 1);
-            if (tapSide === 'left') {
-              rewind(seconds);
-            } else {
-              forward(seconds);
-            }
-          }
-          tapCount = 0;
-        }, 250);
-      };
-      let autoHideTimer = null;
-      const handleFullscreenTap = (e) => {
-        if (!isFullscreenMode || e.target.closest('button')) return;
-        e.preventDefault();
-        e.stopPropagation();
-        const isShown = fullscreenControls.classList.toggle('show-controls');
-        if (isShown) {
-          startAutoHideTimer();
-        }
-      };
-      const startAutoHideTimer = () => {
-        clearTimeout(autoHideTimer);
-        autoHideTimer = setTimeout(() => {
-          if (isFullscreenMode) {
-            fullscreenControls.classList.remove('show-controls');
-          } else {
-            mediaContainer.classList.remove('show-controls');
-          }
-        }, 3000);
-      };
-      const showSeekIndicator = (side, seconds) => {
-        const indicator = side === 'left' ? seekIndicatorLeft : seekIndicatorRight;
-        const secondsElem = side === 'left' ? seekSecondsLeft : seekSecondsRight;
-        secondsElem.textContent = \`\${seconds}s\`;
-        indicator.classList.add('show');
-        setTimeout(() => indicator.classList.remove('show'), 1000);
-      };
-      const updateProgress = () => {
-        if (!mediaElement.duration) return;
-        const percentage = (mediaElement.currentTime / mediaElement.duration) * 100;
-        progressBarExpanded.style.width = percentage + '%';
-        progressBarMinimized.style.width = percentage + '%';
-        progressBarFullscreen.style.width = percentage + '%';
-        currentTimeExpanded.textContent = formatTime(mediaElement.currentTime);
-        durationExpanded.textContent = formatTime(mediaElement.duration);
-        currentTimeFullscreen.textContent = formatTime(mediaElement.currentTime);
-        durationFullscreen.textContent = formatTime(mediaElement.duration);
-        throttledSaveState();
-      };
-      const formatTime = (seconds) => {
-        if (isNaN(seconds)) return "00:00";
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return \`\${mins.toString().padStart(2, '0')}:\${secs.toString().padStart(2, '0')}\`;
-      };
-      const updateProgressDrag = (clientX, container, progressBar) => {
-        const rect = container.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const width = rect.width;
-        let percentage = (x / width) * 100;
-        percentage = Math.max(0, Math.min(100, percentage));
-        progressBar.style.width = percentage + '%';
-        if (mediaElement.duration) {
-          mediaElement.currentTime = (percentage / 100) * mediaElement.duration;
-        }
-        throttledSaveState();
-      };
-      const updateSpeedButtons = (value) => {
-        currentSpeed.textContent = \`\${value}x\`;
-        if (value !== 1) {
-          speedContainer.classList.add('active');
-        } else {
-          speedContainer.classList.remove('active');
-        }
-      };
-      const setupTimer = () => {
-        if (timerId) clearTimeout(timerId);
-        if (timerCountdownInterval) clearInterval(timerCountdownInterval);
-        if (timerValue === 'end') {
-          currentEpisodeId = currentMedia.mediaUrl;
-          const updateEndTimer = () => {
-            const remaining = mediaElement.duration - mediaElement.currentTime;
-            if (remaining <= 0 && currentEpisodeId === currentMedia.mediaUrl) {
-              mediaElement.pause();
-              resetTimer();
-            }
-          };
-          mediaElement.addEventListener('timeupdate', updateEndTimer);
-          timerCountdownInterval = setInterval(() => {
-            countdownDisplay.textContent = formatTime(mediaElement.duration - mediaElement.currentTime);
-          }, 1000);
-        } else if (timerValue !== '0') {
-          const minutes = parseInt(timerValue);
-          let remaining = minutes * 60;
-          timerId = setTimeout(() => {
-            mediaElement.pause();
-            resetTimer();
-          }, remaining * 1000);
-          timerCountdownInterval = setInterval(() => {
-            remaining--;
-            countdownDisplay.textContent = formatTime(remaining);
-            if (remaining <= 0) clearInterval(timerCountdownInterval);
-          }, 1000);
-        }
-        updateTimerButtons(timerValue);
-        if (timerValue !== '0') timerContainer.classList.add('active');
-      };
-      const resetTimer = () => {
-        if (timerId) clearTimeout(timerId);
-        if (timerCountdownInterval) clearInterval(timerCountdownInterval);
-        timerValue = 0;
-        timerId = null;
-        timerCountdownInterval = null;
-        currentEpisodeId = null;
-        timerContainer.classList.remove('active');
-        timerCountdown.style.display = 'none';
-        timerOptions.style.display = 'block';
-        updateTimerButtons(0);
-        throttledSaveState();
-      };
-      const updateTimerButtons = (value) => {
-        timerOptions.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
-        const btn = timerOptions.querySelector(\`button[data-value="\${value}"]\`);
-        if (btn) btn.classList.add('selected');
-      };
-      const checkTitleOverflow = () => {
-        [episodeTitle].forEach(title => {
-          if (!title) return;
-          const parent = title.parentElement;
-          if (!parent) return;
-          title.classList.remove('scrolling-title');
-          title.style.animation = 'none';
-          requestAnimationFrame(() => {
-            const availableWidth = parent.offsetWidth;
-            if (title.scrollWidth > availableWidth) {
-              title.classList.add('scrolling-title');
-              title.style.animation = 'scrollTitle 40s linear infinite';
-            }
-          });
-        });
-      };
-      const checkMinimizedTitleOverflow = () => {
-        const title = episodeTitleMinimized;
-        const parent = title.parentElement;
-        if (!parent) return;
-        title.classList.remove('scrolling');
-        title.style.animation = 'none';
-        requestAnimationFrame(() => {
-          const availableWidth = parent.offsetWidth;
-          if (title.scrollWidth > availableWidth) {
-            title.classList.add('scrolling');
-            title.style.animation = 'scrollMinimizedTitle 20s linear infinite';
-          }
-        });
-      };
-      const checkMute = () => {
-        isMuted = mediaElement.muted;
-        isUserMuted = !isAutoMuted && isMuted;
-        const volumeIconSrc = isMuted ? 'https://nikichitonjesus.odoo.com/web/image/584-d2f5c35f/mute.png' : 'https://nikichitonjesus.odoo.com/web/image/587-e4437449/volumen.png';
-        loadImageWithFallback(volumeIcon, volumeIconSrc, isMuted ? 'Muted' : 'Volume', 'https://via.placeholder.com/24');
-        loadImageWithFallback(volumeIconFullscreen, volumeIconSrc, isMuted ? 'Muted' : 'Volume', 'https://via.placeholder.com/24');
-        showMuteIndicator();
-        throttledSaveState();
-      };
-      const updateRepeatButton = () => {
-        const span = repeatBtn.querySelector('span');
-        if (repeatMode === 0) {
-          span.textContent = 'Repetir';
-        } else if (repeatMode === 1) {
-          span.textContent = 'Repetir una vez';
-        } else {
-          span.textContent = 'Repetir infinito';
-        }
-        repeatBtn.classList.toggle('repeat-active', repeatMode > 0);
-      };
-      const updateOpenPlayerButton = (isPlaying) => {
-        const openPlayerBtn = document.querySelector('#openPlayerBtn');
-        if (!openPlayerBtn) return;
-        const img = openPlayerBtn.querySelector('img');
-        const textSpan = openPlayerBtn.querySelector('span');
-        if (img && textSpan) {
-          if (isPlaying) {
-            img.src = 'https://nikichitonjes-home.odoo.com/web/image/477-973a1ff8/Escuchar.gif';
-            img.alt = 'Escuchando';
-            textSpan.textContent = 'Escuchando';
-          } else {
-            img.src = 'https://nikichitonjes-home.odoo.com/web/image/478-0e3df8d3/reanudar.gif';
-            img.alt = 'Escuchar';
-            textSpan.textContent = 'Escuchar';
-          }
-        }
-      };
-      mediaContainer.addEventListener('mouseenter', () => {
-        if (isFullscreenMode) return;
-        mediaContainer.classList.add('show-controls');
-        startAutoHideTimer();
-      });
-      mediaContainer.addEventListener('mousemove', startAutoHideTimer);
-      mediaContainer.addEventListener('click', handleFullscreenTap);
-      mediaContainer.addEventListener('touchend', handleFullscreenTap);
-      mediaElement.addEventListener('timeupdate', updateProgress);
-      mediaElement.addEventListener('loadedmetadata', updateProgress);
-      mediaElement.addEventListener('ended', handleMediaEnd);
-      mediaElement.addEventListener('play', () => { 
-        updateIcons(true); 
-        updateAllItemIcons(true); 
-        updateOpenPlayerButton(true);
-      });
-      mediaElement.addEventListener('pause', () => { 
-        updateIcons(false); 
-        updateAllItemIcons(false); 
-        updateOpenPlayerButton(false);
-      });
-      mediaContainer.addEventListener('touchend', handleMediaTap);
-      mediaContainer.addEventListener('click', handleMediaTap);
-      speedContainer.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePanel('velocidad');
-      });
-      speedContainer.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePanel('velocidad');
-      });
-      timerContainer.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePanel('temporizador');
-        setTimeout(updateTimerView, 100);
-      });
-      timerContainer.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePanel('temporizador');
-        setTimeout(updateTimerView, 100);
-      });
-      speedSlider.addEventListener('input', () => {
-        const value = parseFloat(speedSlider.value);
-        mediaElement.playbackRate = value;
-        updateSpeedButtons(value);
-        throttledSaveState();
-      });
-      timerOptions.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          timerValue = btn.dataset.value;
-          setupTimer();
-          togglePanel();
-          throttledSaveState();
-          updateTimerView();
-        });
-      });
-      deactivateTimer.addEventListener('click', (e) => {
-        e.stopPropagation();
-        resetTimer();
-        togglePanel();
-        updateTimerView();
-      });
-      minimizeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        showMinimized();
-      });
-      minimizeBtn.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        showMinimized();
-      });
-      expandBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        showExpanded();
-      });
-      expandBtn.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        showExpanded();
-      });
-      playerMinimized.addEventListener('click', (e) => {
-        if (!progressContainerMinimized.contains(e.target) && !e.target.closest('.minimized-controls')) {
-          showExpanded();
-        }
-      });
-      episodeInfo.addEventListener('click', (e) => {
-        if (e.target.closest('#addToPlaylistBtn')) return;
-        if (currentMedia?.detailUrl) {
-          window.location.href = currentMedia.detailUrl;
-        }
-      });
-      mediaModeToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleMediaMode();
-      });
-      fullscreenBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (!document.fullscreenElement) {
-          mediaContainer.requestFullscreen().then(() => {
-            isFullscreenMode = true;
-            fullscreenControls.style.display = 'flex';
-            loadImageWithFallback(fullscreenBtn.querySelector('img'), 'https://nikichitonjesus.odoo.com/web/image/623-e47eb360/Exitfull.png', 'Exit Fullscreen', 'https://via.placeholder.com/24');
-            if (screen.orientation && screen.orientation.lock) {
-              screen.orientation.lock('landscape').catch(() => {});
-            }
-            overlayGradient.style.display = 'none';
-            mediaContainer.classList.remove('show-controls');
-            startAutoHideTimer();
-          }).catch(err => console.log('Fullscreen error:', err));
-        } else {
-          document.exitFullscreen().then(() => {
-            isFullscreenMode = false;
-            fullscreenControls.style.display = 'none';
-            loadImageWithFallback(fullscreenBtn.querySelector('img'), 'https://media.baltaanay.org/web/image/883-49c31be4/full.png', 'Fullscreen', 'https://via.placeholder.com/24');
-            overlayGradient.style.display = 'flex';
-          });
-        }
-      });
-      exitFullscreenBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
-        }
-      });
-      exitFullscreenBtn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
-        }
-      });
-      document.addEventListener('fullscreenchange', () => {
-        if (!document.fullscreenElement) {
-          isFullscreenMode = false;
-          fullscreenControls.style.display = 'none';
-          loadImageWithFallback(fullscreenBtn.querySelector('img'), 'https://media.baltaanay.org/web/image/883-49c31be4/full.png', 'Fullscreen', 'https://via.placeholder.com/24');
-          overlayGradient.style.display = 'flex';
-          clearTimeout(autoHideTimer);
-        } else {
-          fullscreenControls.style.display = 'flex';
-          overlayGradient.style.display = 'none';
-          startAutoHideTimer();
-        }
-      });
-      previousFullscreen.addEventListener('click', (e) => {
-        e.stopPropagation();
-        previous();
-      });
-      rewindFullscreen.addEventListener('click', (e) => {
-        e.stopPropagation();
-        rewind();
-      });
-      playPauseFullscreen.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePlayPause();
-      });
-      forwardFullscreen.addEventListener('click', (e) => {
-        e.stopPropagation();
-        forward();
-      });
-      nextFullscreen.addEventListener('click', (e) => {
-        e.stopPropagation();
-        next();
-      });
-      volumeFullscreen.addEventListener('click', (e) => {
-        e.stopPropagation();
-        mediaElement.muted = !mediaElement.muted;
-        checkMute();
-      });
-      volumeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        mediaElement.muted = !mediaElement.muted;
-        checkMute();
-      });
-      playPauseMedia.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePlayPause();
-      });
-      downloadBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (!currentMedia.allowDownload) return;
-        downloadBtn.classList.add('active');
-        setTimeout(() => downloadBtn.classList.remove('active'), 200);
-        if (currentMedia?.mediaUrl) {
-          const link = document.createElement('a');
-          link.href = currentMedia.mediaUrl;
-          link.target = '_blank';
-          link.download = currentMedia.title || 'media';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        } else {
-          alert('No hay archivo para descargar.');
-        }
-      });
-      shareBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        shareBtn.classList.add('active');
-        setTimeout(() => shareBtn.classList.remove('active'), 200);
-        if (currentMedia?.title && currentMedia?.detailUrl) {
-          if (navigator.share && typeof navigator.share === 'function') {
-            navigator.share({
-              title: currentMedia.title,
-              url: currentMedia.detailUrl,
-            }).catch((error) => {
-              console.log('Error al compartir:', error);
-            });
-          } else {
-            navigator.clipboard.writeText(\`\${currentMedia.title}: \${currentMedia.detailUrl}\`)
-              .then(() => alert('Enlace copiado al portapapeles'))
-              .catch(() => alert('Error al copiar el enlace'));
-          }
-        } else {
-          alert('No hay contenido para compartir.');
-        }
-      });
-      programBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const programa = window.PROGRAMA_DEL_DIA || {
-          mediaUrl: 'https://awscdn.podcasts.com/audio-vhhlggMJNysHnLYW8KXAQwu4w.mp3',
-          mediaType: 'audio',
-          coverUrlContainer: 'https://s3.amazonaws.com/podcasts-image-uploads/el-populismo-y-la-democracia-jesus-huerta-de-soto-1400x1400.png',
-          coverUrlInfo: 'https://www.edu.balta.lat/web/image/415-8ae27244/media.png',
-          title: 'El populismo y la democracia',
-          detailUrl: '#',
-          author: "Jesús Huerta de Soto",
-          text: "No disponible",
-          allowDownload: true
-        };
-        loadMedia(programa.mediaUrl, programa.mediaType, programa.coverUrlContainer, programa.coverUrlInfo, programa.title, programa.detailUrl, programa.author, [], programa.text, programa.allowDownload);
-        showExpanded();
-        togglePlayPause(true);
-        throttledSaveState();
-      });
-      repeatBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        repeatBtn.classList.add('active');
-        setTimeout(() => repeatBtn.classList.remove('active'), 200);
-        repeatMode = (repeatMode + 1) % 3;
-        mediaElement.loop = repeatMode === 2;
-        updateRepeatButton();
-        throttledSaveState();
-      });
-      addToPlaylistBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        addToPlaylistBtn.classList.add('active');
-        setTimeout(() => addToPlaylistBtn.classList.remove('active'), 200);
-        if (currentMedia && !playlist.some(item => item.mediaUrl === currentMedia.mediaUrl)) {
-          playlist.push(currentMedia);
-          localStorage.setItem('playlist', JSON.stringify(playlist));
-          updatePlaylist();
-          updateAddButton();
-        } else if (currentMedia) {
-          const index = playlist.findIndex(item => item.mediaUrl === currentMedia.mediaUrl);
-          if (index > -1) {
-            playlist.splice(index, 1);
-            localStorage.setItem('playlist', JSON.stringify(playlist));
-            updatePlaylist();
-            updateAddButton();
-          }
-        } else {
-          alert('No hay episodio cargado.');
-        }
-        throttledSaveState();
-      });
-      likesBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleLikes();
-      });
-      colaBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePanel('cola');
-      });
-      detallesBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePanel('detalles');
-      });
-      bibliotecaBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePanel('biblioteca');
-      });
-      linkCola.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePanel('cola');
-      });
-      linkCola.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePanel('cola');
-      });
-      linkDetalles.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePanel('detalles');
-      });
-      linkDetalles.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePanel('detalles');
-      });
-      linkBiblioteca.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePanel('biblioteca');
-      });
-      linkBiblioteca.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePanel('biblioteca');
-      });
-      closePanelBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePanel();
-      });
-      togglePanelHeightBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePanelHeight();
-      });
-      tabCola.addEventListener('click', (e) => {
-        e.stopPropagation();
-        switchTab('cola');
-      });
-      tabDetalles.addEventListener('click', (e) => {
-        e.stopPropagation();
-        switchTab('detalles');
-      });
-      tabBiblioteca.addEventListener('click', (e) => {
-        e.stopPropagation();
-        switchTab('biblioteca');
-      });
-      tabVelocidad.addEventListener('click', (e) => {
-        e.stopPropagation();
-        switchTab('velocidad');
-      });
-      tabTemporizador.addEventListener('click', (e) => {
-        e.stopPropagation();
-        switchTab('temporizador');
-      });
-      viewAllLikes.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleLikesView();
-      });
-      playUserPlaylistBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        userPlaylistAutoPlay = !userPlaylistAutoPlay;
-        playUserPlaylistBtn.classList.toggle('active', userPlaylistAutoPlay);
-        if (userPlaylistAutoPlay && playlist.length > 0) {
-          activeList = 'playlist';
-          currentIndex = 0;
-          const item = playlist[currentIndex];
-          loadMedia(item.mediaUrl, item.mediaType, item.coverUrlContainer, item.coverUrlInfo, item.title, item.detailUrl, item.author, playlist, item.text, item.allowDownload);
-          togglePlayPause(true);
-        } else if (!userPlaylistAutoPlay) {
-          activeList = 'next';
-        }
-        throttledSaveState();
-      });
-      mediaElement.addEventListener('volumechange', checkMute);
-      rewindExpanded.addEventListener('click', (e) => {
-        e.stopPropagation();
-        rewind();
-      });
-      rewindExpanded.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        rewind();
-      });
-      forwardExpanded.addEventListener('click', (e) => {
-        e.stopPropagation();
-        forward();
-      });
-      forwardExpanded.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        forward();
-      });
-      previousExpanded.addEventListener('click', (e) => {
-        e.stopPropagation();
-        previous();
-      });
-      previousExpanded.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        previous();
-      });
-      nextExpanded.addEventListener('click', (e) => {
-        e.stopPropagation();
-        next();
-      });
-      nextExpanded.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        next();
-      });
-      playPauseExpanded.addEventListener('click', (e) => {
-        e.stopPropagation();
-        togglePlayPause();
-      });
-      playPauseExpanded.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePlayPause();
-      });
-      rewindMinimized.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        rewind();
-      });
-      rewindMinimized.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        rewind();
-      });
-      forwardMinimized.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        forward();
-      });
-      forwardMinimized.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        forward();
-      });
-      playPauseMinimized.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePlayPause();
-      });
-      playPauseMinimized.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        togglePlayPause();
-      });
-      progressContainerExpanded.addEventListener('mousedown', (e) => {
-        isDraggingExpanded = true;
-        progressContainerExpanded.classList.add('dragging');
-        updateProgressDrag(e.clientX, progressContainerExpanded, progressBarExpanded);
-        e.stopPropagation();
-      });
-      document.addEventListener('mousemove', (e) => {
-        if (isDraggingExpanded) {
-          updateProgressDrag(e.clientX, progressContainerExpanded, progressBarExpanded);
-        }
-      });
-      document.addEventListener('mouseup', () => {
-        if (isDraggingExpanded) {
-          isDraggingExpanded = false;
-          progressContainerExpanded.classList.remove('dragging');
-        }
-      });
-      progressContainerExpanded.addEventListener('touchstart', (e) => {
-        isDraggingExpanded = true;
-        progressContainerExpanded.classList.add('dragging');
-        updateProgressDrag(e.touches[0].clientX, progressContainerExpanded, progressBarExpanded);
-        e.preventDefault();
-        e.stopPropagation();
-      });
-      document.addEventListener('touchmove', (e) => {
-        if (isDraggingExpanded) {
-          updateProgressDrag(e.touches[0].clientX, progressContainerExpanded, progressBarExpanded);
-          e.preventDefault();
-        }
-      });
-      document.addEventListener('touchend', () => {
-        if (isDraggingExpanded) {
-          isDraggingExpanded = false;
-          progressContainerExpanded.classList.remove('dragging');
-        }
-      });
-      progressContainerMinimized.addEventListener('mousedown', (e) => {
-        isDraggingMinimized = true;
-        progressContainerMinimized.classList.add('dragging');
-        updateProgressDrag(e.clientX, progressContainerMinimized, progressBarMinimized);
-        e.stopPropagation();
-      });
-      document.addEventListener('mousemove', (e) => {
-        if (isDraggingMinimized) {
-          updateProgressDrag(e.clientX, progressContainerMinimized, progressBarMinimized);
-        }
-      });
-      document.addEventListener('mouseup', () => {
-        if (isDraggingMinimized) {
-          isDraggingMinimized = false;
-          progressContainerMinimized.classList.remove('dragging');
-        }
-      });
-      progressContainerMinimized.addEventListener('touchstart', (e) => {
-        isDraggingMinimized = true;
-        progressContainerMinimized.classList.add('dragging');
-        updateProgressDrag(e.touches[0].clientX, progressContainerMinimized, progressBarMinimized);
-        e.preventDefault();
-        e.stopPropagation();
-      });
-      document.addEventListener('touchmove', (e) => {
-        if (isDraggingMinimized) {
-          updateProgressDrag(e.touches[0].clientX, progressContainerMinimized, progressBarMinimized);
-          e.preventDefault();
-        }
-      });
-      document.addEventListener('touchend', () => {
-        if (isDraggingMinimized) {
-          isDraggingMinimized = false;
-          progressContainerMinimized.classList.remove('dragging');
-        }
-      });
-      progressContainerFullscreen.addEventListener('mousedown', (e) => {
-        isDraggingFullscreen = true;
-        updateProgressDrag(e.clientX, progressContainerFullscreen, progressBarFullscreen);
-      });
-      progressContainerFullscreen.addEventListener('touchstart', (e) => {
-        isDraggingFullscreen = true;
-        updateProgressDrag(e.touches[0].clientX, progressContainerFullscreen, progressBarFullscreen);
-        e.preventDefault();
-      });
-      document.addEventListener('mousemove', (e) => {
-        if (isDraggingFullscreen) {
-          updateProgressDrag(e.clientX, progressContainerFullscreen, progressBarFullscreen);
-        }
-      });
-      document.addEventListener('touchmove', (e) => {
-        if (isDraggingFullscreen) {
-          updateProgressDrag(e.touches[0].clientX, progressContainerFullscreen, progressBarFullscreen);
-          e.preventDefault();
-        }
-      });
-      document.addEventListener('mouseup', () => {
-        if (isDraggingFullscreen) isDraggingFullscreen = false;
-      });
-      document.addEventListener('touchend', () => {
-        if (isDraggingFullscreen) isDraggingFullscreen = false;
-      });
-      playerExpanded.addEventListener('touchstart', (e) => {
-        const target = e.target;
-        if (target.closest('.media-container') || target.closest('.controls') || target.closest('.video-progress-container-expanded') || target.closest('.action-buttons') || target.closest('.episode-info') || target.closest('.panel-container') || target.closest('button')) {
-          return;
-        }
-        touchStartY = e.touches[0].clientY;
-        isSwiping = true;
-      });
-      playerExpanded.addEventListener('touchmove', (e) => {
-        if (!isSwiping) return;
-        touchEndY = e.touches[0].clientY;
-      });
-      playerExpanded.addEventListener('touchend', (e) => {
-        if (!isSwiping) return;
-        const deltaY = touchStartY - touchEndY;
-        if (deltaY > swipeThreshold) {
-          showMinimized();
-        }
-        isSwiping = false;
-      });
-      playerMinimized.addEventListener('touchstart', (e) => {
-        if (e.target.closest('.minimized-controls') || progressContainerMinimized.contains(e.target)) {
-          return;
-        }
-        touchStartY = e.touches[0].clientY;
-        isSwiping = true;
-      });
-      playerMinimized.addEventListener('touchmove', (e) => {
-        if (!isSwiping) return;
-        touchEndY = e.touches[0].clientY;
-      });
-      playerMinimized.addEventListener('touchend', (e) => {
-        if (!isSwiping) return;
-        const deltaY = touchStartY - touchEndY;
-        if (deltaY > swipeThreshold) {
-          showExpanded();
-        }
-        isSwiping = false;
-      });
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden && !isAudioMode && currentMedia?.mediaType === 'video') {
-          mediaElement.pause();
-          updateIcons(false);
-          updateAllItemIcons(false);
-          updateOpenPlayerButton(false);
-        }
-      });
-      panelContainer.addEventListener('click', (e) => {
-        e.stopPropagation();
-      });
-      panelContainer.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-      });
-      window.addEventListener('load', () => {
-        const programa = window.PROGRAMA_DEL_DIA || { title: 'Programa del Día' };
-        document.querySelector('.full-width-btn span').textContent = programa.title;
-        loadState();
-        updatePlaylist();
-        updateLikes();
-        updateNextList();
-        updateRecomendadosList();
-        updateTextContent();
-        checkTitleOverflow();
-        checkMinimizedTitleOverflow();
-        updateOpenPlayerButton(!mediaElement.paused);
-      });
-      window.addEventListener('popstate', () => {
-        throttledSaveState();
-        showMinimized();
-      });
-      window.addEventListener('beforeunload', throttledSaveState);
-      window.togglePlayer = () => {
-        if (!currentMedia) {
-          const programa = window.PROGRAMA_DEL_DIA || {
-            mediaUrl: 'https://awscdn.podcasts.com/audio-vhhlggMJNysHnLYW8KXAQwu4w.mp3',
-            mediaType: 'audio',
-            coverUrlContainer: 'https://s3.amazonaws.com/podcasts-image-uploads/el-populismo-y-la-democracia-jesus-huerta-de-soto-1400x1400.png',
-            coverUrlInfo: 'https://www.edu.balta.lat/web/image/415-8ae27244/media.png',
-            title: 'El populismo y la democracia',
-            detailUrl: '#',
-            author: "Jesús Huerta de Soto",
-            text: "No disponible",
-            allowDownload: true
-          };
-          loadMedia(programa.mediaUrl, programa.mediaType, programa.coverUrlContainer, programa.coverUrlInfo, programa.title, programa.detailUrl, programa.author, [], programa.text, programa.allowDownload);
-          togglePlayPause(true);
-          showExpanded();
-          throttledSaveState();
-        } else {
-          showExpanded();
-        }
-      };
-      window.playEpisode = (mediaUrl, mediaType = 'audio', coverUrlContainer = '', coverUrlInfo = '', title = '', detailUrl = '', author = 'Roberto', next = [], text = '', allowDownload = true) => {
-        if (currentMedia && currentMedia.mediaUrl === mediaUrl && !mediaElement.paused) {
-          togglePlayPause();
-        } else {
-          loadMedia(mediaUrl, mediaType, coverUrlContainer, coverUrlInfo, title, detailUrl, author, next, text, allowDownload);
-          togglePlayPause(true);
-          throttledSaveState();
-        }
-      };
-      window.playEpisodeExpanded = (mediaUrl, mediaType = 'audio', coverUrlContainer = '', coverUrlInfo = '', title = '', detailUrl = '', author = 'Roberto', next = [], text = '', allowDownload = true) => {
-        window.playEpisode(mediaUrl, mediaType, coverUrlContainer, coverUrlInfo, title, detailUrl, author, next, text, allowDownload);
-        showExpanded();
-      };
-      window.playExpanded = (episodioObj) => {
-        if (!episodioObj) return;
-        let mapped = episodioObj;
-        let isFromRec = false;
-        let recIndex = -1;
-        if (episodioObj.type && !episodioObj.mediaType) {
-          mapped = mapEpisodeToMedia(episodioObj);
-          recIndex = cachedRecomendados.findIndex(r => r.mediaUrl === episodioObj.mediaUrl);
-          if (recIndex >= 0) isFromRec = true;
-        }
-        window.playEpisodeExpanded(
-          mapped.mediaUrl || '',
-          mapped.mediaType || 'audio',
-          mapped.coverUrlContainer || '',
-          mapped.coverUrlInfo || '',
-          mapped.title || '',
-          mapped.detailUrl || '',
-          mapped.author || 'Roberto',
-          mapped.next || [],
-          mapped.text || '',
-          mapped.allowDownload ?? true
-        );
-      };
-      window.addToUserPlaylist = (obj) => {
-        if (!obj || !obj.mediaUrl) return false;
-        if (!playlist.some(p => p.mediaUrl === obj.mediaUrl)) {
-          playlist.unshift(obj);
-          localStorage.setItem('playlist', JSON.stringify(playlist));
-          if (typeof updatePlaylist === 'function') updatePlaylist();
-          if (typeof updateAddButton === 'function') updateAddButton();
-          return true;
-        }
-        return false;
-      };
-      window.loadEpisode = loadMedia;
-      window.playEpisodeMinimized = (mediaUrl, mediaType = 'audio', coverUrlContainer = '', coverUrlInfo = '', title = '', detailUrl = '', author = 'Roberto', next = [], text = '', allowDownload = true) => {
-        window.loadEpisode(
-          mediaUrl,
-          mediaType,
-          coverUrlContainer,
-          coverUrlInfo,
-          title,
-          detailUrl,
-          author,
-          next,
-          text,
-          allowDownload
-        );
-        togglePlayPause(true);
-        showMinimized();
-      };
-      const updateMediaSession = () => {
-        if (!('mediaSession' in navigator)) {
-          console.log('[MediaSession] No soportada en este navegador');
-          return;
-        }
-        if (!currentMedia || !mediaElement) {
-          console.log('[MediaSession] Esperando currentMedia o mediaElement...');
-          return;
-        }
-        console.log('[MediaSession] Actualizando con:', {
-          title: currentMedia.title,
-          artist: currentMedia.author,
-          cover: currentMedia.coverUrlContainer
-        });
-        try {
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: currentMedia.title || 'Episodio sin título',
-            artist: currentMedia.author || 'Roberto',
-            album: 'By Balta',
-            artwork: [
-              { src: currentMedia.coverUrlContainer || 'https://via.placeholder.com/512?text=Cover', sizes: '512x512', type: 'image/png' },
-              { src: currentMedia.coverUrlContainer || 'https://via.placeholder.com/256?text=Cover', sizes: '256x256', type: 'image/png' },
-              { src: currentMedia.coverUrlContainer || 'https://via.placeholder.com/192?text=Cover', sizes: '192x192', type: 'image/png' }
-            ]
-          });
-          console.log('[MediaSession] Metadata OK');
-          navigator.mediaSession.setActionHandler('play', () => { togglePlayPause(true); });
-          navigator.mediaSession.setActionHandler('pause', () => { togglePlayPause(); });
-          navigator.mediaSession.setActionHandler('previoustrack', previous);
-          navigator.mediaSession.setActionHandler('nexttrack', next);
-          navigator.mediaSession.setActionHandler('seekbackward', () => rewind(15));
-          navigator.mediaSession.setActionHandler('seekforward', () => forward(15));
-          if (!isNaN(mediaElement.duration)) {
-            navigator.mediaSession.setPositionState({
-              duration: mediaElement.duration,
-              playbackRate: mediaElement.playbackRate || 1,
-              position: mediaElement.currentTime || 0
-            });
-          }
-        } catch (err) {
-          console.error('[MediaSession] Error:', err.message);
-        }
-      };
-      mediaElement.addEventListener('play', updateMediaSession);
-      mediaElement.addEventListener('pause', updateMediaSession);
-      mediaElement.addEventListener('loadedmetadata', updateMediaSession);
-      mediaElement.addEventListener('timeupdate', () => {
-        if ('mediaSession' in navigator && !isNaN(mediaElement.duration)) {
-          navigator.mediaSession.setPositionState({
-            duration: mediaElement.duration,
-            playbackRate: mediaElement.playbackRate || 1,
-            position: mediaElement.currentTime || 0
-          });
-        }
-      });
-      window.addEventListener('beforeunload', () => {
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.metadata = null;
-        }
-      });
-      // Mejoras para el volumen: escuchar cambios del sistema y actualizar mute
-      mediaElement.addEventListener('volumechange', checkMute);
-      // Hacer click en el indicador de mute para activar sonido
-      muteIndicator.addEventListener('click', (e) => {
-        e.stopPropagation();
-        mediaElement.muted = false;
-        isAutoMuted = false;
-        isUserMuted = false;
-        checkMute();
-      });
-      // Escuchar cambios de volumen del sistema (teclas físicas)
-      if (navigator.mediaSession) {
-        navigator.mediaSession.setActionHandler('volumeup', () => {
-          mediaElement.volume = Math.min(1, mediaElement.volume + 0.1);
-        });
-        navigator.mediaSession.setActionHandler('volumedown', () => {
-          mediaElement.volume = Math.max(0, mediaElement.volume - 0.1);
-        });
+        renderPlaylist();
+      });
+      playlistView.appendChild(div);
+    });
+  }
+
+  function saveState() {
+    // Guardar estado relevante en localStorage si se desea
+  }
+
+  // ==================== EVENTOS ====================
+  audioElement.addEventListener('timeupdate', updateProgress);
+  audioElement.addEventListener('loadedmetadata', updateProgress);
+  audioElement.addEventListener('ended', () => {
+    if (repeatMode === 1) {
+      audioElement.currentTime = 0;
+      setPlaying(true);
+    } else if (repeatMode === 2) {
+      audioElement.currentTime = 0;
+      setPlaying(true);
+    } else {
+      // Siguiente canción si existe
+      if (nextList.length > 0) {
+        loadMedia(nextList[0]);
+      } else {
+        setPlaying(false);
       }
-    })();
-  `;
-  document.body.appendChild(script);
+    }
+  });
+
+  // Controles minimizados
+  minimizedPlayPause.addEventListener('click', () => setPlaying(!isPlaying));
+  minimizedNext.addEventListener('click', () => {
+    if (nextList.length > 0) loadMedia(nextList[0]);
+  });
+  minimizedFavorite.addEventListener('click', toggleFavorite);
+  minimizedExpand.addEventListener('click', () => {
+    playerMinimized.classList.add('hidden');
+    playerExpanded.classList.remove('hidden');
+  });
+
+  // Controles expandidos
+  expandedPlayPause.addEventListener('click', () => setPlaying(!isPlaying));
+  expandedRewind.addEventListener('click', () => {
+    audioElement.currentTime = Math.max(0, audioElement.currentTime - 15);
+  });
+  expandedForward.addEventListener('click', () => {
+    audioElement.currentTime = Math.min(audioElement.duration, audioElement.currentTime + 15);
+  });
+  expandedPrevious.addEventListener('click', () => {
+    if (history.length > 1) {
+      const prev = history[history.length - 2];
+      loadMedia(prev);
+    } else {
+      audioElement.currentTime = 0;
+    }
+  });
+  expandedNext.addEventListener('click', () => {
+    if (nextList.length > 0) {
+      loadMedia(nextList[0]);
+    }
+  });
+  minimizeBtn.addEventListener('click', () => {
+    playerExpanded.classList.add('hidden');
+    playerMinimized.classList.remove('hidden');
+  });
+
+  expandedAddPlaylist.addEventListener('click', () => {
+    if (!currentMedia) return;
+    if (!playlist.some(item => item.mediaUrl === currentMedia.mediaUrl)) {
+      playlist.unshift(currentMedia);
+      localStorage.setItem('playlist', JSON.stringify(playlist));
+      renderPlaylist();
+    }
+  });
+
+  // Progreso
+  function seekFromEvent(e, container, fill) {
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const width = rect.width;
+    let percent = (x / width) * 100;
+    percent = Math.max(0, Math.min(100, percent));
+    if (audioElement.duration) {
+      audioElement.currentTime = (percent / 100) * audioElement.duration;
+    }
+  }
+  minimizedProgressContainer.addEventListener('click', (e) => seekFromEvent(e, minimizedProgressContainer, minimizedProgressBar));
+  expandedProgressContainer.addEventListener('click', (e) => seekFromEvent(e, expandedProgressContainer, expandedProgressFill));
+
+  // Velocidad
+  speedButton.addEventListener('click', () => {
+    panelTitle.textContent = 'Velocidad';
+    document.getElementById('timerPanel').style.display = 'none';
+    document.getElementById('speedPanel').style.display = 'block';
+    panelOverlay.classList.add('active');
+  });
+  speedSlider.addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    audioElement.playbackRate = val;
+    speedValue.textContent = val.toFixed(2) + 'x';
+  });
+
+  // Temporizador
+  timerButton.addEventListener('click', () => {
+    panelTitle.textContent = 'Temporizador';
+    document.getElementById('speedPanel').style.display = 'none';
+    document.getElementById('timerPanel').style.display = 'block';
+    panelOverlay.classList.add('active');
+  });
+  timerOptions.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const minutes = btn.dataset.minutes;
+    if (minutes === 'end') {
+      // Programar para el final del episodio
+      timerEndTime = audioElement.duration - audioElement.currentTime;
+    } else {
+      timerEndTime = parseInt(minutes) * 60;
+    }
+    timerOptions.style.display = 'none';
+    timerCountdown.style.display = 'block';
+    panelOverlay.classList.remove('active');
+    // Iniciar cuenta atrás
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      if (timerEndTime <= 0) {
+        setPlaying(false);
+        clearInterval(timerInterval);
+        timerCountdown.style.display = 'none';
+        timerOptions.style.display = 'flex';
+      } else {
+        timerEndTime--;
+        countdownDisplay.textContent = formatTime(timerEndTime);
+      }
+    }, 1000);
+  });
+  deactivateTimer.addEventListener('click', () => {
+    clearInterval(timerInterval);
+    timerCountdown.style.display = 'none';
+    timerOptions.style.display = 'flex';
+  });
+  closePanel.addEventListener('click', () => {
+    panelOverlay.classList.remove('active');
+  });
+
+  // Acciones
+  actionLike.addEventListener('click', toggleFavorite);
+  actionDownload.addEventListener('click', () => {
+    if (currentMedia?.mediaUrl) {
+      window.open(currentMedia.mediaUrl, '_blank');
+    }
+  });
+  actionShare.addEventListener('click', () => {
+    if (navigator.share && currentMedia) {
+      navigator.share({
+        title: currentMedia.title,
+        text: currentMedia.description,
+        url: currentMedia.mediaUrl,
+      });
+    } else {
+      alert('Compartir no soportado');
+    }
+  });
+  actionRepeat.addEventListener('click', () => {
+    repeatMode = (repeatMode + 1) % 3;
+    const texts = ['Repetir', 'Repetir 1', 'Repetir todo'];
+    actionRepeat.querySelector('span').textContent = texts[repeatMode];
+  });
+  actionQueue.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    document.querySelector('[data-tab="next"]').classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tabNext').classList.add('active');
+  });
+  actionDetails.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    document.querySelector('[data-tab="details"]').classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tabDetails').classList.add('active');
+  });
+  actionLibrary.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    document.querySelector('[data-tab="library"]').classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tabLibrary').classList.add('active');
+    renderLikes();
+    renderPlaylist();
+  });
+
+  // Tabs
+  tabs.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      if (target === 'next') document.getElementById('tabNext').classList.add('active');
+      if (target === 'details') document.getElementById('tabDetails').classList.add('active');
+      if (target === 'library') {
+        document.getElementById('tabLibrary').classList.add('active');
+        renderLikes();
+        renderPlaylist();
+      }
+    });
+  });
+
+  // Programa del día
+  programaDelDia.addEventListener('click', () => {
+    // Aquí podrías cargar un episodio destacado
+  });
+
+  // Modo audio/vídeo (simplificado, sólo cambia iconos)
+  mediaModeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      mediaModeButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // Aquí se podría cambiar a video si el medio lo soporta
+    });
+  });
+
+  // ==================== API PÚBLICA ====================
+  window.playEpisode = (mediaUrl, mediaType = 'audio', coverUrl = '', title = '', author = '', description = '', next = [], recomendados = []) => {
+    const media = { mediaUrl, mediaType, coverUrl, title, author, description };
+    nextList = next || [];
+    recomendados = recomendados || [];
+    loadMedia(media);
+    // Guardar en historial
+    history.push(media);
+    if (history.length > 50) history.shift();
+    localStorage.setItem('history', JSON.stringify(history));
+    // Renderizar listas
+    renderNextList();
+    renderRecomendados();
+  };
+
+  window.playEpisodeExpanded = (...args) => {
+    window.playEpisode(...args);
+    playerMinimized.classList.add('hidden');
+    playerExpanded.classList.remove('hidden');
+  };
+
+  window.togglePlayer = () => {
+    if (playerExpanded.classList.contains('hidden')) {
+      playerMinimized.classList.add('hidden');
+      playerExpanded.classList.remove('hidden');
+    } else {
+      playerExpanded.classList.add('hidden');
+      playerMinimized.classList.remove('hidden');
+    }
+  };
+
+  function renderNextList() {
+    nextListEl.innerHTML = '';
+    if (nextList.length === 0) {
+      nextListEl.innerHTML = '<div class="no-items">No hay siguientes episodios</div>';
+      return;
+    }
+    nextList.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'next-item';
+      div.innerHTML = `
+        <img src="${item.coverUrl || ''}" alt="cover">
+        <span>${item.title || ''}</span>
+        <button class="play-next">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
+      `;
+      div.querySelector('.play-next').addEventListener('click', () => loadMedia(item));
+      nextListEl.appendChild(div);
+    });
+  }
+
+  function renderRecomendados() {
+    recomendadosListEl.innerHTML = '';
+    if (recomendados.length === 0) {
+      recomendadosListEl.innerHTML = '';
+      return;
+    }
+    recomendados.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'recomendado-item';
+      div.innerHTML = `
+        <img src="${item.coverUrl || ''}" alt="cover">
+        <span>${item.title || ''}</span>
+        <button class="play-rec">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
+      `;
+      div.querySelector('.play-rec').addEventListener('click', () => loadMedia(item));
+      recomendadosListEl.appendChild(div);
+    });
+  }
+
+  // Inicializar listas
+  renderPlaylist();
+  renderLikes();
+
+  // Exponer también funciones para añadir a playlist, etc.
+  window.addToPlaylist = (media) => {
+    if (!playlist.some(item => item.mediaUrl === media.mediaUrl)) {
+      playlist.unshift(media);
+      localStorage.setItem('playlist', JSON.stringify(playlist));
+      renderPlaylist();
+    }
+  };
 })();
