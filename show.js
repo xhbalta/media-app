@@ -1,5 +1,5 @@
 // show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN DEFINITIVA CON CAPTURA DE EVENTOS
-import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from 'https://podcast.tenam.site/episodios.js';
+import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from 'https://media.baltaanay.org/episodios.js';
 import { userStorage } from './storage.js';
 import './player.js';
 
