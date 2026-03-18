@@ -1,7 +1,7 @@
 // main.js - Router principal (versión definitiva móvil + desktop)
 
 import { DATA, renderFeed, renderGrid, renderEpisodio, renderSerie, renderCategoryPills } from './show.js';
-import { getEpisodioByDetailUrl, getSerieByUrl } from './episodios.js';
+import { getEpisodioByDetailUrl, getSerieByUrl } from '/episodios.js';
 import './player.js';
 
 const PAGES = [
