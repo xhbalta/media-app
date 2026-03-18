@@ -1,7 +1,7 @@
 // main.js - Router principal (versión definitiva móvil + desktop)
 
 import { DATA, renderFeed, renderGrid, renderEpisodio, renderSerie, renderCategoryPills } from './show.js';
-import { getEpisodioByDetailUrl, getSerieByUrl } from 'https://podcast.tenam.site/episodios.js';
+import { getEpisodioByDetailUrl, getSerieByUrl } from 'https://media.baltaanay.org/episodios.js';
 import './player.js';
 
 const PAGES = [
