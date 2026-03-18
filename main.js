@@ -1,7 +1,7 @@
 // main.js - Router principal (versión corregida y compatible con tu show.js)
 
 import { DATA, renderFeed, renderGrid, renderEpisodio, renderSerie, renderCategoryPills } from './show.js';
-import { getEpisodioByDetailUrl, getSerieByUrl } from 'https://podcast.tenam.site/episodios.js';
+import { getEpisodioByDetailUrl, getSerieByUrl } from './episodios.js';
 import './player.js';
 
 function updateCanonicalAndAlternate() {
@@ -28,9 +28,13 @@ function updateActiveCategory() {
 }
 
 async function router() {
+    const container = document.getElementById('content');
+    if (!container) {
+        console.error('No se encontró el contenedor #content');
+        return;
+    }
     const path = window.location.pathname;
     const searchParams = new URLSearchParams(window.location.search);
-    const container = document.getElementById('content');
     const headerContainer = document.getElementById('headerContainer');
 
     // Resetear header (importante)
