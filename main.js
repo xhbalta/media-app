@@ -1,10 +1,10 @@
-// main.js - Router principal (versión definitiva - compatible desktop + móvil)
+// main.js - Router principal (versión corregida y compatible con show.js actual)
 
 import { DATA, renderFeed, renderGrid, renderEpisodio, renderSerie, renderCategoryPills } from './show.js';
 import { getEpisodioByDetailUrl, getSerieByUrl } from './episodios.js';
 import './player.js';
 
-// Actualizar etiquetas canonical y alternate
+// Actualizar canonical y alternate
 function updateCanonicalAndAlternate() {
     const path = window.location.pathname;
     const canonical = document.getElementById('canonicalLink');
@@ -13,7 +13,6 @@ function updateCanonicalAndAlternate() {
     if (alternate) alternate.href = `https://app.baltaanay.org${path}`;
 }
 
-// Páginas especiales
 const PAGES = [
     { path: '/biblioteca', module: () => import('./biblioteca.js'), header: true },
     { path: '/explorar', module: () => import('./explorar.js'), header: true },
@@ -35,12 +34,12 @@ async function router() {
     const container = document.getElementById('content');
     const headerContainer = document.getElementById('headerContainer');
 
-    // Resetear visibilidad del header (el scroll lo controla el index.html)
+    // Resetear header
     if (headerContainer) headerContainer.classList.remove('hidden');
 
     try {
-        // 1. Ruta raíz
-        if (path === '/') {
+        // 1. Ruta raíz → Feed principal
+        if (path === '/' || path === '') {
             renderFeed(container);
             document.title = 'Balta Media · Conocimiento en acción';
         }
@@ -78,25 +77,31 @@ async function router() {
                 }
                 document.title = `${cat} · Balta Media`;
             }
-            // 4. Serie / Episodio / Novedades / 404
+            // 4. Serie
             else {
                 const serie = getSerieByUrl(path);
                 if (serie) {
                     renderSerie(container, path);
                     document.title = `${serie.titulo_serie} · Balta Media`;
-                } else {
+                } 
+                // 5. Episodio
+                else {
                     const episodio = getEpisodioByDetailUrl(path);
                     if (episodio) {
                         renderEpisodio(container, episodio.id);
                         document.title = `${episodio.title} · Balta Media`;
-                    } else if (path === '/novedades') {
+                    } 
+                    // 6. Novedades
+                    else if (path === '/novedades') {
                         const sorted = [...DATA].sort((a, b) => new Date(b.date) - new Date(a.date));
                         const recientes = sorted.slice(0, 20);
                         const aleatorios = [...DATA].sort(() => 0.5 - Math.random()).slice(0, 10);
                         const combined = [...new Set([...recientes, ...aleatorios])];
                         renderGrid(container, combined, 'Novedades y Recomendaciones');
                         document.title = 'Novedades · Balta Media';
-                    } else {
+                    } 
+                    // 7. 404
+                    else {
                         const module404 = await import('./404.js');
                         module404.render(container);
                         document.title = 'Página no encontrada · Balta Media';
@@ -140,7 +145,7 @@ async function router() {
     }
 }
 
-// ==================== NAVEGACIÓN SPA (funciona en desktop y móvil) ====================
+// ==================== NAVEGACIÓN SPA ====================
 document.addEventListener('click', e => {
     const link = e.target.closest('a[data-link]');
     if (link) {
@@ -168,7 +173,7 @@ document.addEventListener('click', e => {
 
 window.addEventListener('popstate', router);
 
-// Observer para cambios en contenido (sidebar, reproductor, etc.)
+// Observer
 const observer = new MutationObserver(() => {
     if (window.sidebarAPI) window.sidebarAPI.setActive();
     if (window.updatePlayerVisibility) window.updatePlayerVisibility();
@@ -178,9 +183,9 @@ if (contentEl) {
     observer.observe(contentEl, { childList: true, subtree: true });
 }
 
-// Exponer router para que lo use la sidebar y otros scripts
+// Exponer router
 window.router = router;
 
 // Inicializar
 router();
-console.log('✅ Main.js cargado correctamente - SPA + Header scroll compatible desktop/móvil');
+console.log('✅ Main.js cargado correctamente - Compatible con show.js actual');
