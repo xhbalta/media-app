@@ -1,11 +1,14 @@
 {
   "name": "Balta Media",
   "short_name": "BM",
-  "description": "Conocimiento en acción",
+  "description": "Si quieres el cambio, haz algo diferente",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#7b2eda",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "icons": [
     {
       "src": "https://balta-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png",
