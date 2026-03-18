@@ -1,23 +1,24 @@
-// main.js - Router principal (versión definitiva móvil + desktop)
+// main.js - Router principal (versión definitiva - compatible desktop + móvil)
 
 import { DATA, renderFeed, renderGrid, renderEpisodio, renderSerie, renderCategoryPills } from './show.js';
-import { getEpisodioByDetailUrl, getSerieByUrl } from '/episodios.js';
+import { getEpisodioByDetailUrl, getSerieByUrl } from './episodios.js';
 import './player.js';
 
+// Actualizar etiquetas canonical y alternate
+function updateCanonicalAndAlternate() {
+    const path = window.location.pathname;
+    const canonical = document.getElementById('canonicalLink');
+    const alternate = document.getElementById('alternateLink');
+    if (canonical) canonical.href = `https://media.baltaanay.org${path}`;
+    if (alternate) alternate.href = `https://app.baltaanay.org${path}`;
+}
+
+// Páginas especiales
 const PAGES = [
     { path: '/biblioteca', module: () => import('./biblioteca.js'), header: true },
     { path: '/explorar', module: () => import('./explorar.js'), header: true },
     { path: '/buscar', module: () => import('./buscar.js'), header: true }
 ];
-
-// Función para normalizar la ruta
-function normalizePath(path) {
-    let normalized = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
-    try {
-        normalized = decodeURIComponent(normalized);
-    } catch (e) {}
-    return normalized;
-}
 
 function updateActiveCategory() {
     const path = window.location.pathname;
@@ -30,62 +31,65 @@ function updateActiveCategory() {
 
 async function router() {
     const path = window.location.pathname;
-    const normalizedPath = normalizePath(path);
     const searchParams = new URLSearchParams(window.location.search);
     const container = document.getElementById('content');
     const headerContainer = document.getElementById('headerContainer');
-    const mainHeader = document.getElementById('main-header');
-    const categoryFilters = document.getElementById('category-filters');
+
+    // Resetear visibilidad del header (el scroll lo controla el index.html)
+    if (headerContainer) headerContainer.classList.remove('hidden');
 
     try {
-        // Resetear visibilidad
-        if (headerContainer) headerContainer.classList.remove('hidden');
-        if (categoryFilters) categoryFilters.classList.remove('hidden');
-        if (categoryFilters) categoryFilters.classList.remove('moved-up');
-
         // 1. Ruta raíz
-        if (normalizedPath === '/') {
+        if (path === '/') {
             renderFeed(container);
             document.title = 'Balta Media · Conocimiento en acción';
         }
+        // 2. Páginas especiales
         else {
-            // 2. Páginas especiales
-            const page = PAGES.find(p => p.path === normalizedPath);
+            const page = PAGES.find(p => p.path === path);
             if (page) {
                 const module = await page.module();
                 if (page.path === '/buscar' && searchParams.has('q')) {
                     const query = searchParams.get('q');
-                    if (module.renderSearch) module.renderSearch(container, query);
-                    else module.render(container);
+                    if (module.renderSearch) {
+                        module.renderSearch(container, query);
+                    } else {
+                        module.render(container);
+                    }
                 } else {
                     module.render(container);
                 }
-                document.title = `${normalizedPath.slice(1).charAt(0).toUpperCase() + normalizedPath.slice(2)} · Balta Media`;
+                document.title = `${path.slice(1).charAt(0).toUpperCase() + path.slice(2)} · Balta Media`;
+                if (module.header === false) {
+                    headerContainer.classList.add('hidden');
+                }
             }
             // 3. Categoría
-            else if (normalizedPath.startsWith('/categoria/')) {
-                const cat = decodeURIComponent(normalizedPath.replace('/categoria/', ''));
+            else if (path.startsWith('/categoria/')) {
+                const cat = decodeURIComponent(path.replace('/categoria/', ''));
                 const buscarModule = await import('./buscar.js');
                 if (buscarModule.renderCategory) {
                     buscarModule.renderCategory(container, cat);
                 } else {
-                    const categoryEpisodes = DATA.filter(ep => ep.categories && ep.categories.includes(cat));
+                    const categoryEpisodes = DATA.filter(ep =>
+                        ep.categories && ep.categories.includes(cat)
+                    );
                     renderGrid(container, categoryEpisodes, cat);
                 }
                 document.title = `${cat} · Balta Media`;
             }
             // 4. Serie / Episodio / Novedades / 404
             else {
-                const serie = getSerieByUrl(normalizedPath);
+                const serie = getSerieByUrl(path);
                 if (serie) {
-                    renderSerie(container, normalizedPath);
+                    renderSerie(container, path);
                     document.title = `${serie.titulo_serie} · Balta Media`;
                 } else {
-                    const episodio = getEpisodioByDetailUrl(normalizedPath);
+                    const episodio = getEpisodioByDetailUrl(path);
                     if (episodio) {
                         renderEpisodio(container, episodio.id);
                         document.title = `${episodio.title} · Balta Media`;
-                    } else if (normalizedPath === '/novedades') {
+                    } else if (path === '/novedades') {
                         const sorted = [...DATA].sort((a, b) => new Date(b.date) - new Date(a.date));
                         const recientes = sorted.slice(0, 20);
                         const aleatorios = [...DATA].sort(() => 0.5 - Math.random()).slice(0, 10);
@@ -97,7 +101,7 @@ async function router() {
                         module404.render(container);
                         document.title = 'Página no encontrada · Balta Media';
                         if (module404.header === false) {
-                            if (headerContainer) headerContainer.classList.add('hidden');
+                            headerContainer.classList.add('hidden');
                         }
                     }
                 }
@@ -105,10 +109,14 @@ async function router() {
         }
 
         updateActiveCategory();
+        updateCanonicalAndAlternate();
+
         document.dispatchEvent(new Event('spa-navigation'));
 
         if (window.sidebarAPI) {
-            if (normalizedPath === '/' || normalizedPath === '/novedades') window.sidebarAPI.refresh();
+            if (path === '/' || path === '/novedades') {
+                window.sidebarAPI.refresh();
+            }
             window.sidebarAPI.setActive();
         }
 
@@ -122,7 +130,7 @@ async function router() {
             <div class="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
                 <span class="text-6xl mb-4">😵</span>
                 <h2 class="text-2xl font-bold text-white mb-2">Algo salió mal</h2>
-                <p class="text-gray-300 mb-6">${error.message || 'Error al cargar la página'}</p>
+                <p class="text-gray-400 mb-6">${error.message || 'Error al cargar la página'}</p>
                 <button onclick="window.history.pushState(null,null,'/'); router();" 
                         class="bg-[#7b2eda] hover:bg-[#8f3ef0] text-white font-bold px-6 py-3 rounded-full transition">
                     Volver al inicio
@@ -132,7 +140,7 @@ async function router() {
     }
 }
 
-// ==================== NAVEGACIÓN SPA ====================
+// ==================== NAVEGACIÓN SPA (funciona en desktop y móvil) ====================
 document.addEventListener('click', e => {
     const link = e.target.closest('a[data-link]');
     if (link) {
@@ -160,53 +168,19 @@ document.addEventListener('click', e => {
 
 window.addEventListener('popstate', router);
 
-// ==================== SCROLL HEADER MÓVIL ====================
-// Solo ocultamos el header principal, los filtros suben automáticamente
-let lastScrollTop = 0;
-const headerContainer = document.getElementById('headerContainer');
-const mainHeader = document.getElementById('main-header');
-const categoryFilters = document.getElementById('category-filters');
-
-function handleScroll() {
-    const content = document.getElementById('content');
-    if (!content || !headerContainer) return;
-
-    const st = content.scrollTop;
-
-    if (Math.abs(st - lastScrollTop) < 15) return;
-
-    if (st > lastScrollTop && st > 80) {
-        // Scroll hacia abajo → ocultar header
-        headerContainer.classList.add('hidden');
-        if (categoryFilters) categoryFilters.classList.add('moved-up');
-    } else {
-        // Scroll hacia arriba → mostrar header
-        headerContainer.classList.remove('hidden');
-        if (categoryFilters) categoryFilters.classList.remove('moved-up');
-    }
-
-    lastScrollTop = st;
-}
-
-const contentEl = document.getElementById('content');
-if (contentEl) {
-    contentEl.addEventListener('scroll', handleScroll, { passive: true });
-}
-
-// Observer para cambios en el contenido
+// Observer para cambios en contenido (sidebar, reproductor, etc.)
 const observer = new MutationObserver(() => {
     if (window.sidebarAPI) window.sidebarAPI.setActive();
     if (window.updatePlayerVisibility) window.updatePlayerVisibility();
 });
-
-const contentObserver = document.getElementById('content');
-if (contentObserver) {
-    observer.observe(contentObserver, { childList: true, subtree: true });
+const contentEl = document.getElementById('content');
+if (contentEl) {
+    observer.observe(contentEl, { childList: true, subtree: true });
 }
 
-// Exponer router para sidebar y otros scripts
+// Exponer router para que lo use la sidebar y otros scripts
 window.router = router;
 
 // Inicializar
 router();
-console.log('✅ Main.js cargado correctamente - Scroll header optimizado para móvil');
+console.log('✅ Main.js cargado correctamente - SPA + Header scroll compatible desktop/móvil');
