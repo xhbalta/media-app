@@ -1,10 +1,9 @@
-// main.js - Router principal (versión corregida y compatible con show.js actual)
+// main.js - Router principal (versión corregida y compatible con tu show.js)
 
 import { DATA, renderFeed, renderGrid, renderEpisodio, renderSerie, renderCategoryPills } from './show.js';
 import { getEpisodioByDetailUrl, getSerieByUrl } from 'https://podcast.tenam.site/episodios.js';
 import './player.js';
 
-// Actualizar canonical y alternate
 function updateCanonicalAndAlternate() {
     const path = window.location.pathname;
     const canonical = document.getElementById('canonicalLink');
@@ -34,80 +33,61 @@ async function router() {
     const container = document.getElementById('content');
     const headerContainer = document.getElementById('headerContainer');
 
-    // Resetear header
+    // Resetear header (importante)
     if (headerContainer) headerContainer.classList.remove('hidden');
 
     try {
-        // 1. Ruta raíz → Feed principal
         if (path === '/' || path === '') {
             renderFeed(container);
             document.title = 'Balta Media · Conocimiento en acción';
         }
-        // 2. Páginas especiales
         else {
             const page = PAGES.find(p => p.path === path);
             if (page) {
                 const module = await page.module();
                 if (page.path === '/buscar' && searchParams.has('q')) {
                     const query = searchParams.get('q');
-                    if (module.renderSearch) {
-                        module.renderSearch(container, query);
-                    } else {
-                        module.render(container);
-                    }
+                    if (module.renderSearch) module.renderSearch(container, query);
+                    else module.render(container);
                 } else {
                     module.render(container);
                 }
                 document.title = `${path.slice(1).charAt(0).toUpperCase() + path.slice(2)} · Balta Media`;
-                if (module.header === false) {
-                    headerContainer.classList.add('hidden');
-                }
+                if (module.header === false) headerContainer.classList.add('hidden');
             }
-            // 3. Categoría
             else if (path.startsWith('/categoria/')) {
                 const cat = decodeURIComponent(path.replace('/categoria/', ''));
                 const buscarModule = await import('./buscar.js');
                 if (buscarModule.renderCategory) {
                     buscarModule.renderCategory(container, cat);
                 } else {
-                    const categoryEpisodes = DATA.filter(ep =>
-                        ep.categories && ep.categories.includes(cat)
-                    );
+                    const categoryEpisodes = DATA.filter(ep => ep.categories && ep.categories.includes(cat));
                     renderGrid(container, categoryEpisodes, cat);
                 }
                 document.title = `${cat} · Balta Media`;
             }
-            // 4. Serie
             else {
                 const serie = getSerieByUrl(path);
                 if (serie) {
                     renderSerie(container, path);
                     document.title = `${serie.titulo_serie} · Balta Media`;
-                } 
-                // 5. Episodio
-                else {
+                } else {
                     const episodio = getEpisodioByDetailUrl(path);
                     if (episodio) {
                         renderEpisodio(container, episodio.id);
                         document.title = `${episodio.title} · Balta Media`;
-                    } 
-                    // 6. Novedades
-                    else if (path === '/novedades') {
+                    } else if (path === '/novedades') {
                         const sorted = [...DATA].sort((a, b) => new Date(b.date) - new Date(a.date));
                         const recientes = sorted.slice(0, 20);
                         const aleatorios = [...DATA].sort(() => 0.5 - Math.random()).slice(0, 10);
                         const combined = [...new Set([...recientes, ...aleatorios])];
                         renderGrid(container, combined, 'Novedades y Recomendaciones');
                         document.title = 'Novedades · Balta Media';
-                    } 
-                    // 7. 404
-                    else {
+                    } else {
                         const module404 = await import('./404.js');
                         module404.render(container);
                         document.title = 'Página no encontrada · Balta Media';
-                        if (module404.header === false) {
-                            headerContainer.classList.add('hidden');
-                        }
+                        if (module404.header === false) headerContainer.classList.add('hidden');
                     }
                 }
             }
@@ -115,13 +95,10 @@ async function router() {
 
         updateActiveCategory();
         updateCanonicalAndAlternate();
-
         document.dispatchEvent(new Event('spa-navigation'));
 
         if (window.sidebarAPI) {
-            if (path === '/' || path === '/novedades') {
-                window.sidebarAPI.refresh();
-            }
+            if (path === '/' || path === '/novedades') window.sidebarAPI.refresh();
             window.sidebarAPI.setActive();
         }
 
@@ -145,7 +122,7 @@ async function router() {
     }
 }
 
-// ==================== NAVEGACIÓN SPA ====================
+// Navegación SPA
 document.addEventListener('click', e => {
     const link = e.target.closest('a[data-link]');
     if (link) {
@@ -162,7 +139,6 @@ document.addEventListener('click', e => {
     }
 });
 
-// Cerrar búsqueda
 document.addEventListener('click', e => {
     if (e.target.closest('#closeGridBtn')) {
         e.preventDefault();
@@ -179,13 +155,9 @@ const observer = new MutationObserver(() => {
     if (window.updatePlayerVisibility) window.updatePlayerVisibility();
 });
 const contentEl = document.getElementById('content');
-if (contentEl) {
-    observer.observe(contentEl, { childList: true, subtree: true });
-}
+if (contentEl) observer.observe(contentEl, { childList: true, subtree: true });
 
-// Exponer router
 window.router = router;
 
-// Inicializar
 router();
-console.log('✅ Main.js cargado correctamente - Compatible con show.js actual');
+console.log('✅ Main.js restaurado y compatible');
