@@ -1,5 +1,5 @@
 // sw.js - Service Worker mejorado para Balta Media Móvil
-const CACHE_NAME = 'balta-mobile-v2';
+const CACHE_NAME = 'balta-mobile-v3';
 
 const urlsToCache = [
   '/',
