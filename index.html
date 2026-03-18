@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Balta Media · Conocimiento en acción</title>
+    <title>Balta Media</title>
+    <!-- Etiquetas SEO -->
     <link rel="canonical" href="https://balta-media.odoo.com/" id="canonicalLink">
     <link rel="alternate" media="only screen and (max-width: 640px)" href="https://app.baltaanay.org/" id="alternateLink">
-    <!-- Manifest PWA -->
-    <link rel="manifest" href="/manifest.json">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fuentes -->
@@ -19,16 +18,154 @@
     <link rel="stylesheet" href="/styles.css">
 
     <!-- ESTILOS BASE -->
-    <style>
-        * { box-sizing: border-box; }
+    <style id="sidebar-base-styles">
+        * {
+            box-sizing: border-box;
+        }
         html, body {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
             background: #050505;
         }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            grid-template-areas:
+                "sidebar main-area";
+            grid-template-rows: 1fr;
+        }
+        /* SIDEBAR */
+        .sidebar-desktop {
+            grid-area: sidebar;
+            background: #0F0F0F;
+            color: #fff;
+            z-index: 900;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+            scrollbar-width: none;
+            transition: width 0.3s ease;
+            width: 70px;
+            min-width: 70px;
+        }
+        .sidebar-desktop::-webkit-scrollbar { display: none; }
+        .sidebar-desktop.expanded {
+            width: 220px;
+            min-width: 220px;
+        }
+        @media (min-width: 1280px) {
+            .sidebar-desktop.expanded {
+                width: 250px;
+                min-width: 250px;
+            }
+        }
+        @media (max-width: 768px) {
+            .sidebar-desktop { display: none !important; }
+        }
+        .sidebar-toggle {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        .sidebar-toggle svg { width: 24px; height: 24px; fill: white; transition: transform 0.2s; }
+        .sidebar-desktop.expanded .sidebar-toggle svg { transform: rotate(180deg); }
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 0 8px;
+            margin-bottom: 30px;
+        }
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .sidebar-nav-item:hover { background: rgba(255,255,255,0.1); }
+        .sidebar-nav-item.active { background: rgba(255,255,255,0.2); }
+        .sidebar-nav-item img { width: 24px; height: 24px; filter: brightness(1.2); flex-shrink: 0; }
+        .sidebar-nav-item span { font-size: 14px; font-weight: 500; }
+        .sidebar-desktop:not(.expanded) .sidebar-nav-item span { display: none; }
+        .sidebar-desktop:not(.expanded) .sidebar-rec-section { display: none; }
+        .sidebar-rec-section {
+            padding: 0 8px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 16px;
+        }
+        .sidebar-rec-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .sidebar-rec-header a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sidebar-rec-header svg { width: 16px; height: 16px; fill: white; }
+        .sidebar-rec-list { display: flex; flex-direction: column; gap: 12px; }
+        .sidebar-rec-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s;
+            padding: 6px;
+            border-radius: 6px;
+        }
+        .sidebar-rec-item:hover { background: rgba(255,255,255,0.08); }
+        .sidebar-rec-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+        .sidebar-rec-item-info { flex: 1; min-width: 0; }
+        .sidebar-rec-item-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-rec-item-author { font-size: 11px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-rec-play-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .sidebar-rec-play-btn:hover { background: rgba(255,255,255,0.2); }
+        .sidebar-rec-play-btn svg { width: 18px; height: 18px; fill: white; }
+        /* MAIN AREA */
         .main-area {
+            grid-area: main-area;
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -51,49 +188,41 @@
             background: transparent;
             border-bottom: 1px solid rgba(255,255,255,0.07);
         }
-        #main-header > div { padding: 0.75rem 1rem; }
+        #main-header > div {
+            padding: 0.75rem 1rem;
+        }
         #category-filters {
             background: rgba(5,5,5,0.96);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255,255,255,0.07);
             flex-shrink: 0;
-            transition: transform 0.32s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
-        #category-filters.moved-up {
-            transform: translateY(-52px);
+        #category-filters > div {
+            padding: 0.5rem 1rem;
         }
         #content {
             flex: 1 1 auto;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             padding: 1.25rem 1rem;
-            padding-bottom: 140px;
+            padding-bottom: 140px;   /* Espacio para footer/derechos de autor */
         }
-        .install-button {
-            background: #7b2eda;
-            color: white;
-            border: none;
-            border-radius: 9999px;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
-        }
-        .install-button.hidden { display: none; }
-        .install-button.update { background: #f59e0b; }
-        .install-button img {
-            width: 20px; height: 20px;
-            filter: brightness(0) invert(1);
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: 1fr;
+                grid-template-areas: "main-area";
+            }
         }
     </style>
 </head>
 <body class="bg-[#050505] text-white font-[Plus_Jakarta_Sans]">
 
+<!-- Sidebar (se genera dinámicamente con JS) -->
+<aside class="sidebar-desktop collapsed" id="sidebarDesktop"></aside>
+
+<!-- Área principal -->
 <div class="main-area">
+    <!-- Header + Filtros -->
     <div class="header-container" id="headerContainer">
         <header id="main-header">
             <div class="flex items-center justify-between">
@@ -106,11 +235,7 @@
                         <img src="https://balta-media.odoo.com/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
                         <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     </a>
-                    <button id="install-button-container" class="install-button hidden">
-                        <img id="install-icon" src="https://nikichitonjesus.odoo.com/web/image/624-ec376d7f/descargar.png" alt="Instalar">
-                        <span id="install-text">Instalar app</span>
-                    </button>
-                    <a href="/my/home" id="profile-link" class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
+                    <a href="/my/home" class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
                         <img src="https://balta-media.odoo.com/web/image/793-902e5b33/Search%20%282%29.png" alt="Usuario" class="w-full h-full object-cover" loading="lazy">
                     </a>
                 </div>
@@ -122,11 +247,15 @@
             </div>
         </div>
     </div>
+
+    <!-- Contenido con scroll principal -->
     <main id="content"></main>
 </div>
 
+<!-- Reproductor flotante -->
 <div id="floating-player" class="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-[#333] p-3 flex items-center justify-between z-[10000] backdrop-blur hidden"></div>
 
+<!-- Modal de error -->
 <div id="errorModal" class="fixed inset-0 z-[10000] flex items-center justify-center hidden" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
     <div class="bg-[#1e1e2f] rounded-2xl max-w-md w-full p-6 border border-white/10 shadow-2xl">
         <h3 class="text-xl font-bold text-white mb-3" id="errorModalTitle">Error</h3>
@@ -139,251 +268,217 @@
     </div>
 </div>
 
-<!-- BARRA INFERIOR MÓVIL -->
-<script>
+<!-- Script sidebar -->
+<script type="module">
+import { episodios, getSerieById } from '/episodios.js';
 (function() {
-    const BOTTOMBAR_CONFIG = { BREAKPOINT: 768, HEIGHT: '60px' };
-    const bottomBarStyles = `
-        .bottom-bar-mobile {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: ${BOTTOMBAR_CONFIG.HEIGHT};
-            background: #0F0F0F; color: #fff; z-index: 950;
-            display: flex; align-items: center; justify-content: space-around;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
-        }
-        @media (min-width: ${BOTTOMBAR_CONFIG.BREAKPOINT + 1}px) { .bottom-bar-mobile { display: none !important; } }
-        .bottom-bar-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: rgba(255,255,255,0.8); text-decoration: none; font-size: 11px; gap: 4px;
-            padding: 8px 12px; border-radius: 8px; transition: all 0.2s; flex: 1;
-        }
-        .bottom-bar-item.active { color: white; background: rgba(255,255,255,0.15); }
-        .bottom-bar-item img { width: 24px; height: 24px; filter: brightness(1.2); }
-        body.with-bottom-bar { margin-bottom: ${BOTTOMBAR_CONFIG.HEIGHT}; }
-        @media (max-width: ${BOTTOMBAR_CONFIG.BREAKPOINT}px) {
-            #floating-player { bottom: ${BOTTOMBAR_CONFIG.HEIGHT} !important; }
-        }
-    `;
-
-    function injectStyles() {
-        if (document.getElementById('bottom-bar-styles')) return;
-        const style = document.createElement('style');
-        style.id = 'bottom-bar-styles';
-        style.textContent = bottomBarStyles;
-        document.head.appendChild(style);
-    }
-
-    function renderBottomBar() {
-        const bar = document.createElement('nav');
-        bar.className = 'bottom-bar-mobile';
-        bar.id = 'bottomBarMobile';
-        const items = [
-            { href: '/', icon: 'https://balta-media.odoo.com/web/image/798-1b947c8d/Home%20%282%29.webp', label: 'Inicio' },
-            { href: '/buscar', icon: 'https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp', label: 'Buscar' },
-            { href: '/explorar', icon: 'https://balta-media.odoo.com/web/image/796-aee658de/Explore.png', label: 'Explorar' },
-            { href: 'https://www.baltaanay.org/solicitud', icon: 'https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp', label: 'Solicitar' },
-            { href: '/my/home', icon: 'https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png', label: 'Perfil' }
-        ];
-        items.forEach(item => {
-            const link = document.createElement('a');
-            link.href = item.href;
-            link.className = 'bottom-bar-item';
-            link.setAttribute('data-link', 'true');
-            link.innerHTML = `<img src="${item.icon}" alt="${item.label}" loading="lazy"><span>${item.label}</span>`;
-            bar.appendChild(link);
-        });
-        return bar;
-    }
-
-    function setActiveBottomItem() {
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.bottom-bar-item').forEach(item => {
-            const href = item.getAttribute('href');
-            item.classList.toggle('active', href === currentPath || (href === '/' && currentPath === '/'));
-        });
-    }
-
-    function initBottomBar() {
-        const isMobile = window.innerWidth <= BOTTOMBAR_CONFIG.BREAKPOINT;
-        document.getElementById('bottomBarMobile')?.remove();
-        if (!isMobile) {
-            document.body.classList.remove('with-bottom-bar');
-            return;
-        }
-        injectStyles();
-        const bar = renderBottomBar();
-        document.body.appendChild(bar);
-        setActiveBottomItem();
-        document.body.classList.add('with-bottom-bar');
-    }
-
-    document.addEventListener('DOMContentLoaded', initBottomBar);
-    window.addEventListener('resize', initBottomBar);
-    window.addEventListener('popstate', setActiveBottomItem);
-    document.addEventListener('spa-navigation', setActiveBottomItem);
-})();
-</script>
-
-<!-- PWA con tus iconos -->
-<script>
-(function() {
-    let deferredPrompt = null;
-    let isUpdateAvailable = false;
-    const installBtn = document.getElementById('install-button-container');
-    const installText = document.getElementById('install-text');
-    const installIcon = document.getElementById('install-icon');
-    const profileLink = document.getElementById('profile-link');
-
-    const ICONS = {
-        install: "https://nikichitonjesus.odoo.com/web/image/624-ec376d7f/descargar.png",
-        update: "https://nikichitonjesus.odoo.com/web/image/775-4e2e83af/repetir-.webp",
-        openApp: "https://nikichitonjesus.odoo.com/web/image/993-70b1b1d5/userlist.webp",
-        myHome: "https://nikichitonjesus.odoo.com/web/image/776-52d85853/a%C3%B1adir%20a.webp"
+    const SIDEBAR_CONFIG = { BREAKPOINT: 768 };
+    let sidebarInstance = {
+        initialized: false,
+        currentState: localStorage.getItem('sidebar_state') || 'collapsed',
+        isMobile: window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT
     };
-
-    function isStandalone() {
-        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    function getRandomEpisodes(count = 12) {
+        const shuffled = [...episodios].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
     }
-
-    function updateButtonUI() {
-        const standalone = isStandalone();
-        if (standalone) {
-            installBtn.classList.add('hidden');
-            profileLink.classList.remove('hidden');
-            profileLink.innerHTML = `<img src="${ICONS.myHome}" alt="Perfil" class="w-full h-full object-cover" loading="lazy">`;
-            if (isUpdateAvailable) {
-                installBtn.classList.remove('hidden');
-                installBtn.classList.add('update');
-                installText.textContent = 'Actualizar';
-                installIcon.src = ICONS.update;
-            }
-        } else {
-            profileLink.classList.add('hidden');
-            if (isUpdateAvailable) {
-                installBtn.classList.remove('hidden');
-                installBtn.classList.add('update');
-                installText.textContent = 'Actualizar';
-                installIcon.src = ICONS.update;
-            } else if (deferredPrompt) {
-                installBtn.classList.remove('hidden');
-                installBtn.classList.remove('update');
-                installText.textContent = 'Instalar app';
-                installIcon.src = ICONS.install;
-            } else {
-                installBtn.classList.remove('hidden');
-                installBtn.classList.remove('update');
-                installText.textContent = 'Abrir app';
-                installIcon.src = ICONS.openApp;
-            }
-        }
+    function renderSidebar() {
+        const sidebar = document.createElement('aside');
+        sidebar.className = `sidebar-desktop ${sidebarInstance.currentState}`;
+        sidebar.id = 'sidebarDesktop';
+        const toggle = document.createElement('div');
+        toggle.className = 'sidebar-toggle';
+        toggle.id = 'sidebarDesktopToggle';
+        toggle.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>';
+        const nav = document.createElement('div');
+        nav.className = 'sidebar-nav';
+        nav.innerHTML = `
+            <a href="/" class="sidebar-nav-item" title="Inicio" data-link>
+                <img src="https://balta-media.odoo.com/web/image/798-1b947c8d/Home%20%282%29.webp" alt="Inicio" loading="lazy"><span>Inicio</span>
+            </a>
+            <a href="/buscar" class="sidebar-nav-item" title="Buscar" data-link>
+                <img src="https://balta-media.odoo.com/web/image/800-91a2fecc/Search%20%282%29.webp" alt="Buscar" loading="lazy"><span>Buscar</span>
+            </a>
+            <a href="/explorar" class="sidebar-nav-item" title="Explorar" data-link>
+                <img src="https://balta-media.odoo.com/web/image/796-aee658de/Explore.png" alt="Explorar" loading="lazy"><span>Explorar</span>
+            </a>
+            <a href="https://www.baltaanay.org/solicitud" class="sidebar-nav-item" title="Crear">
+                <img src="https://balta-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Crear" loading="lazy"><span>Crear</span>
+            </a>
+            <a href="/biblioteca" class="sidebar-nav-item" title="Biblioteca" data-link>
+                <img src="https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png" alt="Biblioteca" loading="lazy"><span>Biblioteca</span>
+            </a>
+        `;
+        const recSection = document.createElement('div');
+        recSection.className = 'sidebar-rec-section';
+        recSection.innerHTML = `
+            <div class="sidebar-rec-header">
+                <a href="/novedades" data-link>Recomendados<svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+            </div>
+            <div class="sidebar-rec-list" id="sidebarRecList"></div>
+        `;
+        sidebar.appendChild(toggle);
+        sidebar.appendChild(nav);
+        sidebar.appendChild(recSection);
+        return sidebar;
     }
-
-    window.addEventListener('beforeinstallprompt', e => {
-        e.preventDefault();
-        deferredPrompt = e;
-        updateButtonUI();
-    });
-
-    installBtn.addEventListener('click', async () => {
-        if (isUpdateAvailable && window.registration?.waiting) {
-            window.registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-            window.location.reload();
+    function populateRecommendations() {
+        const container = document.getElementById('sidebarRecList');
+        if (!container) return;
+        container.innerHTML = '';
+        const selected = getRandomEpisodes(12);
+        if (!selected.length) {
+            container.innerHTML = '<div style="color:#aaa; padding:8px;">No hay episodios disponibles</div>';
             return;
         }
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            updateButtonUI();
-        } else {
-            window.location.href = "https://app.baltaanay.org/";
+        selected.forEach(ep => {
+            const serie = getSerieById(ep.seriesid) || {};
+            const item = document.createElement('div');
+            item.className = 'sidebar-rec-item';
+            item.innerHTML = `
+                <img src="${serie.portada_serie || ep.coverUrl || 'https://via.placeholder.com/40'}" alt="${ep.title}" loading="lazy">
+                <div class="sidebar-rec-item-info">
+                    <div class="sidebar-rec-item-title">${ep.title}</div>
+                    <div class="sidebar-rec-item-author">${ep.author || serie.titulo_serie || '—'}</div>
+                </div>
+                <button class="sidebar-rec-play-btn" data-url="${ep.detailUrl || '#'}">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+            `;
+            const btn = item.querySelector('button');
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                const url = btn.dataset.url;
+                if (url && url !== '#' && window.router) {
+                    window.history.pushState(null, null, url);
+                    window.router();
+                }
+            });
+            item.addEventListener('click', e => {
+                if (e.target.tagName !== 'BUTTON') {
+                    e.preventDefault();
+                    const url = ep.detailUrl;
+                    if (url && url !== '#' && window.router) {
+                        window.history.pushState(null, null, url);
+                        window.router();
+                    }
+                }
+            });
+            container.appendChild(item);
+        });
+    }
+    function setActiveNavItem() {
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+            const href = item.getAttribute('href');
+            item.classList.toggle('active',
+                (href === currentPath) ||
+                (href === '/' && currentPath === '/') ||
+                (href === '/buscar' && currentPath === '/buscar')
+            );
+        });
+    }
+    function initSidebarToggle() {
+        const sidebar = document.getElementById('sidebarDesktop');
+        const toggle = document.getElementById('sidebarDesktopToggle');
+        if (!sidebar || !toggle) return;
+        const newToggle = toggle.cloneNode(true);
+        toggle.parentNode.replaceChild(newToggle, toggle);
+        newToggle.addEventListener('click', e => {
+            e.stopPropagation();
+            e.preventDefault();
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            if (isCollapsed) {
+                sidebar.classList.remove('collapsed');
+                sidebar.classList.add('expanded');
+            } else {
+                sidebar.classList.add('collapsed');
+                sidebar.classList.remove('expanded');
+            }
+            localStorage.setItem('sidebar_state', isCollapsed ? 'expanded' : 'collapsed');
+        });
+    }
+    function initSidebar() {
+        sidebarInstance.isMobile = window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT;
+        const oldSidebar = document.querySelector('.sidebar-desktop');
+        if (oldSidebar) oldSidebar.remove();
+        if (sidebarInstance.isMobile) return;
+        const sidebar = renderSidebar();
+        document.body.insertBefore(sidebar, document.body.firstChild);
+        populateRecommendations();
+        initSidebarToggle();
+        setActiveNavItem();
+        sidebarInstance.initialized = true;
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSidebar);
+    } else {
+        initSidebar();
+    }
+    window.addEventListener('resize', () => {
+        const wasMobile = sidebarInstance.isMobile;
+        const isMobileNow = window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT;
+        if (wasMobile !== isMobileNow) {
+            sidebarInstance.isMobile = isMobileNow;
+            initSidebar();
         }
     });
-
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
-            .then(reg => {
-                window.registration = reg;
-                reg.addEventListener('updatefound', () => {
-                    const newWorker = reg.installing;
-                    if (newWorker) {
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                isUpdateAvailable = true;
-                                updateButtonUI();
-                            }
-                        });
-                    }
-                });
-            })
-            .catch(err => console.error('SW error:', err));
-    }
-
-    window.matchMedia('(display-mode: standalone)').addEventListener('change', updateButtonUI);
-    updateButtonUI();
+    document.addEventListener('spa-navigation', setActiveNavItem);
+    window.addEventListener('popstate', setActiveNavItem);
+    window.sidebarAPI = {
+        refresh: populateRecommendations,
+        setActive: setActiveNavItem,
+        toggle: () => {
+            const sidebar = document.getElementById('sidebarDesktop');
+            if (sidebar) {
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                if (isCollapsed) {
+                    sidebar.classList.remove('collapsed');
+                    sidebar.classList.add('expanded');
+                } else {
+                    sidebar.classList.add('collapsed');
+                    sidebar.classList.remove('expanded');
+                }
+                localStorage.setItem('sidebar_state', isCollapsed ? 'expanded' : 'collapsed');
+            }
+        }
+    };
 })();
 </script>
 
-<!-- SCROLL HEADER MÓVIL (importante) -->
+<!-- HEADER HIDE ON SCROLL (versión definitiva - solo escucha #content) -->
 <script>
     let lastScrollTop = 0;
+    const headerContainer = document.getElementById('headerContainer');
+
     function handleHeaderScroll() {
-        const content = document.getElementById('content');
-        if (!content) return;
-        const st = content.scrollTop;
-        const header = document.getElementById('headerContainer');
-        if (!header) return;
+        const st = document.getElementById('content').scrollTop;
 
         if (Math.abs(st - lastScrollTop) < 15) return;
 
         if (st > lastScrollTop && st > 80) {
-            header.classList.add('hidden');
+            headerContainer.classList.add('hidden');
         } else {
-            header.classList.remove('hidden');
+            headerContainer.classList.remove('hidden');
         }
+
         lastScrollTop = st;
     }
 
-    // Esperamos a que #content exista
-    const checkContent = setInterval(() => {
-        const content = document.getElementById('content');
-        if (content) {
-            content.addEventListener('scroll', handleHeaderScroll, { passive: true });
-            clearInterval(checkContent);
-        }
-    }, 100);
+    document.getElementById('content').addEventListener('scroll', handleHeaderScroll, { passive: true });
 </script>
 
-<!-- Router principal -->
+<!-- Cargar el router principal -->
 <script type="module" src="/main.js"></script>
-
-<!-- Offline -->
-<script>
-(function() {
-    function showOfflineMessage() {
-        const content = document.getElementById('content');
-        if (content) {
-            content.innerHTML = `
-                <div class="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-                    <span class="text-6xl mb-4">📡</span>
-                    <h2 class="text-2xl font-bold text-white mb-2">Sin conexión</h2>
-                    <p class="text-gray-300 mb-6">Conéctate para disfrutar del contenido.</p>
-                    <button onclick="window.location.reload()" class="bg-[#7b2eda] hover:bg-[#8f3ef0] text-white font-bold px-6 py-3 rounded-full transition">
-                        Reintentar
-                    </button>
-                </div>
-            `;
-        }
-    }
-    if (!navigator.onLine) showOfflineMessage();
-    window.addEventListener('offline', showOfflineMessage);
-    window.addEventListener('online', () => window.location.reload());
-})();
-</script>
-
 </body>
 </html>
+<!-- Finaliza el index -->
 
-<!-- Fin de index -->
+
+<!-- Inicia el reproductor-->
+
+
 
 
 <!DOCTYPE html>
