@@ -1,5 +1,5 @@
-// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN COMPLETA CORREGIDA
-import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from 'https://podcast.tenam.site/episodios.js';
+// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN DEFINITIVA FUNCIONAL
+import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from './episodios.js';
 import { userStorage } from './storage.js';
 import './player.js';
 
@@ -21,24 +21,57 @@ const CATEGORIES = [
     "Tecnología e Informática", "Otras Ciencias"
 ];
 
+// ---------- ESTILOS GLOBALES (fondo degradado) ----------
+const GLOBAL_STYLES = `
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a2639 0%, #0f172a 50%, #1e293b 100%);
+            min-height: 100vh;
+        }
+        .bg-custom-dark {
+            background: linear-gradient(135deg, #1a2639 0%, #0f172a 50%, #1e293b 100%);
+        }
+        .card-std, .card-video, .grid-card, .list-item, .detail-view, .serie-header {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(2px);
+        }
+        /* Ajuste para carrusel double (Mix de Saberes) */
+        .carousel-double .flex-col {
+            gap: 0.75rem;
+        }
+        .carousel-double .card-std {
+            margin-bottom: 0;
+        }
+    </style>
+`;
+
+// Aplicar estilos globales
+if (!document.getElementById('global-styles')) {
+    const styleSheet = document.createElement('style');
+    styleSheet.id = 'global-styles';
+    styleSheet.textContent = GLOBAL_STYLES.replace('<style>', '').replace('</style>', '');
+    document.head.appendChild(styleSheet);
+}
+
 // ---------- UTILIDADES ----------
 function determineCategories(ep) {
     const cats = new Set();
     const text = (ep.title + ' ' + ep.description + ' ' + (ep.series?.titulo_serie || '') + ' ' + (ep.series?.descripcion_serie || '')).toLowerCase();
     const patterns = {
-        "Derecho": /\b(derecho|penal|civil|constitucional|procesal|delito|ley|jurisprudencia|código|tribunal|justicia|proceso)\b/i,
-        "Física y Astronomía": /\b(física|fisica|mecánica|mecanica|cuántica|cuantica|termodinámica|termodinamica|newton|einstein|astronomía|astronomia|planeta|cosmos)\b/i,
-        "Matemáticas": /\b(matemática|matematicas|calculo|cálculo|algebra|álgebra|geometria|geometría|estadistica|estadística|probabilidad|ecuacion|ecuación|teorema|integral)\b/i,
-        "Historia": /\b(historia|histórico|historico|siglo|época|epoca|imperio|guerra|revolución|revolucion|antiguo|medieval)\b/i,
-        "Filosofía": /\b(filosofía|filosofia|kant|platon|platón|aristoteles|ética|etica|metafísica|metafisica|ontología|ontologia|epistemología|epistemologia)\b/i,
-        "Economía y Finanzas": /\b(economía|economia|finanzas|inflación|inflacion|keynes|oferta|demanda|macroeconomía|macroeconomia|pib|mercado)\b/i,
-        "Ciencias Sociales": /\b(sociología|sociologia|antropología|antropologia|psicología|psicologia|sociedad|cultura|identidad|género|genero|desigualdad)\b/i,
-        "Arte y Cultura": /\b(arte|pintura|escultura|arquitectura|renacimiento|barroco|música|musica|cultura|artístico|artistico)\b/i,
-        "Literatura y Audiolibros": /\b(audiolibro|libro|novela|cuento|poema|clásico|clasico|literatura|lectura)\b/i,
-        "Cine y TV": /\b(cine|película|pelicula|serie|director|guion|ficción|ficcion|animación|animacion)\b/i,
-        "Documentales": /\b(documental|bbc|ciencia|naturaleza|espacio|universo|planeta|nacional geographic)\b/i,
-        "Ciencias Naturales": /\b(biología|biologia|química|quimica|geología|geologia|ecología|ecologia|evolución|evolucion|genética|genetica|clima|botánica|botanica)\b/i,
-        "Tecnología e Informática": /\b(tecnología|tecnologia|programación|programacion|python|ia|computación|computacion|algoritmo|software|desarrollo)\b/i
+        "Derecho": /\b(derecho|penal|civil|constitucional|procesal|delito|ley|jurisprudencia|código|tribunal|justicia|proceso|abogado|legal)\b/i,
+        "Física y Astronomía": /\b(física|fisica|mecánica|mecanica|cuántica|cuantica|termodinámica|termodinamica|newton|einstein|astronomía|astronomia|planeta|cosmos|gravedad|universo)\b/i,
+        "Matemáticas": /\b(matemática|matematicas|calculo|cálculo|algebra|álgebra|geometria|geometría|estadistica|estadística|probabilidad|ecuacion|ecuación|teorema|integral|función|funcion)\b/i,
+        "Historia": /\b(historia|histórico|historico|siglo|época|epoca|imperio|guerra|revolución|revolucion|antiguo|medieval|edad media|antigüedad)\b/i,
+        "Filosofía": /\b(filosofía|filosofia|kant|platon|platón|aristoteles|ética|etica|metafísica|metafisica|ontología|ontologia|epistemología|epistemologia|pensamiento|razón|razon)\b/i,
+        "Economía y Finanzas": /\b(economía|economia|finanzas|inflación|inflacion|keynes|oferta|demanda|macroeconomía|macroeconomia|pib|mercado|dinero|banco|inversión|inversion|geopolítica|geopolitica|política|politica)\b/i,
+        "Ciencias Sociales": /\b(sociología|sociologia|antropología|antropologia|psicología|psicologia|sociedad|cultura|identidad|género|genero|desigualdad|comunidad|social|humano)\b/i,
+        "Arte y Cultura": /\b(arte|pintura|escultura|arquitectura|renacimiento|barroco|música|musica|cultura|artístico|artistico|artista|obra)\b/i,
+        "Literatura y Audiolibros": /\b(audiolibro|libro|novela|cuento|poema|clásico|clasico|literatura|lectura|escritor|poesía|poesia)\b/i,
+        "Cine y TV": /\b(cine|película|pelicula|serie|director|guion|ficción|ficcion|animación|animacion|actor|actriz|documental)\b/i,
+        "Documentales": /\b(documental|bbc|naturaleza|espacio|universo|planeta|national geographic|descubrimiento|exploración|exploracion)\b/i,
+        "Ciencias Naturales": /\b(biología|biologia|química|quimica|geología|geologia|ecología|ecologia|evolución|evolucion|genética|genetica|clima|botánica|botanica|animal|planta|ecosistema)\b/i,
+        "Tecnología e Informática": /\b(tecnología|tecnologia|programación|programacion|python|ia|computación|computacion|algoritmo|software|desarrollo|hardware|informática|informatica)\b/i,
+        "Investigación y Criminología": /\b(investigación|investigacion|criminalística|criminalistica|crimen|delito|forense|guerra|conflicto|violencia|seguridad|policía|policia|detective|asesinato|homicidio)\b/i
     };
     for (const [cat, regex] of Object.entries(patterns)) {
         if (regex.test(text)) cats.add(cat);
@@ -56,13 +89,36 @@ export const DATA = getEpisodiosConSerie().map(ep => ({
     categories: determineCategories(ep)
 }));
 
-// ---------- RENDERIZADO DE TARJETAS ----------
+// ---------- RENDERIZADO DE TARJETAS (con botones que NO redirigen) ----------
 export function createStandardCard(ep) {
     const inPlaylist = userStorage.playlist.has(ep.id);
     const addIcon = inPlaylist ? ICONS.added : ICONS.add;
     const dlIcon = ep.allowDownload ? ICONS.dl : ICONS.noDl;
     return `<div class="card-std group" data-episodio-id="${ep.id}">
-        <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-zinc-800 cursor-pointer" onclick="window.goToDetail('${ep.detailUrl}')">
+        <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-zinc-800/50 cursor-pointer" onclick="window.goToDetail('${ep.detailUrl}')">
+            <img src="${ep.coverUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+            <div class="overlay-full">
+                <img src="${addIcon}" class="action-icon" onclick="window.handleAdd(event, '${ep.id}'); return false;" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
+                <img src="${ICONS.play}" class="play-icon-lg" onclick="window.handlePlay(event, '${ep.id}'); return false;">
+                <img src="${dlIcon}" class="action-icon" onclick="window.handleDl(event, '${ep.id}'); return false;" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
+            </div>
+            <div class="mobile-play-button" onclick="window.handlePlay(event, '${ep.id}'); return false;">
+                <img src="${ICONS.play}" alt="Play">
+            </div>
+        </div>
+        <div onclick="window.goToDetail('${ep.detailUrl}')" class="cursor-pointer">
+            <h3 class="font-bold text-white text-sm truncate hover:text-blue-400 transition-colors">${ep.title}</h3>
+            <p class="text-xs text-gray-400 mt-1 truncate">${ep.author}</p>
+        </div>
+    </div>`;
+}
+
+export function createVerticalCard(ep) {
+    const inPlaylist = userStorage.playlist.has(ep.id);
+    const addIcon = inPlaylist ? ICONS.added : ICONS.add;
+    const dlIcon = ep.allowDownload ? ICONS.dl : ICONS.noDl;
+    return `<div class="card-std group" data-episodio-id="${ep.id}">
+        <div class="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-zinc-800/50 cursor-pointer" onclick="window.goToDetail('${ep.detailUrl}')">
             <img src="${ep.coverUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
             <div class="overlay-full">
                 <img src="${addIcon}" class="action-icon" onclick="window.handleAdd(event, '${ep.id}'); return false;" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
@@ -84,10 +140,11 @@ export function createVideoExpand(ep) {
     const inPlaylist = userStorage.playlist.has(ep.id);
     const addIcon = inPlaylist ? ICONS.added : ICONS.add;
     const dlIcon = ep.allowDownload ? ICONS.dl : ICONS.noDl;
-    const hasCover2 = ep.coverWide && ep.coverWide !== ep.coverUrl;
+    // Usar coverWide si existe, sino fallback a coverUrl
+    const coverWide = ep.coverWide && ep.coverWide !== ep.coverUrl ? ep.coverWide : ep.coverUrl;
     return `<div class="card-video group" data-episodio-id="${ep.id}">
         <img src="${ep.coverUrl}" class="absolute inset-0 w-full h-full object-cover z-10 group-hover:opacity-0 transition-opacity duration-300">
-        ${hasCover2 ? `<img src="${ep.coverWide}" class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300">` : ''}
+        <img src="${coverWide}" class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <div class="overlay-full z-20">
             <img src="${addIcon}" class="action-icon" onclick="window.handleAdd(event, '${ep.id}'); return false;" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
             <img src="${ICONS.play}" class="play-icon-lg" onclick="window.handlePlay(event, '${ep.id}'); return false;">
@@ -111,10 +168,11 @@ export function createListItem(ep, idx) {
             <!-- Índice -->
             <span class="text-gray-400 font-semibold w-6 text-center text-sm flex-shrink-0">${idx + 1}</span>
             
-            <!-- Cover -->
+            <!-- Cover (solo para navegar a detalle) -->
             <div class="relative w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer"
                  onclick="window.goToDetail('${ep.detailUrl}')">
                 <img src="${ep.coverUrl}" class="w-full h-full object-cover" loading="lazy">
+                <!-- Play superpuesto (también invoca reproductor) -->
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
                      onclick="window.handlePlay(event, '${ep.id}'); return false;">
                     <img src="${ICONS.play}" class="w-5 h-5">
@@ -144,7 +202,7 @@ export function createGridCard(item) {
     const dlIcon = item.allowDownload ? ICONS.dl : ICONS.noDl;
     return `
         <div class="grid-card group" data-episodio-id="${item.id}">
-            <div class="aspect-square bg-zinc-800 relative rounded-xl overflow-hidden cursor-pointer" onclick="window.goToDetail('${item.detailUrl}')">
+            <div class="aspect-square bg-zinc-800/50 relative rounded-xl overflow-hidden cursor-pointer" onclick="window.goToDetail('${item.detailUrl}')">
                 <img src="${item.coverUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
                 <div class="overlay-full">
                     <img src="${addIcon}" class="action-icon" onclick="window.handleAdd(event, '${item.id}'); return false;" data-episodio-id="${item.id}" data-added="${inPlaylist}">
@@ -164,12 +222,15 @@ export function createGridCard(item) {
 }
 
 // ---------- CARRUSELES ----------
-function createCarousel(title, type, items, categoryContext) {
+function createCarousel(title, type, items, categoryContext, viewAllType = 'category') {
     if (!items || items.length === 0) return '';
     const id = 'c-' + Math.random().toString(36).substr(2, 9);
     let content = '';
+    let extraClass = '';
+    
     if (type === 'double') {
-        content = `<div id="${id}" class="flex flex-col flex-wrap h-[580px] gap-x-6 gap-y-6 overflow-x-auto no-scrollbar scroll-smooth">` +
+        extraClass = 'carousel-double';
+        content = `<div id="${id}" class="flex flex-col flex-wrap h-[580px] gap-x-6 gap-y-3 overflow-x-auto no-scrollbar scroll-smooth">` +
             items.map(ep => createStandardCard(ep)).join('') +
             `</div>`;
     } else if (type === 'list') {
@@ -187,16 +248,29 @@ function createCarousel(title, type, items, categoryContext) {
         content = `<div id="${id}" class="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 pl-1">` +
             items.map(ep => createVideoExpand(ep)).join('') +
             `</div>`;
+    } else if (type === 'vertical') {
+        content = `<div id="${id}" class="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth py-2 pl-1">` +
+            items.map(ep => createVerticalCard(ep)).join('') +
+            `</div>`;
     } else {
         content = `<div id="${id}" class="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth py-2 pl-1">` +
             items.map(ep => createStandardCard(ep)).join('') +
             `</div>`;
     }
-    // Usar handleCategoryClick para navegación SPA
-    const verTodoHandler = categoryContext !== 'Todos'
-        ? `window.handleCategoryClick('${categoryContext}')`
-        : `window.goToDetail('/')`; // Volver al inicio si es "Todos"
-    return `<section class="carousel-wrapper relative group/section mb-8 sm:mb-12">
+    
+    // Manejar clic en título y botón "Ver todo"
+    let verTodoHandler;
+    if (viewAllType === 'series') {
+        verTodoHandler = `window.showSeriesGrid('${title}')`;
+    } else if (categoryContext && categoryContext !== 'Todos') {
+        verTodoHandler = `window.handleCategoryClick('${categoryContext}')`;
+    } else {
+        // Si no hay categoría específica, mostrar los mismos items en grid
+        const itemIds = JSON.stringify(items.map(ep => ep.id));
+        verTodoHandler = `window.showItemsGrid('${title}', ${itemIds})`;
+    }
+    
+    return `<section class="carousel-wrapper relative group/section mb-8 sm:mb-12 ${extraClass}">
         <div class="flex items-end justify-between mb-3 sm:mb-5 px-1">
             <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition-colors cursor-pointer" onclick="${verTodoHandler}">${title}</h2>
             <button onclick="${verTodoHandler}" class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">Ver todo</button>
@@ -221,17 +295,29 @@ function createSeriesCarousel() {
             seriesGroups[serieKey].episodes.push(ep);
         }
     });
-    const seriesKeys = Object.keys(seriesGroups);
-    if (seriesKeys.length === 0) return '';
+    
+    // Convertir a array y mezclar aleatoriamente
+    let seriesArray = Object.entries(seriesGroups).map(([key, value]) => ({
+        key,
+        ...value
+    }));
+    
+    // Mezclar aleatoriamente (Fisher-Yates)
+    for (let i = seriesArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [seriesArray[i], seriesArray[j]] = [seriesArray[j], seriesArray[i]];
+    }
+    
+    if (seriesArray.length === 0) return '';
+    
     let content = `<div id="${id}" class="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth pb-4">`;
-    seriesKeys.forEach(serieKey => {
-        const group = seriesGroups[serieKey];
+    seriesArray.forEach(group => {
         group.episodes.sort((a, b) => new Date(b.date) - new Date(a.date));
         const s = group.seriesInfo;
         if (!s || group.episodes.length < 1) return;
         content += `<div class="card-list-group min-w-[300px] sm:min-w-[340px]">
             <div class="mb-4 cursor-pointer group/serie" onclick="window.goToDetail('${s.url_serie}')">
-                <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-zinc-800">
+                <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-zinc-800/50">
                     <img src="${s.portada_serie}" class="w-full h-full object-cover group-hover/serie:scale-105 transition-transform duration-500" loading="lazy">
                 </div>
                 <h3 class="font-bold text-white text-sm truncate mt-2 group-hover/serie:text-blue-400 transition-colors">${s.titulo_serie}</h3>
@@ -246,11 +332,11 @@ function createSeriesCarousel() {
         </div>`;
     });
     content += `</div>`;
-    // Al hacer clic en "Ver todo" de series, podrías ir a /series (si existiera) o a la primera serie. Por ahora, no hacemos nada.
+    
     return `<section class="carousel-wrapper relative group/section mb-8 sm:mb-12">
         <div class="flex items-end justify-between mb-3 sm:mb-5 px-1">
-            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition-colors cursor-default">Series y Cursos Académicos</h2>
-            <button class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors" onclick="alert('Funcionalidad en desarrollo')">Ver todo</button>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition-colors cursor-pointer" onclick="window.showSeriesGrid('Series y Cursos Académicos')">Series y Cursos Académicos</h2>
+            <button class="text-xs font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors" onclick="window.showSeriesGrid('Series y Cursos Académicos')">Ver todo</button>
         </div>
         <div class="relative">
             <div class="nav-btn left" onclick="document.getElementById('${id}').scrollLeft -= 600"><button>❮</button></div>
@@ -260,7 +346,7 @@ function createSeriesCarousel() {
     </section>`;
 }
 
-// ---------- VISTAS DE DETALLE (protegidas con try/catch) ----------
+// ---------- VISTAS DE DETALLE (con botones que NO redirigen) ----------
 export function renderEpisodio(container, episodioId) {
     try {
         const ep = DATA.find(e => e.id === episodioId);
@@ -286,7 +372,7 @@ export function renderEpisodio(container, episodioId) {
                                 <span class="font-bold">Reproducir</span>
                             </button>
                             <button class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleAdd(event, '${ep.id}')">
-                                <img src="${addIcon}" class="w-6 h-6 icon-white">
+                                <img src="${addIcon}" class="w-6 h-6 icon-white" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
                             </button>
                             <button class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleDl(event, '${ep.id}')">
                                 <img src="${ep.allowDownload ? ICONS.dl : ICONS.noDl}" class="w-6 h-6 icon-white">
@@ -296,7 +382,7 @@ export function renderEpisodio(container, episodioId) {
                             </button>
                         </div>
                     </div>
-                    <div class="hidden lg:block relative rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-900 to-black border border-white/10">
+                    <div class="hidden lg:block relative rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-900/50 to-black/50 border border-white/10">
                         <div class="absolute inset-0 opacity-20">
                             <img src="${ep.coverUrl}" class="w-full h-full object-cover blur-3xl scale-110">
                         </div>
@@ -312,7 +398,7 @@ export function renderEpisodio(container, episodioId) {
                                         <span class="font-bold text-lg">Reproducir</span>
                                     </button>
                                     <button class="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleAdd(event, '${ep.id}')" title="Añadir a lista">
-                                        <img src="${addIcon}" class="w-6 h-6 icon-white">
+                                        <img src="${addIcon}" class="w-6 h-6 icon-white" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
                                     </button>
                                     <button class="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleDl(event, '${ep.id}')" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
                                         <img src="${ep.allowDownload ? ICONS.dl : ICONS.noDl}" class="w-6 h-6 icon-white">
@@ -378,7 +464,7 @@ export function renderSerie(container, serieUrl) {
                         <p class="text-gray-400 text-sm mt-2 line-clamp-2 hidden sm:block">${ep.description}</p>
                         <div class="flex items-center gap-2 mt-4">
                             <button class="episode-action-btn w-10 h-10 rounded-xl bg-black/30 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleAdd(event, '${ep.id}')" title="Añadir a lista">
-                                <img src="${addIcon}" class="w-5 h-5 icon-white">
+                                <img src="${addIcon}" class="w-5 h-5 icon-white" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
                             </button>
                             <button class="episode-action-btn w-10 h-10 rounded-xl bg-black/30 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleDl(event, '${ep.id}')" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
                                 <img src="${ep.allowDownload ? ICONS.dl : ICONS.noDl}" class="w-5 h-5 icon-white">
@@ -417,7 +503,7 @@ export function renderSerie(container, serieUrl) {
                             </button>
                         </div>
                     </div>
-                    <div class="hidden lg:block relative rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-900 to-black border border-white/10">
+                    <div class="hidden lg:block relative rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-900/50 to-black/50 border border-white/10">
                         <div class="absolute inset-0 opacity-20">
                             <img src="${serie.portada_serie}" class="w-full h-full object-cover blur-3xl scale-110">
                         </div>
@@ -488,51 +574,74 @@ export function renderFeed(container) {
         feedView = document.getElementById('feed-view');
         gridView = document.getElementById('grid-view');
     }
+    
     const getRandomSafe = (count, filterFn = () => true) => {
         const filtered = DATA.filter(filterFn);
         if (filtered.length === 0) return [];
         const shuffled = [...filtered].sort(() => 0.5 - Math.random());
         return shuffled.slice(0, Math.min(count, filtered.length));
     };
+    
     feedView.innerHTML = '';
+    
+    // Nuevo carrusel vertical al inicio (4:5)
+    feedView.innerHTML += createCarousel("Destacados del Día", "vertical",
+        getRandomSafe(15), "Todos", 'items');
+    
     feedView.innerHTML += createCarousel("Nuevos Lanzamientos", "standard",
-        getRandomSafe(15, ep => new Date(ep.date) > new Date(Date.now() - 30*24*60*60*1000)), "Todos");
+        getRandomSafe(15, ep => new Date(ep.date) > new Date(Date.now() - 30*24*60*60*1000)), "Todos", 'items');
+    
     feedView.innerHTML += createCarousel("Series de Video", "expand",
-        getRandomSafe(10, e => e.type === 'video'), "Cine y TV");
+        getRandomSafe(10, e => e.type === 'video'), "Cine y TV", 'category');
+    
     feedView.innerHTML += createCarousel("Top Semanal", "list",
-        getRandomSafe(16), "Todos");
+        getRandomSafe(16), "Todos", 'items');
+    
     feedView.innerHTML += createCarousel("Para Estudiar Profundamente", "double",
-        getRandomSafe(20, e => e.categories.includes("Matemáticas") || e.categories.includes("Física y Astronomía")), "Matemáticas");
+        getRandomSafe(20, e => e.categories.includes("Matemáticas") || e.categories.includes("Física y Astronomía")), "Matemáticas", 'category');
+    
     feedView.innerHTML += createCarousel("Matemáticas", "standard",
-        getRandomSafe(15, e => e.categories.includes("Matemáticas")), "Matemáticas");
+        getRandomSafe(15, e => e.categories.includes("Matemáticas")), "Matemáticas", 'category');
+    
     feedView.innerHTML += createCarousel("Especiales en Video", "expand",
-        getRandomSafe(10, e => e.type === 'video' && e.categories.includes("Documentales")), "Documentales");
+        getRandomSafe(10, e => e.type === 'video' && e.categories.includes("Documentales")), "Documentales", 'category');
+    
     feedView.innerHTML += createCarousel("Física y Astronomía", "standard",
-        getRandomSafe(15, e => e.categories.includes("Física y Astronomía")), "Física y Astronomía");
+        getRandomSafe(15, e => e.categories.includes("Física y Astronomía")), "Física y Astronomía", 'category');
+    
     feedView.innerHTML += createCarousel("Ciencias Naturales y Tecnología", "double",
-        getRandomSafe(20, e => e.categories.some(c => ["Ciencias Naturales", "Tecnología e Informática"].includes(c))), "Otras Ciencias");
+        getRandomSafe(20, e => e.categories.some(c => ["Ciencias Naturales", "Tecnología e Informática"].includes(c))), "Otras Ciencias", 'category');
+    
     feedView.innerHTML += createSeriesCarousel();
+    
+    // ELIMINADO: Carrusel "Sociedad, Política y Economía" (anteriormente Humanidades)
+    
     feedView.innerHTML += createCarousel("Otras Ciencias y Disciplinas", "standard",
         getRandomSafe(15, e => e.categories.includes("Otras Ciencias") ||
             e.categories.some(c => ["Ciencias Naturales", "Tecnología e Informática"].includes(c))),
-        "Otras Ciencias");
+        "Otras Ciencias", 'category');
+    
     feedView.innerHTML += createCarousel("Imprescindibles del Mes", "list",
-        getRandomSafe(16, e => new Date(e.date) > new Date(Date.now() - 60*24*60*60*1000)), "Todos");
+        getRandomSafe(16, e => new Date(e.date) > new Date(Date.now() - 60*24*60*60*1000)), "Todos", 'items');
+    
     feedView.innerHTML += createCarousel("Podcasts Destacados", "standard",
-        getRandomSafe(15, e => e.type === 'audio'), "Todos");
+        getRandomSafe(15, e => e.type === 'audio'), "Todos", 'items');
+    
     feedView.innerHTML += createCarousel("Charlas y Conferencias", "expand",
-        getRandomSafe(10, e => e.type === 'video' && (e.categories.includes("Cine y TV") || e.categories.includes("Documentales"))), "Cine y TV");
-    feedView.innerHTML += createCarousel("Humanidades y Sociedad", "double",
-        getRandomSafe(20, e => e.categories.some(c => ["Historia", "Filosofía", "Ciencias Sociales", "Arte y Cultura"].includes(c))), "Ciencias Sociales");
+        getRandomSafe(10, e => e.type === 'video' && (e.categories.includes("Cine y TV") || e.categories.includes("Documentales"))), "Cine y TV", 'category');
+    
+    // Mentes Curiosas (investigación, criminalismo, guerras, conflictos)
     feedView.innerHTML += createCarousel("Mentes Curiosas", "standard",
-        getRandomSafe(15, e => e.categories.includes("Tecnología e Informática") || e.categories.includes("Ciencias Naturales")), "Tecnología e Informática");
-    feedView.innerHTML += createCarousel("Actualidad Académica", "list",
-        getRandomSafe(16, e => new Date(e.date) > new Date(Date.now() - 45*24*60*60*1000)), "Todos");
+        getRandomSafe(15, e => 
+            /\b(investigación|investigacion|criminalística|criminalistica|crimen|delito|forense|guerra|conflicto|violencia|seguridad|policía|policia|detective|asesinato|homicidio|justicia|penal|legal|sociedad|problema social)\b/i
+            .test(e.title + ' ' + e.description + ' ' + (e.series?.titulo_serie || ''))
+        ), "Derecho", 'category');
+    
     feedView.innerHTML += createCarousel("Mix de Saberes", "double",
-        getRandomSafe(20), "Todos");
+        getRandomSafe(20), "Todos", 'items');
 }
 
-// ---------- RENDER GRID ----------
+// ---------- RENDER GRID (para resultados de búsqueda, categorías, etc.) ----------
 export function renderGrid(container, items, title) {
     let gridView = document.getElementById('grid-view');
     if (!gridView) {
@@ -586,6 +695,70 @@ export function renderGrid(container, items, title) {
     });
 }
 
+// ---------- RENDER GRID DE SERIES ----------
+export function renderSeriesGrid(container, title) {
+    const seriesSet = new Map();
+    DATA.forEach(ep => {
+        if (ep.series && !seriesSet.has(ep.series.url_serie)) {
+            seriesSet.set(ep.series.url_serie, ep.series);
+        }
+    });
+    
+    const series = Array.from(seriesSet.values());
+    
+    let gridView = document.getElementById('grid-view');
+    if (!gridView) {
+        container.innerHTML = `
+            <div id="feed-view" class="hidden"></div>
+            <div id="grid-view" class="transition-opacity duration-300">
+                <div class="flex items-center justify-between mb-6 sm:mb-8 mt-4 sm:mt-6">
+                    <h2 id="grid-title" class="text-xl sm:text-2xl font-bold">${title}</h2>
+                    <button id="closeGridBtn" class="text-sm font-bold text-gray-400 hover:text-white flex items-center gap-1">
+                        <span class="text-xl">×</span> Cerrar búsqueda
+                    </button>
+                </div>
+                <div id="results-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6"></div>
+                <div id="empty-state" class="hidden py-8 sm:py-10 text-center">
+                    <p class="text-gray-400 text-base sm:text-lg mb-6 sm:mb-8" id="empty-msg">No encontramos series...</p>
+                </div>
+            </div>
+        `;
+        gridView = document.getElementById('grid-view');
+    }
+    
+    const gridContainer = document.getElementById('results-grid');
+    const emptyState = document.getElementById('empty-state');
+    const titleEl = document.getElementById('grid-title');
+    titleEl.innerText = title;
+    gridContainer.innerHTML = '';
+    
+    if (series.length === 0) {
+        emptyState.classList.remove('hidden');
+        gridContainer.classList.add('hidden');
+    } else {
+        emptyState.classList.add('hidden');
+        gridContainer.classList.remove('hidden');
+        series.forEach(serie => {
+            gridContainer.innerHTML += `
+                <div class="grid-card group cursor-pointer" onclick="window.goToDetail('${serie.url_serie}')">
+                    <div class="aspect-square bg-zinc-800/50 relative rounded-xl overflow-hidden">
+                        <img src="${serie.portada_serie}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                    </div>
+                    <h4 class="font-bold text-sm text-white truncate mt-2 group-hover:text-blue-400 transition-colors">${serie.titulo_serie}</h4>
+                    <p class="text-xs text-gray-500 truncate">Serie</p>
+                </div>
+            `;
+        });
+    }
+    
+    document.getElementById('feed-view')?.classList.add('hidden');
+    gridView.classList.remove('hidden');
+    document.getElementById('closeGridBtn')?.addEventListener('click', () => {
+        window.history.pushState(null, null, '/');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+}
+
 // ---------- FUNCIONES GLOBALES ----------
 window.shareContent = async (title, url) => {
     const fullUrl = window.location.origin + url;
@@ -597,7 +770,6 @@ window.shareContent = async (title, url) => {
         }
     } else {
         navigator.clipboard.writeText(fullUrl);
-        // Sin alert
     }
 };
 
@@ -627,7 +799,6 @@ window.handlePlay = function(e, episodioId) {
             ep.description,
             ep.allowDownload
         );
-        // Si llegó aquí → reproductor se abrió correctamente → silencio total
     } catch (err) {
         console.error('Error al reproducir:', err);
         showCustomAlert(ep.title, 'no está disponible por ahora.');
@@ -649,6 +820,7 @@ window.handleDl = function(e, episodioId) {
 
     const ext = ep.type === 'video' ? 'mp4' : 'mp3';
     const filename = `${ep.title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}.${ext}`;
+    
     try {
         const a = document.createElement('a');
         a.href = ep.mediaUrl;
@@ -656,9 +828,14 @@ window.handleDl = function(e, episodioId) {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        
+        // Verificar si la descarga realmente se inició (opcional)
+        // Si el navegador no soporta download o hay error CORS, saltará al catch
     } catch (error) {
+        console.error('Error en descarga:', error);
         showCustomAlert(ep.title, 'no se pudo descargar automáticamente.');
     }
+    
     return false;
 };
 
@@ -677,13 +854,16 @@ window.handleAdd = function(e, episodioId) {
         userStorage.playlist.add(ep);
     }
 
-    // Solo cambio de icono + animación, SIN alert
-    document.querySelectorAll(`[data-episodio-id="${episodioId}"] img[data-added]`)
+    // Actualizar TODOS los iconos de añadir para este episodio en toda la página
+    document.querySelectorAll(`[data-episodio-id="${episodioId}"] img[data-added], [data-episodio-id="${episodioId}"] .action-icon[data-added]`)
         .forEach(img => {
-            img.src = alreadyIn ? ICONS.add : ICONS.added;
-            img.dataset.added = alreadyIn ? 'false' : 'true';
-            img.style.transform = 'scale(1.3)';
-            setTimeout(() => img.style.transform = 'scale(1)', 180);
+            if (img.tagName === 'IMG') {
+                img.src = alreadyIn ? ICONS.add : ICONS.added;
+                img.dataset.added = alreadyIn ? 'false' : 'true';
+                // Animación de escala
+                img.style.transform = 'scale(1.3)';
+                setTimeout(() => img.style.transform = 'scale(1)', 180);
+            }
         });
 
     return false;
@@ -701,6 +881,21 @@ window.handleCategoryClick = function(category) {
     window.history.pushState(null, null, url);
     window.dispatchEvent(new PopStateEvent('popstate'));
     window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.showItemsGrid = function(title, itemIds) {
+    const items = itemIds.map(id => DATA.find(ep => ep.id === id)).filter(ep => ep);
+    const container = document.getElementById('app');
+    if (container) {
+        renderGrid(container, items, title);
+    }
+};
+
+window.showSeriesGrid = function(title) {
+    const container = document.getElementById('app');
+    if (container) {
+        renderSeriesGrid(container, title);
+    }
 };
 
 export function renderCategoryPills(activeCat = 'Todos') {
@@ -729,7 +924,7 @@ if (document.readyState === 'loading') {
     renderCategoryPills();
 }
 
-// ---------- ALERTA PERSONALIZADA ----------
+// ---------- ALERTA PERSONALIZADA (solo para errores reales) ----------
 function showCustomAlert(title, message) {
     const fullMessage = `"${title}" ${message}`;
     
@@ -761,4 +956,4 @@ function showCustomAlert(title, message) {
     });
 }
 
-console.log('✅ show.js cargado completamente - versión FINAL corregida');
+console.log('✅ show.js cargado completamente - versión DEFINITIVA FUNCIONAL');
