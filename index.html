@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Balta Media</title>
+    <title>Balta Media · Conocimiento en acción</title>
     <link rel="canonical" href="https://balta-media.odoo.com/" id="canonicalLink">
     <link rel="alternate" media="only screen and (max-width: 640px)" href="https://app.baltaanay.org/" id="alternateLink">
     <!-- Manifest PWA -->
@@ -13,7 +13,7 @@
     <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="https://bata-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://balta-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png">
     <link rel="icon" type="image/png" sizes="16x16" href="https://balta-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png">
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="/styles.css">
@@ -107,7 +107,7 @@
                         <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     </a>
                     <button id="install-button-container" class="install-button hidden">
-                        <img id="install-icon" src="https://img.icons8.com/ios-filled/50/000000/download--v1.png" alt="Instalar">
+                        <img id="install-icon" src="https://nikichitonjesus.odoo.com/web/image/624-ec376d7f/descargar.png" alt="Instalar">
                         <span id="install-text">Instalar app</span>
                     </button>
                     <a href="/my/home" id="profile-link" class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
@@ -122,7 +122,6 @@
             </div>
         </div>
     </div>
-
     <main id="content"></main>
 </div>
 
@@ -144,7 +143,6 @@
 <script>
 (function() {
     const BOTTOMBAR_CONFIG = { BREAKPOINT: 768, HEIGHT: '60px' };
-
     const bottomBarStyles = `
         .bottom-bar-mobile {
             position: fixed; bottom: 0; left: 0; width: 100%; height: ${BOTTOMBAR_CONFIG.HEIGHT};
@@ -178,15 +176,13 @@
         const bar = document.createElement('nav');
         bar.className = 'bottom-bar-mobile';
         bar.id = 'bottomBarMobile';
-
         const items = [
             { href: '/', icon: 'https://balta-media.odoo.com/web/image/798-1b947c8d/Home%20%282%29.webp', label: 'Inicio' },
             { href: '/buscar', icon: 'https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp', label: 'Buscar' },
-            { href: '/explorar', icon: 'https://balta-media.odoo.com/web/image/796-aee658de/Explore.png', label: 'Subir' },
-            { href: 'https://www.baltaanay.org/solicitud', icon: 'https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp', label: 'Crear' },
-            { href: '/biblioteca', icon: 'https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png', label: 'Biblioteca' }
+            { href: '/explorar', icon: 'https://balta-media.odoo.com/web/image/796-aee658de/Explore.png', label: 'Explorar' },
+            { href: 'https://www.baltaanay.org/solicitud', icon: 'https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp', label: 'Solicitar' },
+            { href: '/my/home', icon: 'https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png', label: 'Perfil' }
         ];
-
         items.forEach(item => {
             const link = document.createElement('a');
             link.href = item.href;
@@ -195,7 +191,6 @@
             link.innerHTML = `<img src="${item.icon}" alt="${item.label}" loading="lazy"><span>${item.label}</span>`;
             bar.appendChild(link);
         });
-
         return bar;
     }
 
@@ -210,12 +205,10 @@
     function initBottomBar() {
         const isMobile = window.innerWidth <= BOTTOMBAR_CONFIG.BREAKPOINT;
         document.getElementById('bottomBarMobile')?.remove();
-
         if (!isMobile) {
             document.body.classList.remove('with-bottom-bar');
             return;
         }
-
         injectStyles();
         const bar = renderBottomBar();
         document.body.appendChild(bar);
@@ -230,8 +223,7 @@
 })();
 </script>
 
-<!-- PWA: Instalación, Actualización y Redirección -->
-<!-- PWA: Instalación, Actualización, Abrir App y Perfil -->
+<!-- PWA con tus iconos -->
 <script>
 (function() {
     let deferredPrompt = null;
@@ -241,7 +233,6 @@
     const installIcon = document.getElementById('install-icon');
     const profileLink = document.getElementById('profile-link');
 
-    // Iconos que proporcionaste
     const ICONS = {
         install: "https://nikichitonjesus.odoo.com/web/image/624-ec376d7f/descargar.png",
         update: "https://nikichitonjesus.odoo.com/web/image/775-4e2e83af/repetir-.webp",
@@ -255,41 +246,29 @@
 
     function updateButtonUI() {
         const standalone = isStandalone();
-
         if (standalone) {
-            // Ya está instalada como app → mostrar botón de Perfil (/my/home)
             installBtn.classList.add('hidden');
             profileLink.classList.remove('hidden');
             profileLink.innerHTML = `<img src="${ICONS.myHome}" alt="Perfil" class="w-full h-full object-cover" loading="lazy">`;
-
-            // Si hay actualización disponible, mostramos botón de Actualizar
             if (isUpdateAvailable) {
                 installBtn.classList.remove('hidden');
                 installBtn.classList.add('update');
                 installText.textContent = 'Actualizar';
                 installIcon.src = ICONS.update;
             }
-        } 
-        else {
-            // No está instalada como app
+        } else {
             profileLink.classList.add('hidden');
-
             if (isUpdateAvailable) {
-                // Prioridad: Actualizar
                 installBtn.classList.remove('hidden');
                 installBtn.classList.add('update');
                 installText.textContent = 'Actualizar';
                 installIcon.src = ICONS.update;
-            } 
-            else if (deferredPrompt) {
-                // Mostrar instalar
+            } else if (deferredPrompt) {
                 installBtn.classList.remove('hidden');
                 installBtn.classList.remove('update');
                 installText.textContent = 'Instalar app';
                 installIcon.src = ICONS.install;
-            } 
-            else {
-                // Fallback: intentar abrir app (si falla la redirección automática)
+            } else {
                 installBtn.classList.remove('hidden');
                 installBtn.classList.remove('update');
                 installText.textContent = 'Abrir app';
@@ -298,37 +277,28 @@
         }
     }
 
-    // Before install prompt (Chrome, Edge, etc.)
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         deferredPrompt = e;
         updateButtonUI();
     });
 
-    // Click en el botón
     installBtn.addEventListener('click', async () => {
         if (isUpdateAvailable && window.registration?.waiting) {
-            // Actualizar la app
             window.registration.waiting.postMessage({ type: 'SKIP_WAITING' });
             window.location.reload();
             return;
         }
-
         if (deferredPrompt) {
-            // Instalar la app
             deferredPrompt.prompt();
             await deferredPrompt.userChoice;
             deferredPrompt = null;
             updateButtonUI();
-        } 
-        else {
-            // Fallback: Abrir app (si el usuario está en navegador)
-            // Intenta redirigir a la URL de la app instalada
+        } else {
             window.location.href = "https://app.baltaanay.org/";
         }
     });
 
-    // Service Worker + detección de actualizaciones
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js')
             .then(reg => {
@@ -348,29 +318,41 @@
             .catch(err => console.error('SW error:', err));
     }
 
-    // Escuchar cambios de modo (standalone vs browser)
     window.matchMedia('(display-mode: standalone)').addEventListener('change', updateButtonUI);
-
-    // Inicializar
     updateButtonUI();
-
-    // Intentar redirección automática a la app instalada cuando se abre desde navegador
-    function tryOpenInApp() {
-        if (isStandalone()) return;
-        // Pequeño delay para dar tiempo a que se detecte standalone
-        setTimeout(() => {
-            if (!isStandalone()) {
-                // Si no está en standalone, intentamos forzar apertura en app
-                console.log("Intentando abrir en app instalada...");
-                // Puedes mejorar esto con launch_handler en manifest
-            }
-        }, 800);
-    }
-
-    window.addEventListener('load', tryOpenInApp);
-
 })();
 </script>
+
+<!-- SCROLL HEADER MÓVIL (importante) -->
+<script>
+    let lastScrollTop = 0;
+    function handleHeaderScroll() {
+        const content = document.getElementById('content');
+        if (!content) return;
+        const st = content.scrollTop;
+        const header = document.getElementById('headerContainer');
+        if (!header) return;
+
+        if (Math.abs(st - lastScrollTop) < 15) return;
+
+        if (st > lastScrollTop && st > 80) {
+            header.classList.add('hidden');
+        } else {
+            header.classList.remove('hidden');
+        }
+        lastScrollTop = st;
+    }
+
+    // Esperamos a que #content exista
+    const checkContent = setInterval(() => {
+        const content = document.getElementById('content');
+        if (content) {
+            content.addEventListener('scroll', handleHeaderScroll, { passive: true });
+            clearInterval(checkContent);
+        }
+    }, 100);
+</script>
+
 <!-- Router principal -->
 <script type="module" src="/main.js"></script>
 
