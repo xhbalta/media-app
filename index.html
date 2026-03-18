@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Balta Media · Conocimiento en acción</title>
+    <title>Balta Media</title>
     <link rel="canonical" href="https://balta-media.odoo.com/" id="canonicalLink">
     <link rel="alternate" media="only screen and (max-width: 640px)" href="https://app.baltaanay.org/" id="alternateLink">
     <!-- Manifest PWA -->
@@ -231,6 +231,7 @@
 </script>
 
 <!-- PWA: Instalación, Actualización y Redirección -->
+<!-- PWA: Instalación, Actualización, Abrir App y Perfil -->
 <script>
 (function() {
     let deferredPrompt = null;
@@ -240,56 +241,94 @@
     const installIcon = document.getElementById('install-icon');
     const profileLink = document.getElementById('profile-link');
 
+    // Iconos que proporcionaste
+    const ICONS = {
+        install: "https://nikichitonjesus.odoo.com/web/image/624-ec376d7f/descargar.png",
+        update: "https://nikichitonjesus.odoo.com/web/image/775-4e2e83af/repetir-.webp",
+        openApp: "https://nikichitonjesus.odoo.com/web/image/993-70b1b1d5/userlist.webp",
+        myHome: "https://nikichitonjesus.odoo.com/web/image/776-52d85853/a%C3%B1adir%20a.webp"
+    };
+
     function isStandalone() {
         return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     }
 
     function updateButtonUI() {
         const standalone = isStandalone();
+
         if (standalone) {
+            // Ya está instalada como app → mostrar botón de Perfil (/my/home)
             installBtn.classList.add('hidden');
             profileLink.classList.remove('hidden');
+            profileLink.innerHTML = `<img src="${ICONS.myHome}" alt="Perfil" class="w-full h-full object-cover" loading="lazy">`;
+
+            // Si hay actualización disponible, mostramos botón de Actualizar
             if (isUpdateAvailable) {
                 installBtn.classList.remove('hidden');
                 installBtn.classList.add('update');
                 installText.textContent = 'Actualizar';
-                installIcon.src = 'https://img.icons8.com/ios-filled/50/ffffff/refresh.png';
+                installIcon.src = ICONS.update;
             }
-        } else {
+        } 
+        else {
+            // No está instalada como app
             profileLink.classList.add('hidden');
-            if (deferredPrompt || isUpdateAvailable) {
+
+            if (isUpdateAvailable) {
+                // Prioridad: Actualizar
                 installBtn.classList.remove('hidden');
-                installBtn.classList.toggle('update', isUpdateAvailable);
-                installText.textContent = isUpdateAvailable ? 'Actualizar' : 'Instalar app';
-                installIcon.src = isUpdateAvailable 
-                    ? 'https://img.icons8.com/ios-filled/50/ffffff/refresh.png'
-                    : 'https://img.icons8.com/ios-filled/50/000000/download--v1.png';
-            } else {
-                installBtn.classList.add('hidden');
+                installBtn.classList.add('update');
+                installText.textContent = 'Actualizar';
+                installIcon.src = ICONS.update;
+            } 
+            else if (deferredPrompt) {
+                // Mostrar instalar
+                installBtn.classList.remove('hidden');
+                installBtn.classList.remove('update');
+                installText.textContent = 'Instalar app';
+                installIcon.src = ICONS.install;
+            } 
+            else {
+                // Fallback: intentar abrir app (si falla la redirección automática)
+                installBtn.classList.remove('hidden');
+                installBtn.classList.remove('update');
+                installText.textContent = 'Abrir app';
+                installIcon.src = ICONS.openApp;
             }
         }
     }
 
+    // Before install prompt (Chrome, Edge, etc.)
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         deferredPrompt = e;
         updateButtonUI();
     });
 
+    // Click en el botón
     installBtn.addEventListener('click', async () => {
         if (isUpdateAvailable && window.registration?.waiting) {
+            // Actualizar la app
             window.registration.waiting.postMessage({ type: 'SKIP_WAITING' });
             window.location.reload();
             return;
         }
+
         if (deferredPrompt) {
+            // Instalar la app
             deferredPrompt.prompt();
             await deferredPrompt.userChoice;
             deferredPrompt = null;
             updateButtonUI();
+        } 
+        else {
+            // Fallback: Abrir app (si el usuario está en navegador)
+            // Intenta redirigir a la URL de la app instalada
+            window.location.href = "https://app.baltaanay.org/";
         }
     });
 
+    // Service Worker + detección de actualizaciones
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js')
             .then(reg => {
@@ -309,11 +348,29 @@
             .catch(err => console.error('SW error:', err));
     }
 
+    // Escuchar cambios de modo (standalone vs browser)
     window.matchMedia('(display-mode: standalone)').addEventListener('change', updateButtonUI);
+
+    // Inicializar
     updateButtonUI();
+
+    // Intentar redirección automática a la app instalada cuando se abre desde navegador
+    function tryOpenInApp() {
+        if (isStandalone()) return;
+        // Pequeño delay para dar tiempo a que se detecte standalone
+        setTimeout(() => {
+            if (!isStandalone()) {
+                // Si no está en standalone, intentamos forzar apertura en app
+                console.log("Intentando abrir en app instalada...");
+                // Puedes mejorar esto con launch_handler en manifest
+            }
+        }, 800);
+    }
+
+    window.addEventListener('load', tryOpenInApp);
+
 })();
 </script>
-
 <!-- Router principal -->
 <script type="module" src="/main.js"></script>
 
