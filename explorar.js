@@ -1,5 +1,5 @@
 // explorar.js - Página de exploración con diseño profesional
-import { getEpisodiosConSerie, getAllEpisodios, series } from './episodios.js';
+import { getEpisodiosConSerie, getAllEpisodios, series } from 'https://podcast.tenam.site/episodios.js';
 
 // ---------- CONSTANTES ----------
 const ICONS = {
