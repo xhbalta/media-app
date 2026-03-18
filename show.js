@@ -1,4 +1,4 @@
-// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN DEFINITIVA FUNCIONAL
+// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN DEFINITIVA CON CAPTURA DE EVENTOS
 import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from './episodios.js';
 import { userStorage } from './storage.js';
 import './player.js';
@@ -35,7 +35,6 @@ const GLOBAL_STYLES = `
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(2px);
         }
-        /* Ajuste para carrusel double (Mix de Saberes) */
         .carousel-double .flex-col {
             gap: 0.75rem;
         }
@@ -89,7 +88,7 @@ export const DATA = getEpisodiosConSerie().map(ep => ({
     categories: determineCategories(ep)
 }));
 
-// ---------- RENDERIZADO DE TARJETAS (con botones que NO redirigen) ----------
+// ---------- RENDERIZADO DE TARJETAS ----------
 export function createStandardCard(ep) {
     const inPlaylist = userStorage.playlist.has(ep.id);
     const addIcon = inPlaylist ? ICONS.added : ICONS.add;
@@ -98,11 +97,11 @@ export function createStandardCard(ep) {
         <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-zinc-800/50 cursor-pointer" onclick="window.goToDetail('${ep.detailUrl}')">
             <img src="${ep.coverUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
             <div class="overlay-full">
-                <img src="${addIcon}" class="action-icon" onclick="window.handleAdd(event, '${ep.id}'); return false;" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
-                <img src="${ICONS.play}" class="play-icon-lg" onclick="window.handlePlay(event, '${ep.id}'); return false;">
-                <img src="${dlIcon}" class="action-icon" onclick="window.handleDl(event, '${ep.id}'); return false;" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
+                <img src="${addIcon}" class="action-icon" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
+                <img src="${ICONS.play}" class="play-icon-lg" data-episodio-id="${ep.id}">
+                <img src="${dlIcon}" class="action-icon" data-episodio-id="${ep.id}" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
             </div>
-            <div class="mobile-play-button" onclick="window.handlePlay(event, '${ep.id}'); return false;">
+            <div class="mobile-play-button" data-episodio-id="${ep.id}">
                 <img src="${ICONS.play}" alt="Play">
             </div>
         </div>
@@ -121,11 +120,11 @@ export function createVerticalCard(ep) {
         <div class="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-zinc-800/50 cursor-pointer" onclick="window.goToDetail('${ep.detailUrl}')">
             <img src="${ep.coverUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
             <div class="overlay-full">
-                <img src="${addIcon}" class="action-icon" onclick="window.handleAdd(event, '${ep.id}'); return false;" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
-                <img src="${ICONS.play}" class="play-icon-lg" onclick="window.handlePlay(event, '${ep.id}'); return false;">
-                <img src="${dlIcon}" class="action-icon" onclick="window.handleDl(event, '${ep.id}'); return false;" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
+                <img src="${addIcon}" class="action-icon" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
+                <img src="${ICONS.play}" class="play-icon-lg" data-episodio-id="${ep.id}">
+                <img src="${dlIcon}" class="action-icon" data-episodio-id="${ep.id}" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
             </div>
-            <div class="mobile-play-button" onclick="window.handlePlay(event, '${ep.id}'); return false;">
+            <div class="mobile-play-button" data-episodio-id="${ep.id}">
                 <img src="${ICONS.play}" alt="Play">
             </div>
         </div>
@@ -140,17 +139,16 @@ export function createVideoExpand(ep) {
     const inPlaylist = userStorage.playlist.has(ep.id);
     const addIcon = inPlaylist ? ICONS.added : ICONS.add;
     const dlIcon = ep.allowDownload ? ICONS.dl : ICONS.noDl;
-    // Usar coverWide si existe, sino fallback a coverUrl
     const coverWide = ep.coverWide && ep.coverWide !== ep.coverUrl ? ep.coverWide : ep.coverUrl;
     return `<div class="card-video group" data-episodio-id="${ep.id}">
         <img src="${ep.coverUrl}" class="absolute inset-0 w-full h-full object-cover z-10 group-hover:opacity-0 transition-opacity duration-300">
         <img src="${coverWide}" class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <div class="overlay-full z-20">
-            <img src="${addIcon}" class="action-icon" onclick="window.handleAdd(event, '${ep.id}'); return false;" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
-            <img src="${ICONS.play}" class="play-icon-lg" onclick="window.handlePlay(event, '${ep.id}'); return false;">
-            <img src="${dlIcon}" class="action-icon" onclick="window.handleDl(event, '${ep.id}'); return false;" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
+            <img src="${addIcon}" class="action-icon" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
+            <img src="${ICONS.play}" class="play-icon-lg" data-episodio-id="${ep.id}">
+            <img src="${dlIcon}" class="action-icon" data-episodio-id="${ep.id}" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
         </div>
-        <div class="mobile-play-button z-30" onclick="window.handlePlay(event, '${ep.id}'); return false;">
+        <div class="mobile-play-button z-30" data-episodio-id="${ep.id}">
             <img src="${ICONS.play}" alt="Play">
         </div>
         <div class="absolute bottom-2 left-2 z-20 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold border border-white/10">VIDEO</div>
@@ -164,22 +162,15 @@ export function createListItem(ep, idx) {
     return `
         <div class="list-item group flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors w-full"
              data-episodio-id="${ep.id}">
-            
-            <!-- Índice -->
             <span class="text-gray-400 font-semibold w-6 text-center text-sm flex-shrink-0">${idx + 1}</span>
-            
-            <!-- Cover (solo para navegar a detalle) -->
             <div class="relative w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer"
                  onclick="window.goToDetail('${ep.detailUrl}')">
                 <img src="${ep.coverUrl}" class="w-full h-full object-cover" loading="lazy">
-                <!-- Play superpuesto (también invoca reproductor) -->
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                     onclick="window.handlePlay(event, '${ep.id}'); return false;">
+                     data-episodio-id="${ep.id}">
                     <img src="${ICONS.play}" class="w-5 h-5">
                 </div>
             </div>
-            
-            <!-- Título y autor (en línea) -->
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
                     <h4 class="text-sm font-medium text-white truncate group-hover:text-blue-400 cursor-pointer"
@@ -187,10 +178,8 @@ export function createListItem(ep, idx) {
                     <span class="text-xs text-gray-400 truncate">${ep.author}</span>
                 </div>
             </div>
-            
-            <!-- Botón añadir/quitar -->
-            <button onclick="window.handleAdd(event, '${ep.id}'); return false;"
-                    class="flex-shrink-0 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 flex items-center justify-center transition-colors">
+            <button class="flex-shrink-0 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 flex items-center justify-center transition-colors"
+                    data-episodio-id="${ep.id}" data-action="add">
                 <img src="${addIcon}" class="w-5 h-5" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
             </button>
         </div>`;
@@ -205,11 +194,11 @@ export function createGridCard(item) {
             <div class="aspect-square bg-zinc-800/50 relative rounded-xl overflow-hidden cursor-pointer" onclick="window.goToDetail('${item.detailUrl}')">
                 <img src="${item.coverUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
                 <div class="overlay-full">
-                    <img src="${addIcon}" class="action-icon" onclick="window.handleAdd(event, '${item.id}'); return false;" data-episodio-id="${item.id}" data-added="${inPlaylist}">
-                    <img src="${ICONS.play}" class="play-icon-lg" onclick="window.handlePlay(event, '${item.id}'); return false;">
-                    <img src="${dlIcon}" class="action-icon" onclick="window.handleDl(event, '${item.id}'); return false;" title="${item.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
+                    <img src="${addIcon}" class="action-icon" data-episodio-id="${item.id}" data-added="${inPlaylist}">
+                    <img src="${ICONS.play}" class="play-icon-lg" data-episodio-id="${item.id}">
+                    <img src="${dlIcon}" class="action-icon" data-episodio-id="${item.id}" title="${item.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
                 </div>
-                <div class="mobile-play-button" onclick="window.handlePlay(event, '${item.id}'); return false;">
+                <div class="mobile-play-button" data-episodio-id="${item.id}">
                     <img src="${ICONS.play}" alt="Play">
                 </div>
             </div>
@@ -258,14 +247,12 @@ function createCarousel(title, type, items, categoryContext, viewAllType = 'cate
             `</div>`;
     }
     
-    // Manejar clic en título y botón "Ver todo"
     let verTodoHandler;
     if (viewAllType === 'series') {
         verTodoHandler = `window.showSeriesGrid('${title}')`;
     } else if (categoryContext && categoryContext !== 'Todos') {
         verTodoHandler = `window.handleCategoryClick('${categoryContext}')`;
     } else {
-        // Si no hay categoría específica, mostrar los mismos items en grid
         const itemIds = JSON.stringify(items.map(ep => ep.id));
         verTodoHandler = `window.showItemsGrid('${title}', ${itemIds})`;
     }
@@ -296,13 +283,7 @@ function createSeriesCarousel() {
         }
     });
     
-    // Convertir a array y mezclar aleatoriamente
-    let seriesArray = Object.entries(seriesGroups).map(([key, value]) => ({
-        key,
-        ...value
-    }));
-    
-    // Mezclar aleatoriamente (Fisher-Yates)
+    let seriesArray = Object.entries(seriesGroups).map(([key, value]) => ({ key, ...value }));
     for (let i = seriesArray.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [seriesArray[i], seriesArray[j]] = [seriesArray[j], seriesArray[i]];
@@ -346,7 +327,7 @@ function createSeriesCarousel() {
     </section>`;
 }
 
-// ---------- VISTAS DE DETALLE (con botones que NO redirigen) ----------
+// ---------- VISTAS DE DETALLE ----------
 export function renderEpisodio(container, episodioId) {
     try {
         const ep = DATA.find(e => e.id === episodioId);
@@ -367,14 +348,14 @@ export function renderEpisodio(container, episodioId) {
                         <p class="text-lg text-gray-300 mb-3">${ep.author}</p>
                         <p class="text-gray-400 mb-6 leading-relaxed">${ep.description}</p>
                         <div class="flex items-center gap-3 mb-8">
-                            <button class="flex-1 bg-[#7b2eda] hover:bg-[#8f3ef0] rounded-2xl py-4 px-6 flex items-center justify-center gap-3 transition transform hover:scale-[1.02]" onclick="window.handlePlay(event, '${ep.id}')">
+                            <button class="flex-1 bg-[#7b2eda] hover:bg-[#8f3ef0] rounded-2xl py-4 px-6 flex items-center justify-center gap-3 transition transform hover:scale-[1.02]" data-episodio-id="${ep.id}" data-action="play">
                                 <img src="${ICONS.play}" class="w-6 h-6 icon-white">
                                 <span class="font-bold">Reproducir</span>
                             </button>
-                            <button class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleAdd(event, '${ep.id}')">
+                            <button class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" data-episodio-id="${ep.id}" data-action="add">
                                 <img src="${addIcon}" class="w-6 h-6 icon-white" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
                             </button>
-                            <button class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleDl(event, '${ep.id}')">
+                            <button class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" data-episodio-id="${ep.id}" data-action="dl">
                                 <img src="${ep.allowDownload ? ICONS.dl : ICONS.noDl}" class="w-6 h-6 icon-white">
                             </button>
                             <button class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" onclick="window.shareContent('${ep.title}', '${ep.detailUrl}')">
@@ -393,14 +374,14 @@ export function renderEpisodio(container, episodioId) {
                                 <p class="text-xl text-gray-300 mb-4">${ep.author}</p>
                                 <p class="text-gray-400 max-w-3xl leading-relaxed">${ep.description}</p>
                                 <div class="flex items-center gap-4 mt-8">
-                                    <button class="bg-[#7b2eda] hover:bg-[#8f3ef0] rounded-2xl py-4 px-8 flex items-center gap-3 transition transform hover:scale-105" onclick="window.handlePlay(event, '${ep.id}')">
+                                    <button class="bg-[#7b2eda] hover:bg-[#8f3ef0] rounded-2xl py-4 px-8 flex items-center gap-3 transition transform hover:scale-105" data-episodio-id="${ep.id}" data-action="play">
                                         <img src="${ICONS.play}" class="w-6 h-6 icon-white">
                                         <span class="font-bold text-lg">Reproducir</span>
                                     </button>
-                                    <button class="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleAdd(event, '${ep.id}')" title="Añadir a lista">
+                                    <button class="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" data-episodio-id="${ep.id}" data-action="add" title="Añadir a lista">
                                         <img src="${addIcon}" class="w-6 h-6 icon-white" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
                                     </button>
-                                    <button class="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleDl(event, '${ep.id}')" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
+                                    <button class="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" data-episodio-id="${ep.id}" data-action="dl" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
                                         <img src="${ep.allowDownload ? ICONS.dl : ICONS.noDl}" class="w-6 h-6 icon-white">
                                     </button>
                                     <button class="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur border border-white/20 flex items-center justify-center hover:bg-white/20 transition" onclick="window.shareContent('${ep.title}', '${ep.detailUrl}')" title="Compartir">
@@ -463,16 +444,16 @@ export function renderSerie(container, serieUrl) {
                         </div>
                         <p class="text-gray-400 text-sm mt-2 line-clamp-2 hidden sm:block">${ep.description}</p>
                         <div class="flex items-center gap-2 mt-4">
-                            <button class="episode-action-btn w-10 h-10 rounded-xl bg-black/30 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleAdd(event, '${ep.id}')" title="Añadir a lista">
+                            <button class="episode-action-btn w-10 h-10 rounded-xl bg-black/30 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-white/20 transition" data-episodio-id="${ep.id}" data-action="add" title="Añadir a lista">
                                 <img src="${addIcon}" class="w-5 h-5 icon-white" data-episodio-id="${ep.id}" data-added="${inPlaylist}">
                             </button>
-                            <button class="episode-action-btn w-10 h-10 rounded-xl bg-black/30 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-white/20 transition" onclick="window.handleDl(event, '${ep.id}')" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
+                            <button class="episode-action-btn w-10 h-10 rounded-xl bg-black/30 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-white/20 transition" data-episodio-id="${ep.id}" data-action="dl" title="${ep.allowDownload ? 'Descargar' : 'Descarga no disponible'}">
                                 <img src="${ep.allowDownload ? ICONS.dl : ICONS.noDl}" class="w-5 h-5 icon-white">
                             </button>
                             <button class="episode-action-btn w-10 h-10 rounded-xl bg-black/30 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-white/20 transition" onclick="window.shareContent('${ep.title}', '${ep.detailUrl}')" title="Compartir">
                                 <img src="${ICONS.share}" class="w-5 h-5 icon-white">
                             </button>
-                            <button class="episode-play-btn w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-[#7b2eda] flex items-center justify-center hover:scale-110 transition ml-auto" onclick="window.handlePlay(event, '${ep.id}')" title="Reproducir">
+                            <button class="episode-play-btn w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-[#7b2eda] flex items-center justify-center hover:scale-110 transition ml-auto" data-episodio-id="${ep.id}" data-action="play" title="Reproducir">
                                 <img src="${ICONS.play}" class="w-5 h-5 sm:w-7 sm:h-7 icon-white ml-1">
                             </button>
                         </div>
@@ -493,7 +474,7 @@ export function renderSerie(container, serieUrl) {
                         <p class="text-gray-400 mb-6 leading-relaxed">${serie.descripcion_serie}</p>
                         <div class="flex items-center gap-3 mb-8">
                             ${ultimoEpisodio ? `
-                            <button class="flex-1 bg-[#7b2eda] hover:bg-[#8f3ef0] rounded-2xl py-4 px-6 flex items-center justify-center gap-3 transition transform hover:scale-[1.02]" onclick="window.handlePlay(event, '${ultimoEpisodio.id}')">
+                            <button class="flex-1 bg-[#7b2eda] hover:bg-[#8f3ef0] rounded-2xl py-4 px-6 flex items-center justify-center gap-3 transition transform hover:scale-[1.02]" data-episodio-id="${ultimoEpisodio.id}" data-action="play">
                                 <img src="${ICONS.play}" class="w-6 h-6 icon-white">
                                 <span class="font-bold">Último episodio</span>
                             </button>
@@ -515,7 +496,7 @@ export function renderSerie(container, serieUrl) {
                                 <p class="text-gray-400 max-w-3xl leading-relaxed">${serie.descripcion_serie}</p>
                                 <div class="flex items-center gap-4 mt-8">
                                     ${ultimoEpisodio ? `
-                                    <button class="bg-[#7b2eda] hover:bg-[#8f3ef0] rounded-2xl py-4 px-8 flex items-center gap-3 transition transform hover:scale-105" onclick="window.handlePlay(event, '${ultimoEpisodio.id}')">
+                                    <button class="bg-[#7b2eda] hover:bg-[#8f3ef0] rounded-2xl py-4 px-8 flex items-center gap-3 transition transform hover:scale-105" data-episodio-id="${ultimoEpisodio.id}" data-action="play">
                                         <img src="${ICONS.play}" class="w-6 h-6 icon-white">
                                         <span class="font-bold text-lg">Último episodio</span>
                                     </button>
@@ -584,7 +565,6 @@ export function renderFeed(container) {
     
     feedView.innerHTML = '';
     
-    // Nuevo carrusel vertical al inicio (4:5)
     feedView.innerHTML += createCarousel("Destacados del Día", "vertical",
         getRandomSafe(15), "Todos", 'items');
     
@@ -614,8 +594,6 @@ export function renderFeed(container) {
     
     feedView.innerHTML += createSeriesCarousel();
     
-    // ELIMINADO: Carrusel "Sociedad, Política y Economía" (anteriormente Humanidades)
-    
     feedView.innerHTML += createCarousel("Otras Ciencias y Disciplinas", "standard",
         getRandomSafe(15, e => e.categories.includes("Otras Ciencias") ||
             e.categories.some(c => ["Ciencias Naturales", "Tecnología e Informática"].includes(c))),
@@ -630,7 +608,6 @@ export function renderFeed(container) {
     feedView.innerHTML += createCarousel("Charlas y Conferencias", "expand",
         getRandomSafe(10, e => e.type === 'video' && (e.categories.includes("Cine y TV") || e.categories.includes("Documentales"))), "Cine y TV", 'category');
     
-    // Mentes Curiosas (investigación, criminalismo, guerras, conflictos)
     feedView.innerHTML += createCarousel("Mentes Curiosas", "standard",
         getRandomSafe(15, e => 
             /\b(investigación|investigacion|criminalística|criminalistica|crimen|delito|forense|guerra|conflicto|violencia|seguridad|policía|policia|detective|asesinato|homicidio|justicia|penal|legal|sociedad|problema social)\b/i
@@ -641,7 +618,7 @@ export function renderFeed(container) {
         getRandomSafe(20), "Todos", 'items');
 }
 
-// ---------- RENDER GRID (para resultados de búsqueda, categorías, etc.) ----------
+// ---------- RENDER GRID ----------
 export function renderGrid(container, items, title) {
     let gridView = document.getElementById('grid-view');
     if (!gridView) {
@@ -801,7 +778,7 @@ window.handlePlay = function(e, episodioId) {
         );
     } catch (err) {
         console.error('Error al reproducir:', err);
-        showCustomAlert(ep.title, 'no está disponible por ahora.');
+        // No mostramos alerta para no interrumpir
     }
 
     return false;
@@ -828,9 +805,6 @@ window.handleDl = function(e, episodioId) {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        
-        // Verificar si la descarga realmente se inició (opcional)
-        // Si el navegador no soporta download o hay error CORS, saltará al catch
     } catch (error) {
         console.error('Error en descarga:', error);
         showCustomAlert(ep.title, 'no se pudo descargar automáticamente.');
@@ -854,13 +828,11 @@ window.handleAdd = function(e, episodioId) {
         userStorage.playlist.add(ep);
     }
 
-    // Actualizar TODOS los iconos de añadir para este episodio en toda la página
     document.querySelectorAll(`[data-episodio-id="${episodioId}"] img[data-added], [data-episodio-id="${episodioId}"] .action-icon[data-added]`)
         .forEach(img => {
             if (img.tagName === 'IMG') {
                 img.src = alreadyIn ? ICONS.add : ICONS.added;
                 img.dataset.added = alreadyIn ? 'false' : 'true';
-                // Animación de escala
                 img.style.transform = 'scale(1.3)';
                 setTimeout(() => img.style.transform = 'scale(1)', 180);
             }
@@ -924,7 +896,36 @@ if (document.readyState === 'loading') {
     renderCategoryPills();
 }
 
-// ---------- ALERTA PERSONALIZADA (solo para errores reales) ----------
+// ---------- LISTENER DE CAPTURA GLOBAL PARA BOTONES ----------
+document.addEventListener('click', function(e) {
+    // Buscar el elemento más cercano que sea un botón de acción
+    const target = e.target.closest(
+        '.action-icon, .play-icon-lg, .mobile-play-button, .episode-play-btn, .episode-action-btn, [data-action="play"], [data-action="add"], [data-action="dl"]'
+    );
+    if (!target) return;
+
+    // Prevenir cualquier comportamiento por defecto y detener propagación inmediatamente
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    const episodioId = target.closest('[data-episodio-id]')?.dataset.episodioId;
+    if (!episodioId) return;
+
+    // Determinar la acción según la clase o atributo data-action
+    if (target.matches('.play-icon-lg, .mobile-play-button, .episode-play-btn') || target.closest('[data-action="play"]')) {
+        window.handlePlay(e, episodioId);
+    } else if (target.matches('.action-icon') || target.closest('[data-action="add"]')) {
+        // Si es el icono de añadir, pero puede ser también descarga, distinguimos por el título o atributo
+        if (target.title?.includes('Descargar') || target.closest('[data-action="dl"]')) {
+            window.handleDl(e, episodioId);
+        } else {
+            window.handleAdd(e, episodioId);
+        }
+    }
+}, true); // true = fase de captura, se ejecuta antes que cualquier otro listener
+
+// ---------- ALERTA PERSONALIZADA ----------
 function showCustomAlert(title, message) {
     const fullMessage = `"${title}" ${message}`;
     
@@ -956,4 +957,4 @@ function showCustomAlert(title, message) {
     });
 }
 
-console.log('✅ show.js cargado completamente - versión DEFINITIVA FUNCIONAL');
+console.log('✅ show.js cargado completamente - versión con captura de eventos');
