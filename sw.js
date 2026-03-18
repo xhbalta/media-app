@@ -1,5 +1,6 @@
-// sw.js - Service Worker para app.baltaanay.org
-const CACHE_NAME = 'balta-mobile-v1';
+// sw.js - Service Worker mejorado para Balta Media Móvil
+const CACHE_NAME = 'balta-mobile-v2';
+
 const urlsToCache = [
   '/',
   '/index.html',
@@ -13,7 +14,8 @@ const urlsToCache = [
   '/404.js',
   '/styles.css',
   'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap'
+  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap',
+  'https://podcast.tenam.site/episodios.js'
 ];
 
 self.addEventListener('install', event => {
@@ -39,4 +41,11 @@ self.addEventListener('activate', event => {
       );
     })
   );
+});
+
+// Soporte para botón de actualizar
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
