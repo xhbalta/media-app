@@ -1,4 +1,5 @@
-// main.js - Router principal con soporte completo para SPA (versión corregida)
+// main.js - Router principal (versión definitiva móvil + desktop)
+
 import { DATA, renderFeed, renderGrid, renderEpisodio, renderSerie, renderCategoryPills } from './show.js';
 import { getEpisodioByDetailUrl, getSerieByUrl } from 'https://podcast.tenam.site/episodios.js';
 import './player.js';
@@ -9,16 +10,12 @@ const PAGES = [
     { path: '/buscar', module: () => import('./buscar.js'), header: true }
 ];
 
-let lastScrollTop = 0;
-
-// Función para normalizar la ruta (quitar barra final y decodificar)
+// Función para normalizar la ruta
 function normalizePath(path) {
     let normalized = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
     try {
         normalized = decodeURIComponent(normalized);
-    } catch (e) {
-        // ignorar
-    }
+    } catch (e) {}
     return normalized;
 }
 
@@ -36,11 +33,15 @@ async function router() {
     const normalizedPath = normalizePath(path);
     const searchParams = new URLSearchParams(window.location.search);
     const container = document.getElementById('content');
-    const header = document.getElementById('main-header');
+    const headerContainer = document.getElementById('headerContainer');
+    const mainHeader = document.getElementById('main-header');
     const categoryFilters = document.getElementById('category-filters');
 
     try {
+        // Resetear visibilidad
+        if (headerContainer) headerContainer.classList.remove('hidden');
         if (categoryFilters) categoryFilters.classList.remove('hidden');
+        if (categoryFilters) categoryFilters.classList.remove('moved-up');
 
         // 1. Ruta raíz
         if (normalizedPath === '/') {
@@ -73,47 +74,37 @@ async function router() {
                 }
                 document.title = `${cat} · Balta Media`;
             }
-            // 4. Serie (prioridad sobre episodio)
+            // 4. Serie / Episodio / Novedades / 404
             else {
                 const serie = getSerieByUrl(normalizedPath);
                 if (serie) {
                     renderSerie(container, normalizedPath);
                     document.title = `${serie.titulo_serie} · Balta Media`;
-                    return;
-                }
-
-                // 5. Episodio
-                const episodio = getEpisodioByDetailUrl(normalizedPath);
-                if (episodio) {
-                    renderEpisodio(container, episodio.id);
-                    document.title = `${episodio.title} · Balta Media`;
-                    return;
-                }
-
-                // 6. Novedades
-                else if (normalizedPath === '/novedades') {
-                    const sorted = [...DATA].sort((a, b) => new Date(b.date) - new Date(a.date));
-                    const recientes = sorted.slice(0, 20);
-                    const aleatorios = [...DATA].sort(() => 0.5 - Math.random()).slice(0, 10);
-                    const combined = [...new Set([...recientes, ...aleatorios])];
-                    renderGrid(container, combined, 'Novedades y Recomendaciones');
-                    document.title = 'Novedades · Balta Media';
-                }
-                // 7. 404
-                else {
-                    const module404 = await import('./404.js');
-                    module404.render(container);
-                    document.title = 'Página no encontrada · Balta Media';
-                    if (module404.header === false) {
-                        header.classList.add('hidden');
-                        categoryFilters.classList.add('hidden');
+                } else {
+                    const episodio = getEpisodioByDetailUrl(normalizedPath);
+                    if (episodio) {
+                        renderEpisodio(container, episodio.id);
+                        document.title = `${episodio.title} · Balta Media`;
+                    } else if (normalizedPath === '/novedades') {
+                        const sorted = [...DATA].sort((a, b) => new Date(b.date) - new Date(a.date));
+                        const recientes = sorted.slice(0, 20);
+                        const aleatorios = [...DATA].sort(() => 0.5 - Math.random()).slice(0, 10);
+                        const combined = [...new Set([...recientes, ...aleatorios])];
+                        renderGrid(container, combined, 'Novedades y Recomendaciones');
+                        document.title = 'Novedades · Balta Media';
+                    } else {
+                        const module404 = await import('./404.js');
+                        module404.render(container);
+                        document.title = 'Página no encontrada · Balta Media';
+                        if (module404.header === false) {
+                            if (headerContainer) headerContainer.classList.add('hidden');
+                        }
                     }
                 }
             }
         }
 
         updateActiveCategory();
-      
         document.dispatchEvent(new Event('spa-navigation'));
 
         if (window.sidebarAPI) {
@@ -132,7 +123,7 @@ async function router() {
                 <span class="text-6xl mb-4">😵</span>
                 <h2 class="text-2xl font-bold text-white mb-2">Algo salió mal</h2>
                 <p class="text-gray-300 mb-6">${error.message || 'Error al cargar la página'}</p>
-                <button onclick="window.history.pushState(null,null,'/'); router();"
+                <button onclick="window.history.pushState(null,null,'/'); router();" 
                         class="bg-[#7b2eda] hover:bg-[#8f3ef0] text-white font-bold px-6 py-3 rounded-full transition">
                     Volver al inicio
                 </button>
@@ -141,7 +132,7 @@ async function router() {
     }
 }
 
-// Navegación SPA con enlaces data-link
+// ==================== NAVEGACIÓN SPA ====================
 document.addEventListener('click', e => {
     const link = e.target.closest('a[data-link]');
     if (link) {
@@ -150,7 +141,8 @@ document.addEventListener('click', e => {
         if (href && !href.startsWith('http')) {
             window.history.pushState(null, null, href);
             router();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const content = document.getElementById('content');
+            if (content) content.scrollTop = 0;
         } else if (href) {
             window.open(href, '_blank');
         }
@@ -168,33 +160,53 @@ document.addEventListener('click', e => {
 
 window.addEventListener('popstate', router);
 
-// Ocultar SOLO el header al hacer scroll (la barra de categorías queda fija siempre)
-window.addEventListener('scroll', () => {
-    const st = window.pageYOffset || document.documentElement.scrollTop;
-    const header = document.getElementById('main-header');
-    if (!header) return;
+// ==================== SCROLL HEADER MÓVIL ====================
+// Solo ocultamos el header principal, los filtros suben automáticamente
+let lastScrollTop = 0;
+const headerContainer = document.getElementById('headerContainer');
+const mainHeader = document.getElementById('main-header');
+const categoryFilters = document.getElementById('category-filters');
 
-    if (st > lastScrollTop && st > 100) {
-        header.classList.add('hidden');
+function handleScroll() {
+    const content = document.getElementById('content');
+    if (!content || !headerContainer) return;
+
+    const st = content.scrollTop;
+
+    if (Math.abs(st - lastScrollTop) < 15) return;
+
+    if (st > lastScrollTop && st > 80) {
+        // Scroll hacia abajo → ocultar header
+        headerContainer.classList.add('hidden');
+        if (categoryFilters) categoryFilters.classList.add('moved-up');
     } else {
-        header.classList.remove('hidden');
+        // Scroll hacia arriba → mostrar header
+        headerContainer.classList.remove('hidden');
+        if (categoryFilters) categoryFilters.classList.remove('moved-up');
     }
-    lastScrollTop = st <= 0 ? 0 : st;
-});
 
-// Observer para cambios en contenido
+    lastScrollTop = st;
+}
+
+const contentEl = document.getElementById('content');
+if (contentEl) {
+    contentEl.addEventListener('scroll', handleScroll, { passive: true });
+}
+
+// Observer para cambios en el contenido
 const observer = new MutationObserver(() => {
     if (window.sidebarAPI) window.sidebarAPI.setActive();
     if (window.updatePlayerVisibility) window.updatePlayerVisibility();
 });
-const content = document.getElementById('content');
-if (content) {
-    observer.observe(content, { childList: true, subtree: true, attributes: false });
+
+const contentObserver = document.getElementById('content');
+if (contentObserver) {
+    observer.observe(contentObserver, { childList: true, subtree: true });
 }
 
-// Exponer router para que la sidebar lo pueda usar en SPA
+// Exponer router para sidebar y otros scripts
 window.router = router;
 
 // Inicializar
 router();
-console.log('✅ Main.js optimizado - solo header se oculta con scroll');
+console.log('✅ Main.js cargado correctamente - Scroll header optimizado para móvil');
