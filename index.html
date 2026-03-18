@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Balta Media · Conocimiento en acción</title>
-    <link rel="canonical" href="https://media.baltaanay.org/" id="canonicalLink">
+    <link rel="canonical" href="https://balta-media.odoo.com/" id="canonicalLink">
     <link rel="alternate" media="only screen and (max-width: 640px)" href="https://app.baltaanay.org/" id="alternateLink">
     <!-- Manifest PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -13,8 +13,8 @@
     <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://bata-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://balta-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png">
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="/styles.css">
 
@@ -98,12 +98,12 @@
         <header id="main-header">
             <div class="flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2" data-link>
-                    <img src="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg object-cover" loading="lazy">
+                    <img src="https://balta-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg object-cover" loading="lazy">
                     <span class="text-lg sm:text-xl font-bold text-white">Balta Media</span>
                 </a>
                 <div class="flex items-center gap-3 sm:gap-4">
                     <a href="/novedades" class="relative text-gray-400 hover:text-white" data-link>
-                        <img src="https://media.baltaanay.org/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
+                        <img src="https://balta-media.odoo.com/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
                         <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     </a>
                     <button id="install-button-container" class="install-button hidden">
@@ -111,7 +111,7 @@
                         <span id="install-text">Instalar app</span>
                     </button>
                     <a href="/my/home" id="profile-link" class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
-                        <img src="https://media.baltaanay.org/web/image/793-902e5b33/Search%20%282%29.png" alt="Usuario" class="w-full h-full object-cover" loading="lazy">
+                        <img src="https://balta-media.odoo.com/web/image/793-902e5b33/Search%20%282%29.png" alt="Usuario" class="w-full h-full object-cover" loading="lazy">
                     </a>
                 </div>
             </div>
@@ -180,7 +180,7 @@
         bar.id = 'bottomBarMobile';
 
         const items = [
-            { href: '/', icon: 'https://media.baltaanay.org/web/image/798-1b947c8d/Home%20%282%29.webp', label: 'Home' },
+            { href: '/', icon: 'https://balta-media.odoo.com/web/image/798-1b947c8d/Home%20%282%29.webp', label: 'Home' },
             { href: '/buscar', icon: 'https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp', label: 'Explorar' },
             { href: '/subir', icon: 'https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp', label: 'Subir' },
             { href: 'https://www.baltaanay.org/solicitud', icon: 'https://www.baltaanay.org/web/image/922-f3d79ca9/xhbalta-aula.png', label: 'Solicitar' },
@@ -2848,7 +2848,7 @@ fullscreenBtn.addEventListener('click', (e) => {
     document.exitFullscreen().then(() => {
       isFullscreenMode = false;
       fullscreenControls.style.display = 'none';
-      loadImageWithFallback(fullscreenBtn.querySelector('img'), 'https://media.baltaanay.org/web/image/883-49c31be4/full.png', 'Fullscreen', 'https://via.placeholder.com/24');
+      loadImageWithFallback(fullscreenBtn.querySelector('img'), 'https://balta-media.odoo.com/web/image/883-49c31be4/full.png', 'Fullscreen', 'https://via.placeholder.com/24');
       overlayGradient.style.display = 'flex';
     });
   }
@@ -2871,7 +2871,7 @@ document.addEventListener('fullscreenchange', () => {
   if (!document.fullscreenElement) {
     isFullscreenMode = false;
     fullscreenControls.style.display = 'none';
-    loadImageWithFallback(fullscreenBtn.querySelector('img'), 'https://media.baltaanay.org/web/image/883-49c31be4/full.png', 'Fullscreen', 'https://via.placeholder.com/24');
+    loadImageWithFallback(fullscreenBtn.querySelector('img'), 'https://balta-media.odoo.com/web/image/883-49c31be4/full.png', 'Fullscreen', 'https://via.placeholder.com/24');
     overlayGradient.style.display = 'flex';
     clearTimeout(autoHideTimer);
   } else {
