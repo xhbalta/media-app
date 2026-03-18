@@ -128,6 +128,61 @@ body {
 /* List-item seguro */
 .list-item { min-height: 56px; }
 .list-item .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+/* Corrección específica para list-item: todo en una fila horizontal perfecta */
+.list-item {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;           /* espacio entre elementos */
+    padding: 8px 12px !important;   /* padding interno más controlado */
+    min-height: 56px !important;    /* altura mínima para consistencia */
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.list-item > * {
+    flex-shrink: 0;                 /* evita que se achiquen elementos clave */
+}
+
+.list-item .flex-1 {
+    flex: 1 1 auto !important;      /* el bloque de título + autor ocupa el espacio disponible */
+    min-width: 0 !important;        /* permite truncado real */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+}
+
+.list-item h4,
+.list-item p {
+    margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.list-item h4 {
+    font-size: 0.9375rem !important;  /* ≈15px, legible pero compacto */
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+}
+
+.list-item p {
+    font-size: 0.75rem !important;    /* ≈12px para autor */
+    color: #9ca3af !important;        /* gris suave */
+    line-height: 1.2 !important;
+}
+
+/* Botón de añadir siempre visible y alineado a la derecha */
+.list-item button {
+    flex-shrink: 0 !important;
+    margin-left: auto !important;     /* lo empuja al extremo derecho */
+}
+
+/* Evitar que el hover rompa la alineación */
+.list-item:hover {
+    background: rgba(255,255,255,0.05) !important;
+}
 
 /* Medida extra de seguridad para cualquier módulo futuro */
 #content section,
