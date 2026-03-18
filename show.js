@@ -1,5 +1,5 @@
-// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN DEFINITIVA CON CAPTURA DE EVENTOS
-import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from 'https://podcast.tenam.site/episodios.js';
+// show.js - Vistas del feed, episodio, serie, etc. - VERSIÓN CORREGIDA
+import { getAllEpisodios, getSerieById, getEpisodiosBySerieId, getEpisodiosConSerie } from './episodios.js';
 import { userStorage } from './storage.js';
 import './player.js';
 
@@ -83,10 +83,14 @@ function determineCategories(ep) {
     return Array.from(cats);
 }
 
-export const DATA = getEpisodiosConSerie().map(ep => ({
+// Aseguramos que siempre tengamos un array para DATA
+const rawEpisodios = getEpisodiosConSerie() || [];
+export const DATA = rawEpisodios.map(ep => ({
     ...ep,
     categories: determineCategories(ep)
 }));
+
+console.log('✅ DATA cargada en show.js:', DATA.length, 'episodios');
 
 // ---------- RENDERIZADO DE TARJETAS ----------
 export function createStandardCard(ep) {
@@ -540,7 +544,7 @@ export function renderFeed(container) {
             <div id="grid-view" class="hidden transition-opacity duration-300">
                 <div class="flex items-center justify-between mb-6 sm:mb-8 mt-4 sm:mt-6">
                     <h2 id="grid-title" class="text-xl sm:text-2xl font-bold">Resultados</h2>
-                    <button id="closeGridBtn" class="text-sm font-bold text-gray-400 hover:text-white flex items-center gap-1">
+                    <button id="closeGridBtn" class="text-sm font-bold text-gray-400 hover:text-white flex items-center gap-1" onclick="window.history.pushState(null,null,'/'); window.dispatchEvent(new PopStateEvent('popstate'))">
                         <span class="text-xl">×</span> Cerrar búsqueda
                     </button>
                 </div>
@@ -627,7 +631,7 @@ export function renderGrid(container, items, title) {
             <div id="grid-view" class="transition-opacity duration-300">
                 <div class="flex items-center justify-between mb-6 sm:mb-8 mt-4 sm:mt-6">
                     <h2 id="grid-title" class="text-xl sm:text-2xl font-bold">${title}</h2>
-                    <button id="closeGridBtn" class="text-sm font-bold text-gray-400 hover:text-white flex items-center gap-1">
+                    <button id="closeGridBtn" class="text-sm font-bold text-gray-400 hover:text-white flex items-center gap-1" onclick="window.history.pushState(null,null,'/'); window.dispatchEvent(new PopStateEvent('popstate'))">
                         <span class="text-xl">×</span> Cerrar búsqueda
                     </button>
                 </div>
@@ -666,10 +670,7 @@ export function renderGrid(container, items, title) {
     }
     document.getElementById('feed-view')?.classList.add('hidden');
     gridView.classList.remove('hidden');
-    document.getElementById('closeGridBtn')?.addEventListener('click', () => {
-        window.history.pushState(null, null, '/');
-        window.dispatchEvent(new PopStateEvent('popstate'));
-    });
+    // El botón de cerrar ya tiene onclick, no es necesario añadir listener aquí
 }
 
 // ---------- RENDER GRID DE SERIES ----------
@@ -690,7 +691,7 @@ export function renderSeriesGrid(container, title) {
             <div id="grid-view" class="transition-opacity duration-300">
                 <div class="flex items-center justify-between mb-6 sm:mb-8 mt-4 sm:mt-6">
                     <h2 id="grid-title" class="text-xl sm:text-2xl font-bold">${title}</h2>
-                    <button id="closeGridBtn" class="text-sm font-bold text-gray-400 hover:text-white flex items-center gap-1">
+                    <button id="closeGridBtn" class="text-sm font-bold text-gray-400 hover:text-white flex items-center gap-1" onclick="window.history.pushState(null,null,'/'); window.dispatchEvent(new PopStateEvent('popstate'))">
                         <span class="text-xl">×</span> Cerrar búsqueda
                     </button>
                 </div>
@@ -730,10 +731,7 @@ export function renderSeriesGrid(container, title) {
     
     document.getElementById('feed-view')?.classList.add('hidden');
     gridView.classList.remove('hidden');
-    document.getElementById('closeGridBtn')?.addEventListener('click', () => {
-        window.history.pushState(null, null, '/');
-        window.dispatchEvent(new PopStateEvent('popstate'));
-    });
+    // El botón de cerrar ya tiene onclick
 }
 
 // ---------- FUNCIONES GLOBALES ----------
@@ -752,7 +750,6 @@ window.shareContent = async (title, url) => {
 
 window.handlePlay = function(e, episodioId) {
     e.stopPropagation();
-    e.stopImmediatePropagation();
     e.preventDefault();
     
     const ep = DATA.find(x => x.id === episodioId);
@@ -778,7 +775,6 @@ window.handlePlay = function(e, episodioId) {
         );
     } catch (err) {
         console.error('Error al reproducir:', err);
-        // No mostramos alerta para no interrumpir
     }
 
     return false;
@@ -856,15 +852,14 @@ window.handleCategoryClick = function(category) {
 };
 
 window.showItemsGrid = function(title, itemIds) {
+    const container = document.getElementById('content'); // CORREGIDO: antes era 'app'
+    if (!container) return;
     const items = itemIds.map(id => DATA.find(ep => ep.id === id)).filter(ep => ep);
-    const container = document.getElementById('app');
-    if (container) {
-        renderGrid(container, items, title);
-    }
+    renderGrid(container, items, title);
 };
 
 window.showSeriesGrid = function(title) {
-    const container = document.getElementById('app');
+    const container = document.getElementById('content'); // CORREGIDO
     if (container) {
         renderSeriesGrid(container, title);
     }
@@ -896,34 +891,50 @@ if (document.readyState === 'loading') {
     renderCategoryPills();
 }
 
-// ---------- LISTENER DE CAPTURA GLOBAL PARA BOTONES ----------
+// ---------- LISTENER DE CAPTURA GLOBAL PARA BOTONES (MEJORADO) ----------
 document.addEventListener('click', function(e) {
-    // Buscar el elemento más cercano que sea un botón de acción
-    const target = e.target.closest(
-        '.action-icon, .play-icon-lg, .mobile-play-button, .episode-play-btn, .episode-action-btn, [data-action="play"], [data-action="add"], [data-action="dl"]'
+    // 1. Encontrar el elemento de acción más cercano
+    const actionElement = e.target.closest(
+        '.action-icon, .play-icon-lg, .mobile-play-button, .episode-play-btn, [data-action="play"], [data-action="add"], [data-action="dl"]'
     );
-    if (!target) return;
+    if (!actionElement) return;
 
-    // Prevenir cualquier comportamiento por defecto y detener propagación inmediatamente
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    const episodioId = target.closest('[data-episodio-id]')?.dataset.episodioId;
+    // 2. Obtener el ID del episodio desde el ancestro con data-episodio-id
+    const episodioId = actionElement.closest('[data-episodio-id]')?.dataset.episodioId;
     if (!episodioId) return;
 
-    // Determinar la acción según la clase o atributo data-action
-    if (target.matches('.play-icon-lg, .mobile-play-button, .episode-play-btn') || target.closest('[data-action="play"]')) {
-        window.handlePlay(e, episodioId);
-    } else if (target.matches('.action-icon') || target.closest('[data-action="add"]')) {
-        // Si es el icono de añadir, pero puede ser también descarga, distinguimos por el título o atributo
-        if (target.title?.includes('Descargar') || target.closest('[data-action="dl"]')) {
-            window.handleDl(e, episodioId);
-        } else {
-            window.handleAdd(e, episodioId);
+    // 3. Determinar la acción priorizando data-action
+    let action = actionElement.dataset.action; // si el elemento tiene data-action
+    if (!action) {
+        // Si no tiene data-action, inferir por clase
+        if (actionElement.matches('.play-icon-lg, .mobile-play-button, .episode-play-btn')) {
+            action = 'play';
+        } else if (actionElement.matches('.action-icon')) {
+            // Para .action-icon, distinguimos por el título (descarga o añadir)
+            action = actionElement.title?.includes('Descargar') ? 'dl' : 'add';
         }
     }
-}, true); // true = fase de captura, se ejecuta antes que cualquier otro listener
+
+    // 4. Prevenir comportamiento por defecto solo si vamos a manejar la acción
+    e.preventDefault();
+    e.stopPropagation(); // Detenemos propagación para evitar dobles disparos
+
+    // 5. Ejecutar la acción correspondiente
+    switch (action) {
+        case 'play':
+            window.handlePlay(e, episodioId);
+            break;
+        case 'add':
+            window.handleAdd(e, episodioId);
+            break;
+        case 'dl':
+            window.handleDl(e, episodioId);
+            break;
+        default:
+            // No hacer nada
+            break;
+    }
+}, true); // Seguimos en fase de captura para asegurar que se ejecuta antes que otros
 
 // ---------- ALERTA PERSONALIZADA ----------
 function showCustomAlert(title, message) {
@@ -957,4 +968,4 @@ function showCustomAlert(title, message) {
     });
 }
 
-console.log('✅ show.js cargado completamente - versión con captura de eventos');
+console.log('✅ show.js cargado completamente - versión corregida');
