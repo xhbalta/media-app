@@ -1,0 +1,21 @@
+{
+  "name": "Balta Media",
+  "short_name": "BM",
+  "description": "Conocimiento en acción",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#7b2eda",
+  "icons": [
+    {
+      "src": "https://balta-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
