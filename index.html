@@ -18,7 +18,7 @@
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="/styles.css">
 
-    <!-- ESTILOS BASE (móvil) -->
+    <!-- ESTILOS BASE -->
     <style>
         * { box-sizing: border-box; }
         html, body {
@@ -60,16 +60,15 @@
             transition: transform 0.32s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
         #category-filters.moved-up {
-            transform: translateY(-100%); /* se mueve arriba cuando header se oculta */
+            transform: translateY(-52px);
         }
         #content {
             flex: 1 1 auto;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             padding: 1.25rem 1rem;
-            padding-bottom: 140px;   /* Espacio para footer/derechos */
+            padding-bottom: 140px;
         }
-        /* Botón instalar / actualizar */
         .install-button {
             background: #7b2eda;
             color: white;
@@ -85,7 +84,7 @@
             transition: all 0.2s;
         }
         .install-button.hidden { display: none; }
-        .install-button.update { background: #f59e0b; } /* color naranja para actualizar */
+        .install-button.update { background: #f59e0b; }
         .install-button img {
             width: 20px; height: 20px;
             filter: brightness(0) invert(1);
@@ -95,7 +94,6 @@
 <body class="bg-[#050505] text-white font-[Plus_Jakarta_Sans]">
 
 <div class="main-area">
-    <!-- Header + Filtros -->
     <div class="header-container" id="headerContainer">
         <header id="main-header">
             <div class="flex items-center justify-between">
@@ -108,7 +106,6 @@
                         <img src="https://media.baltaanay.org/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
                         <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     </a>
-                    <!-- Botón Instalar / Actualizar -->
                     <button id="install-button-container" class="install-button hidden">
                         <img id="install-icon" src="https://img.icons8.com/ios-filled/50/000000/download--v1.png" alt="Instalar">
                         <span id="install-text">Instalar app</span>
@@ -119,7 +116,6 @@
                 </div>
             </div>
         </header>
-        <!-- Filtros -->
         <div id="category-filters">
             <div class="overflow-x-auto no-scrollbar">
                 <div class="flex items-center gap-2 sm:gap-3" id="category-pills"></div>
@@ -127,14 +123,11 @@
         </div>
     </div>
 
-    <!-- Contenido -->
     <main id="content"></main>
 </div>
 
-<!-- Reproductor flotante -->
 <div id="floating-player" class="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-[#333] p-3 flex items-center justify-between z-[10000] backdrop-blur hidden"></div>
 
-<!-- Modal de error -->
 <div id="errorModal" class="fixed inset-0 z-[10000] flex items-center justify-center hidden" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
     <div class="bg-[#1e1e2f] rounded-2xl max-w-md w-full p-6 border border-white/10 shadow-2xl">
         <h3 class="text-xl font-bold text-white mb-3" id="errorModalTitle">Error</h3>
@@ -147,23 +140,23 @@
     </div>
 </div>
 
-<!-- BARRA INFERIOR MÓVIL (mejorada con SPA) -->
+<!-- BARRA INFERIOR MÓVIL -->
 <script>
 (function() {
-    const BOTTOMBAR_CONFIG = { BREAKPOINT: 768, HEIGHT: '60px', BACKGROUND: '#0F0F0F', Z_INDEX: 950 };
+    const BOTTOMBAR_CONFIG = { BREAKPOINT: 768, HEIGHT: '60px' };
 
     const bottomBarStyles = `
         .bottom-bar-mobile {
             position: fixed; bottom: 0; left: 0; width: 100%; height: ${BOTTOMBAR_CONFIG.HEIGHT};
-            background: ${BOTTOMBAR_CONFIG.BACKGROUND}; color: #fff; z-index: ${BOTTOMBAR_CONFIG.Z_INDEX};
+            background: #0F0F0F; color: #fff; z-index: 950;
             display: flex; align-items: center; justify-content: space-around;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.5); transition: transform 0.3s ease;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
         }
         @media (min-width: ${BOTTOMBAR_CONFIG.BREAKPOINT + 1}px) { .bottom-bar-mobile { display: none !important; } }
         .bottom-bar-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             color: rgba(255,255,255,0.8); text-decoration: none; font-size: 11px; gap: 4px;
-            padding: 8px 12px; border-radius: 8px; transition: all 0.2s; flex: 1; max-width: 80px;
+            padding: 8px 12px; border-radius: 8px; transition: all 0.2s; flex: 1;
         }
         .bottom-bar-item.active { color: white; background: rgba(255,255,255,0.15); }
         .bottom-bar-item img { width: 24px; height: 24px; filter: brightness(1.2); }
@@ -173,7 +166,7 @@
         }
     `;
 
-    function injectBottomBarStyles() {
+    function injectStyles() {
         if (document.getElementById('bottom-bar-styles')) return;
         const style = document.createElement('style');
         style.id = 'bottom-bar-styles';
@@ -198,7 +191,7 @@
             const link = document.createElement('a');
             link.href = item.href;
             link.className = 'bottom-bar-item';
-            link.setAttribute('data-link', 'true');   // ← importante para SPA
+            link.setAttribute('data-link', 'true');
             link.innerHTML = `<img src="${item.icon}" alt="${item.label}" loading="lazy"><span>${item.label}</span>`;
             bar.appendChild(link);
         });
@@ -216,37 +209,31 @@
 
     function initBottomBar() {
         const isMobile = window.innerWidth <= BOTTOMBAR_CONFIG.BREAKPOINT;
-        const oldBar = document.getElementById('bottomBarMobile');
-        if (oldBar) oldBar.remove();
+        document.getElementById('bottomBarMobile')?.remove();
 
         if (!isMobile) {
             document.body.classList.remove('with-bottom-bar');
             return;
         }
 
-        injectBottomBarStyles();
+        injectStyles();
         const bar = renderBottomBar();
         document.body.appendChild(bar);
         setActiveBottomItem();
         document.body.classList.add('with-bottom-bar');
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initBottomBar);
-    } else {
-        initBottomBar();
-    }
-
+    document.addEventListener('DOMContentLoaded', initBottomBar);
     window.addEventListener('resize', initBottomBar);
     window.addEventListener('popstate', setActiveBottomItem);
     document.addEventListener('spa-navigation', setActiveBottomItem);
 })();
 </script>
 
-<!-- PWA: Instalación, Actualización y Redirección a App Instalada -->
+<!-- PWA: Instalación, Actualización y Redirección -->
 <script>
 (function() {
-    let deferredPrompt;
+    let deferredPrompt = null;
     let isUpdateAvailable = false;
     const installBtn = document.getElementById('install-button-container');
     const installText = document.getElementById('install-text');
@@ -259,12 +246,9 @@
 
     function updateButtonUI() {
         const standalone = isStandalone();
-
         if (standalone) {
-            // Ya está instalada → mostrar perfil + posible botón de actualizar
             installBtn.classList.add('hidden');
             profileLink.classList.remove('hidden');
-
             if (isUpdateAvailable) {
                 installBtn.classList.remove('hidden');
                 installBtn.classList.add('update');
@@ -272,7 +256,6 @@
                 installIcon.src = 'https://img.icons8.com/ios-filled/50/ffffff/refresh.png';
             }
         } else {
-            // No instalada
             profileLink.classList.add('hidden');
             if (deferredPrompt || isUpdateAvailable) {
                 installBtn.classList.remove('hidden');
@@ -287,87 +270,54 @@
         }
     }
 
-    // Before install prompt
-    window.addEventListener('beforeinstallprompt', (e) => {
+    window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         deferredPrompt = e;
         updateButtonUI();
     });
 
-    // Click en botón (instalar o actualizar)
     installBtn.addEventListener('click', async () => {
-        if (isUpdateAvailable && window.registration && window.registration.waiting) {
-            // Actualizar PWA
+        if (isUpdateAvailable && window.registration?.waiting) {
             window.registration.waiting.postMessage({ type: 'SKIP_WAITING' });
             window.location.reload();
             return;
         }
-
         if (deferredPrompt) {
             deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
+            await deferredPrompt.userChoice;
             deferredPrompt = null;
             updateButtonUI();
         }
     });
 
-    // Detectar si hay actualización del Service Worker
-    function checkForUpdate(registration) {
-        if (!registration) return;
-        registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            if (newWorker) {
-                newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        isUpdateAvailable = true;
-                        updateButtonUI();
-                        // Opcional: mostrar toast "Nueva versión disponible"
-                    }
-                });
-            }
-        });
-    }
-
-    // Registrar Service Worker + detectar updates
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js')
             .then(reg => {
                 window.registration = reg;
-                checkForUpdate(reg);
-                console.log('Service Worker registrado');
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    if (newWorker) {
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                isUpdateAvailable = true;
+                                updateButtonUI();
+                            }
+                        });
+                    }
+                });
             })
-            .catch(err => console.error('Error SW:', err));
+            .catch(err => console.error('SW error:', err));
     }
 
-    // Escuchar cambios de display-mode
     window.matchMedia('(display-mode: standalone)').addEventListener('change', updateButtonUI);
-
-    // Inicializar botón
     updateButtonUI();
-
-    // === Redirección a app instalada cuando se abre desde navegador ===
-    function tryOpenInApp() {
-        if (isStandalone()) return; // ya estamos dentro de la app
-
-        // Intento de deep link / launch handler (funciona en Chrome 134+)
-        const currentUrl = window.location.href;
-        // Puedes mejorar esto con launch_handler en manifest.json
-
-        // Fallback: si detectamos que está instalada, redirigimos a la versión app (opcional)
-        // Por ahora mostramos el botón correcto
-    }
-
-    // Ejecutar al cargar
-    window.addEventListener('load', () => {
-        tryOpenInApp();
-    });
 })();
 </script>
 
-<!-- Cargar router SPA (main.js) -->
+<!-- Router principal -->
 <script type="module" src="/main.js"></script>
 
-<!-- Script para manejo offline -->
+<!-- Offline -->
 <script>
 (function() {
     function showOfflineMessage() {
@@ -385,11 +335,7 @@
             `;
         }
     }
-
-    if (!navigator.onLine) {
-        showOfflineMessage();
-    }
-
+    if (!navigator.onLine) showOfflineMessage();
     window.addEventListener('offline', showOfflineMessage);
     window.addEventListener('online', () => window.location.reload());
 })();
@@ -397,6 +343,8 @@
 
 </body>
 </html>
+
+
 
 <!DOCTYPE html>
 <html lang="es">
