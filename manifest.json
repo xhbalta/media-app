@@ -3,22 +3,109 @@
   "short_name": "BM",
   "description": "Si quieres el cambio, haz algo diferente",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#0a3a65",
   "theme_color": "#77bbc9",
+  "orientation": "any",
   "launch_handler": {
     "client_mode": "focus-existing"
   },
+  "categories": ["music", "entertainment", "media"],
   "icons": [
     {
-      "src": "https://balta-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "https://balta-media.odoo.com/web/image/1052-37ff6faa/Balta%20Media%20%281%29.svg",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://balta-media.odoo.com/web/image/885-f3d79ca9/xhbalta-aula.png",
+      "src": "https://balta-media.odoo.com/web/image/1052-37ff6faa/Balta%20Media%20%281%29.svg",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/1052-37ff6faa/Balta%20Media%20%281%29.svg",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/1052-37ff6faa/Balta%20Media%20%281%29.svg",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/1052-37ff6faa/Balta%20Media%20%281%29.svg",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/1052-37ff6faa/Balta%20Media%20%281%29.svg",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/1052-37ff6faa/Balta%20Media%20%281%29.svg",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/1052-37ff6faa/Balta%20Media%20%281%29.svg",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/1052-37ff6faa/Balta%20Media%20%281%29.svg",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/1052-37ff6faa/Balta%20Media%20%281%29.svg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "https://balta-media.odoo.com/web/image/885-f3d79ca9/screenshot-mobile-1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Pantalla principal móvil"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/885-f3d79ca9/screenshot-mobile-2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Reproductor en uso"
+    },
+    {
+      "src": "https://balta-media.odoo.com/web/image/885-f3d79ca9/screenshot-desktop-1.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Vista escritorio"
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
